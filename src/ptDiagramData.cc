@@ -1137,7 +1137,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     
     // RR
   } else if (inpid.alias == "RR"){
-    cerr << "Asked for RR" << endl;
+    //cerr << "Asked for RR" << endl;
     ParId pid= inpid;
     id1=id2=id3=id4=inpid;
     bool fixed = true;
@@ -1146,7 +1146,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
     if (copyParameter(id1,wp, &error) &&
 	copyParameter(id2,wp2,&error)) {
-	cerr << "Found RR1 + RR2" << endl;
+      //cerr << "Found RR1 + RR2" << endl;
       for (j=0; j<wp.Npoints(); j++){
 	float rr = wp.Data(j,0) + wp2.Data(j,0);
 	wp.setData(j,0,rr);
@@ -1157,7 +1157,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       id2.alias = "RAPR"; // total rain
       if (copyParameter(id1,wp, &error) &&
 	  copyParameter(id2,wp2,&error)) {
-	cerr << "Found SNPR + RAPR" << endl;
+	//cerr << "Found SNPR + RAPR" << endl;
 	for (j=0; j<wp.Npoints(); j++){
 	  float rr = wp.Data(j,0) + wp2.Data(j,0);
 	  wp.setData(j,0,rr);
@@ -1172,7 +1172,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 	    copyParameter(id2,wp2,&error) &&
 	    copyParameter(id3,wp3,&error) &&
 	    copyParameter(id4,wp4,&error)) {
-	  cerr << "Found COSN + CORA + STSN + STRA" << endl;
+	  //cerr << "Found COSN + CORA + STSN + STRA" << endl;
 	  for (j=0; j<wp.Npoints(); j++){
 	    float rr = wp.Data(j,0) + wp2.Data(j,0) +
 	      wp3.Data(j,0) + wp4.Data(j,0) ;
@@ -1181,14 +1181,14 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 	  
 	} else if (copyParameter(id1,wp, &error) &&
 		   copyParameter(id2,wp2,&error)) {
-	  cerr << "Found COSN + CORA" << endl;
+	  //cerr << "Found COSN + CORA" << endl;
 	  for (j=0; j<wp.Npoints(); j++){
 	    float rr = wp.Data(j,0) + wp2.Data(j,0);
 	    wp.setData(j,0,rr);
 	  }
 	} else if (copyParameter(id3,wp, &error) &&
 		   copyParameter(id4,wp2,&error)) {
-	  cerr << "Found STSN + STRA" << endl;
+	  //cerr << "Found STSN + STRA" << endl;
 	  for (j=0; j<wp.Npoints(); j++){
 	    float rr = wp.Data(j,0) + wp2.Data(j,0);
 	    wp.setData(j,0,rr);

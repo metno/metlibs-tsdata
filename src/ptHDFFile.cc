@@ -1079,7 +1079,7 @@ bool HDFFile::_readParList(ErrorFlag* ef)
   refs = new int32[npairs];
   Vgettagrefs(vgparid,tags,refs,npairs);
 
-  for (i=0;i<npairs;i++)
+  for (i=0;i<npairs;i++){
     if (tags[i] == DFTAG_VH) {
       vdid = VSattach(fid,refs[i],"r");
       VSgetname(vdid,vdname);
@@ -1115,6 +1115,7 @@ bool HDFFile::_readParList(ErrorFlag* ef)
       }
       VSdetach(vdid);
     }
+  }
   Vdetach(vgparid);
   delete[] tags;
   delete[] refs;
@@ -1171,6 +1172,7 @@ bool HDFFile::_readParList(ErrorFlag* ef)
     *ef = DF_DATA_READING_ERROR;
     return false;
   }
+  delete[] buf;
   *ef = OK;
   return true;
 }
@@ -1568,6 +1570,7 @@ bool HDFFile::_readModList(ErrorFlag* ef)
     }
     delete[] buf;
     delete[] tempname;
+    delete[] temptext;
   }
   else {
     *ef = DF_DATA_READING_ERROR;

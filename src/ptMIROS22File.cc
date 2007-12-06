@@ -521,6 +521,7 @@ bool MIROS22Server::readData(const int posIndex,
     fdata.clear();
     for (int j=0; j<numt; j++){
       float value= totvps[j].val[i].value;
+      //float scale=(j==3*numt/4 ? 50.0 : 1.0);
       if (value>(MIROSundef+99)){
 	fdata.push_back(value);
 	times.push_back(totvps[j].t);

@@ -44,6 +44,7 @@ extern symbolMaker wsymbols;
 ptDiagramData::ptDiagramData()
   : nfetches(0),new_symbolmaker(false)
 {
+  makedefaultParInfo();
 }
 
 ptDiagramData::ptDiagramData(const ptDiagramData& rhs){
@@ -76,6 +77,10 @@ void ptDiagramData::copyMembers(const ptDiagramData& rhs){
   fetchRange= rhs.fetchRange;
   parList= rhs.parList; // sjekk = operator
   textLines= rhs.textLines;
+  
+  new_symbolmaker = rhs.new_symbolmaker;
+  shcinfo = rhs.shcinfo;
+  parInfo = rhs.parInfo;
 }
 
 void ptDiagramData::Erase()
@@ -2251,6 +2256,89 @@ void ptDiagramData::mergeData(const int& id1,
   }
 }
 
+
+// make default list of parameter info
+void ptDiagramData::makedefaultParInfo()
+{
+  parInfo["TD"] = parameter_info("TD",0,true,false);
+  parInfo["RR1"] = parameter_info("RR1",0,true,true);
+  parInfo["RR2"] = parameter_info("RR2",0,true,true);
+  parInfo["RR"] = parameter_info("RR",0,true,true);
+  parInfo["CC"] = parameter_info("CC",0,true,false);
+  parInfo["CC8"] = parameter_info("CC8",0,true,false);
+  parInfo["TT"] = parameter_info("TT",0,true,false);
+  parInfo["RH"] = parameter_info("RH",0,true,false);
+
+  parInfo["UU"] = parameter_info("UU",0,false,false);
+  parInfo["VV"] = parameter_info("VV",0,false,false);
+  parInfo["WV"] = parameter_info("WV",0,false,false);
+  parInfo["FG"] = parameter_info("FG",0,true,false);
+  parInfo["CL"] = parameter_info("CL",0,true,false);
+  parInfo["CM"] = parameter_info("CM",0,true,false);
+  parInfo["CH"] = parameter_info("CH",0,true,false);
+  parInfo["VVC"] = parameter_info("VVC",10,true,false);
+
+  parInfo["VVQ"] = parameter_info("VVQ",9,false,false);
+  parInfo["WW"] = parameter_info("WW",0,false,false);
+  parInfo["MSLP"] = parameter_info("MSLP",1000,true,false);
+  parInfo["HST"] = parameter_info("HST",0.1,0,15,0,false,true,false); //
+  parInfo["HSX"] = parameter_info("HSX",0,true,false);
+  parInfo["HSTX"] = parameter_info("HSTX",0,true,false);
+  parInfo["HSTE"] = parameter_info("HSTE",0,true,false);
+  parInfo["HSEX"] = parameter_info("HSEX",0,true,false);
+
+  parInfo["HSXF"] = parameter_info("HSXF",1.65,true,false);
+  parInfo["HEXF"] = parameter_info("HEXF",1,true,false);
+  parInfo["TPT"] = parameter_info("TPT",1,true,false);
+  parInfo["DDPT"] = parameter_info("DDPT",1,0,360,360,true,false,false); //
+  parInfo["TST"] = parameter_info("TST",1,true,false);
+  parInfo["HSP"] = parameter_info("HSP",0,true,false);
+  parInfo["TSP"] = parameter_info("TSP",1,true,false);
+  parInfo["DDPP"] = parameter_info("DDPP",1,0,360,360,true,false,false); //
+
+  parInfo["HSD"] = parameter_info("HSD",0,true,false);
+  parInfo["TSD"] = parameter_info("TSD",1,true,false);
+  parInfo["DDPD"] = parameter_info("DDPD",1,0,360,360,true,false,false); //
+  parInfo["FF"] = parameter_info("FF",1,0,50,0,false,true,false); //
+  parInfo["DD"] = parameter_info("DD",1,0,360,0,true,false,false); //
+  parInfo["GU"] = parameter_info("GU",0,true,false);
+  parInfo["WVFD"] = parameter_info("WVFD",0,false,false);
+  parInfo["WVMD"] = parameter_info("WVMD",0,false,false);
+
+  parInfo["HS"] = parameter_info("HS",0.01,-1,6,0,false,true,false); //
+  parInfo["CU"] = parameter_info("CU",0,false,false);
+  parInfo["CV"] = parameter_info("CV",0,false,false);
+  parInfo["CUV"] = parameter_info("CUV",0,false,false);
+  parInfo["CFD"] = parameter_info("CFD",0,false,false);
+  parInfo["STA"] = parameter_info("STA",0,true,false);
+  parInfo["STAQ"] = parameter_info("STAQ",1,false,false);
+  parInfo["CON"] = parameter_info("CON",100,false,false);
+
+  parInfo["CONQ"] = parameter_info("CONQ",0,false,false);
+  parInfo["XWW"] = parameter_info("XWW",0,false,false);
+  parInfo["HEC"] = parameter_info("HEC",0.01,-15,50,0,false,true,false);//
+  parInfo["SHC"] = parameter_info("SHC",0,false,false);
+  parInfo["CWW"] = parameter_info("CWW",0,false,false);
+  parInfo["AGR"] = parameter_info("AGR",0,false,false);
+  parInfo["LII"] = parameter_info("LII",0,false,false);
+  parInfo["SHL"] = parameter_info("SHL",0,false,false);
+
+  parInfo["DDPE"] = parameter_info("DDPE",0,false,false);
+  parInfo["FOI"] = parameter_info("FOI",0,false,false);
+  parInfo["FFMS"] = parameter_info("FFMS",0,true,false);
+  parInfo["CL8"] = parameter_info("CL8",0,true,false);
+  parInfo["CM8"] = parameter_info("CM8",0,true,false);
+  parInfo["CH8"] = parameter_info("CH8",0,true,false);
+  parInfo["PS"] = parameter_info("PS",0,false,false);
+  parInfo["SST"] = parameter_info("SST",0,true,false);
+
+  parInfo["FFMI"] = parameter_info("TD",0,true,false);
+  parInfo["FFMA"] = parameter_info("TD",0,true,false);
+  parInfo["ICEA"] = parameter_info("TD",0,true,false);
+  parInfo["VIS"] = parameter_info("TD",10,true,false);
+
+}
+
 // return info about a specific parameter
 bool ptDiagramData::parameterInfo(const ParId& pid,
 				  float& def,
@@ -2261,68 +2349,86 @@ bool ptDiagramData::parameterInfo(const ParId& pid,
   //      interpok= ok to interpolate values
   //      spreadok= if !interpok, spread datavalues
 {
-  const int numalias=68;
-  const miString aliass[numalias]=
-    { "TD",  "RR1", "RR2", "RR",  "CC",  "CC8", "TT",  "RH",
-      "UU",  "VV",  "WV",  "FG",  "CL",  "CM",  "CH",  "VVC",
-      "VVQ", "WW",  "MSLP","HST", "HSX", "HSTX","HSTE","HSEX",
-      "HSXF","HEXF","TPT", "DDPT","TST", "HSP", "TSP", "DDPP",
-      "HSD", "TSD", "DDPD","FF",  "DD",  "GU",  "WVFD","WVMD",
-      "HS",  "CU",  "CV",  "CUV", "CFD", "STA", "STAQ","CON",
-      "CONQ","XWW", "HEC", "SHC", "CWW", "AGR", "LII", "SHL",
-      "DDPE","FOI","FFMS", "CL8", "CM8", "CH8", "PS",  "SST",
-      "FFMI","FFMA","ICEA","VIS"
-    };
+//   const int numalias=68;
+//   const miString aliass[numalias]=
+//     { "TD",  "RR1", "RR2", "RR",  "CC",  "CC8", "TT",  "RH",
+//       "UU",  "VV",  "WV",  "FG",  "CL",  "CM",  "CH",  "VVC",
+//       "VVQ", "WW",  "MSLP","HST", "HSX", "HSTX","HSTE","HSEX",
+//       "HSXF","HEXF","TPT", "DDPT","TST", "HSP", "TSP", "DDPP",
+//       "HSD", "TSD", "DDPD","FF",  "DD",  "GU",  "WVFD","WVMD",
+//       "HS",  "CU",  "CV",  "CUV", "CFD", "STA", "STAQ","CON",
+//       "CONQ","XWW", "HEC", "SHC", "CWW", "AGR", "LII", "SHL",
+//       "DDPE","FOI","FFMS", "CL8", "CM8", "CH8", "PS",  "SST",
+//       "FFMI","FFMA","ICEA","VIS"
+//     };
 
-  // default value for parameter
-  const float defs[numalias]=
-    { 0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,  10,
-      9,   0,1000,   0,   0,   0,   0,   0,
-      1.65,1,   1, 360,   1,   0,   1, 360,
-      0,   1, 360,   0,   0,   0,   0,   0,
-      0,   0,   0,   0,   0,   0,   1, 100,
-      0,   0,   0,   0,   0,   2,   0,   0,
-      0,   0,   0,   0,   0,   0,   0,   0,
-      0,   0,   0,  10
-    };
+//   // default value for parameter
+//   const float defs[numalias]=
+//     { 0,   0,   0,   0,   0,   0,   0,   0,
+//       0,   0,   0,   0,   0,   0,   0,  10,
+//       9,   0,1000,   0,   0,   0,   0,   0,
+//       1.65,1,   1, 360,   1,   0,   1, 360,
+//       0,   1, 360,   0,   0,   0,   0,   0,
+//       0,   0,   0,   0,   0,   0,   1, 100,
+//       0,   0,   0,   0,   0,   2,   0,   0,
+//       0,   0,   0,   0,   0,   0,   0,   0,
+//       0,   0,   0,  10
+//     };
 
-  // can parameter be interpolated between timepoints
-  const bool interp[numalias]=
-    {  true,  true,  true,  true,  true,  true,  true,  true,
-       false, false, false, true,  true,  true,  true,  true,
-       false, false, true,  true,  true,  true,  true,  true,
-       true,  true,  true,  false, true,  true,  true,  false,
-       true,  true,  false, true,  false, true,  false, false,
-       true,  false, false, false, false, true,  false, false,
-       false, false, true,  false, false, false, false, false,
-       false, false, true,  true,  true,  true,  false, true,
-       true,  true,  true,  true
-    };
+//   // can parameter be interpolated between timepoints
+//   const bool interp[numalias]=
+//     {  true,  true,  true,  true,  true,  true,  true,  true,
+//        false, false, false, true,  true,  true,  true,  true,
+//        false, false, true,  true,  true,  true,  true,  true,
+//        true,  true,  true,  false, true,  true,  true,  false,
+//        true,  true,  false, true,  false, true,  false, false,
+//        true,  false, false, false, false, true,  false, false,
+//        false, false, true,  false, false, false, false, false,
 
-  // can parameter be eavenly spread between timepoints
-  const bool spread[numalias]=
-    { false,  true,  true,  true, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false, false, false, false, false,
-      false, false, false, false
-    };
+//        false, false, true,  true,  true,  true,  false, true,
+//        true,  true,  true,  true
+//     };
+
+//   // can parameter be eavenly spread between timepoints
+//   const bool spread[numalias]=
+//     { false,  true,  true,  true, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false, false, false, false, false,
+//       false, false, false, false
+//     };
 
   if (pid.alias==A_UNDEF) return false;
   miString alias= pid.alias;
 
-  for (int i=0; i<numalias; i++)
-    if (alias==aliass[i]){
-      def= defs[i];
-      interpok= interp[i];
-      spreadok= spread[i];
-      return true;
-    }
+  if ( parInfo.count( alias ) > 0 ){
+    parameter_info pai = parInfo[alias];
+    def= pai.def;
+    interpok= pai.interpok;
+    spreadok= pai.spreadok;
+    return true;
+  }
+  cerr << "ptDiagramData::parameterInfo Id not found:" << pid << endl;
+  return false;
+}
+
+// return info about a specific parameter
+bool ptDiagramData::parameterInfo(const ParId& pid,
+				  parameter_info& pai)
+// input: one parameter id
+// out: parameter_info
+{
+  if (pid.alias==A_UNDEF) return false;
+  miString alias= pid.alias;
+  
+  if ( parInfo.count( alias ) > 0 ){
+    pai = parInfo[alias];
+    return true;
+  }
   cerr << "ptDiagramData::parameterInfo Id not found:" << pid << endl;
   return false;
 }
@@ -2339,10 +2445,11 @@ int ptDiagramData::makeOneParameter(const ParId& pid,
   int i,j;
   miString alias= pid.alias;
   Parameter pp;
+  parameter_info pai;
   bool dum, dum2;
 
   if (parDef.getParameter(pid.alias,pp)){
-    parameterInfo(pid,value,dum,dum2);
+    parameterInfo(pid,pai);
     wp.setPolar(pp.datatype()==polar);
     wp.setTimeLineIndex(tlindex);
     //wp.setType(pp.);
@@ -2352,7 +2459,7 @@ int ptDiagramData::makeOneParameter(const ParId& pid,
     // fill with default data
     for (i=0; i<ntimep; i++)
       for (j=0; j<pp.order(); j++)
-	wp.setData(i,j,value);
+	wp.setData(i,j,pai.def);
     wp.calcAllProperties();
     index = addParameter(wp);
   }
@@ -2369,14 +2476,15 @@ void ptDiagramData::interpData(const int idx,
   //    only one neighbour: raw copy
   if (idx==-1) return; // illegal index
   int j,l,m;
-  float dum;
-  bool interp= false, spread= false;
+  parameter_info pai;
+//   float dum;
+//   bool interp= false, spread= false;
   ParId pid= parList[idx].Id();
   int np= parList[idx].Npoints();
   int nd= parList[idx].Ndim();
   if (np != locked.size()) return; // locked-array and data doesn't match
 
-  parameterInfo(parList[idx].Id(),dum,interp,spread);
+  parameterInfo(parList[idx].Id(),pai);
   bool anyp= false;
   for (j=0; j<np; j++) anyp = anyp || locked[j];
   if (!anyp) return; // data has default values ONLY; nothing to do
@@ -2412,11 +2520,11 @@ void ptDiagramData::interpData(const int idx,
       meanv= (rightd/(right-left));
       // fill data-points
       for (m=left+1; m<right; m++){
-	if (interp){
+	if (pai.interpok){
 	  // interpolation ok
 	  dat= leftd + slope*(m-left);
 	} else {
-	  if (spread){
+	  if (pai.spreadok){
 	    // even spread of data
 	    dat= meanv;
 	  } else {
@@ -2427,7 +2535,7 @@ void ptDiagramData::interpData(const int idx,
 	parList[idx].setData(m,l,dat);
       }
       // correct right value if spread of data
-      if (right<np && !interp && spread)
+      if (right<np && !pai.interpok && pai.spreadok)
 	parList[idx].setData(right,l,meanv);
     }
     // adjust main counter
@@ -2443,19 +2551,24 @@ void ptDiagramData::replaceData(const int oldidx,
 {
   int j,k,l;
   vector<miTime> curtline;
+  parameter_info pai;
 
   if (newidx!=-1 && oldidx!=-1 &&
       parList[oldidx].Ndim()==parList[newidx].Ndim() &&
       inptline.size()==locked.size()){
+    parameterInfo(parList[oldidx].Id(),pai);
     j=parList[newidx].TimeLineIndex();
     timeLine.Timeline(j,curtline);
     for (j=0; j<inptline.size(); j++){
       if (locked[j]) continue;
       for (k=0; k<curtline.size(); k++){
 	if (inptline[j]==curtline[k]){
-	  for (l=0; l<parList[oldidx].Ndim(); l++)
-	    parList[oldidx].
-	      setData(j,l,parList[newidx].Data(k,l));
+	  for (l=0; l<parList[oldidx].Ndim(); l++){
+	    float data = parList[newidx].Data(k,l);
+	    if ( data < pai.min ) data = pai.min;
+	    if ( data > pai.max ) data = pai.max;
+	    parList[oldidx].setData(j,l,data);
+	  }
 	  locked[j]= true;
 	  break;
 	}

@@ -80,6 +80,30 @@ struct datasetparam {
 };
 
 
+struct parameter_info {
+  miString alias;
+  float step;
+  float min;
+  float max;
+  float def;
+  bool wrap;
+  bool interpok;
+  bool spreadok;
+  parameter_info()
+    :step(1),min(-10000000),max(100000000),def(0),wrap(false),
+     interpok(true),spreadok(false)
+  {}
+  parameter_info(miString a, float st, float mi, float ma, float de,
+		 bool wr, bool in, bool sp)
+    :alias(a),step(st),min(mi),max(ma),def(de),wrap(wr),
+     interpok(in),spreadok(sp)
+  {}
+  parameter_info(miString a, float de, bool in, bool sp)
+    : alias(a),step(1),min(-10000000),max(10000000),def(de),
+      wrap(false),interpok(in),spreadok(sp)
+  {}
+
+};
 
 
 class ptDiagramData {
@@ -96,6 +120,8 @@ private:
   bool new_symbolmaker;
   SHCinfo shcinfo;
 
+  map<miString,parameter_info> parInfo;
+
   void cleanDataStructure_();
   void makeWeatherSymbols_(ParId);
   void makeWeatherSymbols_new_(ParId p, bool update);
@@ -104,6 +130,8 @@ private:
 		const int level);
   void copyMembers(const ptDiagramData&);
   bool parameterInfo(const ParId&,float&,bool&,bool&);
+  bool parameterInfo(const ParId&,parameter_info& info);
+  void makedefaultParInfo();
 
 public:
   ptDiagramData();

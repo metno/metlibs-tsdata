@@ -22,10 +22,12 @@ AC_LANG_PUSH(C++)
 AC_CXX_HAVE_STD
 AC_CXX_HAVE_STL
 
+AC_CHECK_HDF4
+
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
 
-PKG_CHECK_MODULES([puTools], [puTools])
-METNO_CHECK_LIB([puTools], [main], , , , [$puTools_LIBS], 
+PKG_CHECK_MODULES([puTools], [putools])
+METNO_CHECK_LIB([putools], [main], , , , [$puTools_LIBS], 
                 [the puTools package])
 METNO_CHECK_HEADERS([puTools/miString.h], , , ,
                     [$puTools_CFLAGS], [the puTools package])

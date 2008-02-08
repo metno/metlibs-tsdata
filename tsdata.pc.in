@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: @PACKAGE_NAME@
 Description: The tsData Library
 Version: @VERSION@
-Requires: puTools >= 4.0.0
+Requires: putools >= 4.0.0
 Libs: -L${libdir}/@PACKAGE_TARNAME@ -l@PACKAGE_TARNAME@
 Cflags: -I${includedir}

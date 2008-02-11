@@ -40,6 +40,7 @@
 
 #include <puDatatypes/miPosition.h>
 #include <puTools/miString.h>
+#include <puMet/symbolMaker.h>
 
 #include <set>
 #include <map>
@@ -117,6 +118,7 @@ private:
   map<miString, vector<miString> > textLines;
 
   WeatherParameter emptypar;
+  symbolMaker wsymbols;
   bool new_symbolmaker;
   SHCinfo shcinfo;
 
@@ -134,7 +136,7 @@ private:
   void makedefaultParInfo();
 
 public:
-  ptDiagramData();
+  ptDiagramData(symbolMaker& wsym);
   ptDiagramData(const ptDiagramData&);
   
   ptDiagramData& operator=(const ptDiagramData&);

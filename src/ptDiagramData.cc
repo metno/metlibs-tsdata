@@ -31,7 +31,6 @@
 #include <ptDiagramData.h>
 
 #include <puMet/ptStatistics.h>
-#include <puMet/symbolMaker.h>
 #include <puMet/vision.h>
 #include <puMet/windProfile.h>
 #include <puMet/cloudGrp.h>
@@ -39,10 +38,8 @@
 
 #include <math.h>
 
-extern symbolMaker wsymbols;
-
-ptDiagramData::ptDiagramData()
-  : nfetches(0),new_symbolmaker(false)
+ptDiagramData::ptDiagramData(symbolMaker& wsym)
+  : nfetches(0),wsymbols(wsym),new_symbolmaker(false)
 {
   makedefaultParInfo();
 }

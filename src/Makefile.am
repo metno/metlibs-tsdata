@@ -1,4 +1,4 @@
-pkglib_LTLIBRARIES = libtsdata.la
+lib_LTLIBRARIES = libtsdata.la
 
 libtsdata_la_SOURCES = \
 ptAsciiStream.cc \

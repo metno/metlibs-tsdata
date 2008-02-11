@@ -7,5 +7,5 @@ Name: @PACKAGE_NAME@
 Description: The tsData Library
 Version: @VERSION@
 Requires: putools >= 4.0.0
-Libs: -L${libdir}/@PACKAGE_TARNAME@ -l@PACKAGE_TARNAME@ 
+Libs: -L${libdir} -l@PACKAGE_NAME@ 
 Cflags: -I${includedir}

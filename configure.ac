@@ -28,7 +28,7 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
 
 # Check for the puTools library.
 PKG_CHECK_MODULES([puTools], [putools])
-METNO_CHECK_LIB([putools], [main], , , , [$puTools_LIBS], 
+METNO_CHECK_LIB([puTools], [main], , , , [$puTools_LIBS], 
                 [the puTools package])
 METNO_CHECK_HEADERS([puTools/miString.h], , , ,
                     [$puTools_CFLAGS], [the puTools package])
@@ -42,14 +42,14 @@ METNO_CHECK_HEADERS([puMet/symbolMaker.h], , , ,
 
 # Check for the puCtools library.
 PKG_CHECK_MODULES([puCtools], [puctools])
-METNO_CHECK_LIB([puctools], [main], , , , [$puCtools_LIBS], 
+METNO_CHECK_LIB([puCtools], [main], , , , [$puCtools_LIBS], 
                 [the puCtools package])
 METNO_CHECK_HEADERS([puCtools/puMath.h], , , ,
                     [$puCtools_CFLAGS], [the puCtools package])
 
 # Check for the puDatatypes library.
 PKG_CHECK_MODULES([puDatatypes], [pudatatypes])
-METNO_CHECK_LIB([pudatatypes], [main], , , , [$puDatatypes_LIBS], 
+METNO_CHECK_LIB([puDatatypes], [main], , , , [$puDatatypes_LIBS], 
                 [the puDatatypes package])
 METNO_CHECK_HEADERS([puDatatypes/miPosition.h], , , ,
                     [$puDatatypes_CFLAGS], [the puDatatypes package])

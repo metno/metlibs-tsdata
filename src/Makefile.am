@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libtsdata.la
+lib_LTLIBRARIES = lib@PACKAGE_NAME@.la
 
-libtsdata_la_SOURCES = \
+lib@PACKAGE_NAME@_la_SOURCES = \
 ptAsciiStream.cc \
 ptDiagramData.cc \
 ptHDFFile.cc \
@@ -11,12 +11,12 @@ ptPrimitiveType.cc \
 ptSHCinfo.cc \
 ptWeatherParameter.cc
 
-libtsdata_la_CPPFLAGS = \
+lib@PACKAGE_NAME@_la_CPPFLAGS = \
 	${puMet_CFLAGS} ${puDatatypes_CFLAGS} ${parameter_CFLAGS} \
 	${puCtools_CFLAGS} ${puTools_CFLAGS} ${miLogger_CFLAGS} \
 	${LOG4CXX_CPPFLAGS} ${HDF4_CFLAGS}
 
-libtsdata_la_LDFLAGS = \
+lib@PACKAGE_NAME@_la_LDFLAGS = \
 	${puMet_LIBS} ${puDatatypes_LIBS} ${parameter_LIBS} \
 	${puCtools_LIBS} ${puTools_LIBS} ${miLogger_LIBS} \
 	${LOG4CXX_LDFLAGS} ${LOG4CXX_LIBS}  \

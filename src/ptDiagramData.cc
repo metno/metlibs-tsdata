@@ -38,6 +38,10 @@
 
 #include <math.h>
 
+ptDiagramData::ptDiagramData()
+  : nfetches(0),new_symbolmaker(false)
+{ }
+
 ptDiagramData::ptDiagramData(symbolMaker& wsym)
   : nfetches(0),wsymbols(wsym),new_symbolmaker(false)
 {

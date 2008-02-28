@@ -136,6 +136,7 @@ private:
   void makedefaultParInfo();
 
 public:
+  ptDiagramData();
   ptDiagramData(symbolMaker& wsym);
   ptDiagramData(const ptDiagramData&);
   

@@ -15,7 +15,6 @@
 # Get version and check if --install can be used.
 autoreconf=$(which autoreconf)
 value=$(autoconf --version  | head -n 1 | sed -e "s/.* //")
-set -ax
 minor=${value#*.}
 major=${value%.*}
 install=""
@@ -24,7 +23,7 @@ if [ $major -lt 2 ]; then
     install="--install"
 fi
 
-if [ $major -eq 2 ] && [ $minor -le 59 ]; then
+if [ $major -eq 2 ] && [ $minor -lt 59 ]; then
     install="--install"
 fi
 

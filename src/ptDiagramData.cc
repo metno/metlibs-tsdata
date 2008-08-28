@@ -2324,19 +2324,20 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["LII"] = parameter_info("LII",0,false,false);
   parInfo["SHL"] = parameter_info("SHL",0,false,false);
 
-  parInfo["DDPE"] = parameter_info("DDPE",0,false,false);
+  parInfo["DDPE"]= parameter_info("DDPE",0,false,false);
   parInfo["FOI"] = parameter_info("FOI",0,false,false);
-  parInfo["FFMS"] = parameter_info("FFMS",0,true,false);
+  parInfo["FFMS"]= parameter_info("FFMS",0,true,false);
   parInfo["CL8"] = parameter_info("CL8",0,true,false);
   parInfo["CM8"] = parameter_info("CM8",0,true,false);
   parInfo["CH8"] = parameter_info("CH8",0,true,false);
-  parInfo["PS"] = parameter_info("PS",0,false,false);
+  parInfo["PS"]  = parameter_info("PS",0,false,false);
   parInfo["SST"] = parameter_info("SST",0,true,false);
 
-  parInfo["FFMI"] = parameter_info("TD",0,true,false);
-  parInfo["FFMA"] = parameter_info("TD",0,true,false);
-  parInfo["ICEA"] = parameter_info("TD",0,true,false);
-  parInfo["VIS"] = parameter_info("TD",10,true,false);
+  parInfo["FFMI"]= parameter_info("FFMI",0,true,false);
+  parInfo["FFMA"]= parameter_info("FFMA",0,true,false);
+  parInfo["ICEA"]= parameter_info("ICEA",0,true,false);
+  parInfo["VIS"] = parameter_info("VIS",10,true,false);
+  parInfo["CB"]  = parameter_info("CB", 9,true,false);
 
 }
 

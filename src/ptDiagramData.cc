@@ -284,11 +284,12 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
     if (findParameter(inpid,wpx,&error) &&
 	findParameter(id1,wpx1,&error)  &&
 	findParameter(id2,wpx2,&error)){
-      locked= parList[wpx].isLocked();
-      for (j=0; j<parList[wpx].Npoints(); j++)
-	if (!locked || parList[wpx1].isModified(j)
-	    || parList[wpx2].isModified(j))
-	  parList[wpx].setData(j,parList[wpx1].Data(j)*parList[wpx2].Data(j));
+//       locked= parList[wpx].isLocked();
+      for (j=0; j<parList[wpx].Npoints(); j++){
+// 	if (!locked || parList[wpx1].isModified(j)
+// 	    || parList[wpx2].isModified(j))
+	parList[wpx].setData(j,parList[wpx1].Data(j)*parList[wpx2].Data(j));
+      }
       parList[wpx].calcAllProperties();
     }
 

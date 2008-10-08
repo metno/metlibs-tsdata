@@ -41,6 +41,7 @@
 #include <puDatatypes/miPosition.h>
 #include <puTools/miString.h>
 #include <puMet/symbolMaker.h>
+#include <puMet/WindCalc.h>
 
 #include <set>
 #include <map>
@@ -121,6 +122,7 @@ private:
   symbolMaker wsymbols;
   bool new_symbolmaker;
   SHCinfo shcinfo;
+  WindCalc windCalc;
 
   map<miString,parameter_info> parInfo;
 
@@ -169,6 +171,7 @@ public:
   vector<miString> getTextLines(const miString modelname);
 
   void setSHCinfo(const SHCinfo& shc);
+  void setWindCalc(const WindCalc& wc);
   bool findParameter(const ParId&, int& index, ErrorFlag*);
   bool copyParameter(int index, WeatherParameter& wp, ErrorFlag*);
   bool copyParameter(const ParId&, WeatherParameter& wp, ErrorFlag*);

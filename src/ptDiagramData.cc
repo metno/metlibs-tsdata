@@ -82,6 +82,7 @@ void ptDiagramData::copyMembers(const ptDiagramData& rhs){
   new_symbolmaker = rhs.new_symbolmaker;
   shcinfo = rhs.shcinfo;
   parInfo = rhs.parInfo;
+  windCalc = rhs.windCalc;
 }
 
 void ptDiagramData::Erase()
@@ -565,59 +566,41 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
   } else if (inpid.alias == "FF" &&
 	     inpid.level != L_UNDEF && inpid.level != 0  ){
     level= inpid.level;
-//     cerr << "tsData:Updating FF at level:"<<level<<endl;
+    cerr << "tsData:Updating FF at level:"<<level<<endl;
     id1.level = 0;
-    
+    id2.alias = "STAQ";
+    id2.level = 0;
+    if (level==0) level = 10;
+
     if (findParameter(inpid,wpx,&error) &&
-	findParameter(id1,wpx1,&error)){
-      locked= parList[wpx].isLocked();
-      double speed10;
-      double Ri = 0;
-      double dlevel= static_cast<double>(level);
-      float speed;
-      
+	findParameter(id1,wpx1,&error) &&
+	findParameter(id2,wpx2,&error)){
       for (j=0; j<parList[wpx].Npoints(); j++){
-// 	if (!locked || parList[wpx1].isModified(j)){
-	  speed10 = static_cast<double>(parList[wpx1].Data(j,0));
-	  profs.editRi(Ri);
-	  speed = profs.compute(reflevel, speed10, dlevel);
-	  parList[wpx].setData(j,0,speed);
-// 	}
+	float speed10 = parList[wpx1].Data(j,0);
+	float st = parList[wpx2].Data(j,0);
+	float speed  = windCalc.meanWind(speed10, static_cast<int>(st), level);
+	parList[wpx].setData(j,0,speed);
       }
       parList[wpx].calcAllProperties();
     }
-
-//     // Wind speed 
-//   } else if (inpid.alias == "FF"){
-//     id1.alias = "WVFD";
-
+    
 //     if (findParameter(inpid,wpx,&error) &&
 // 	findParameter(id1,wpx1,&error)){
 //       locked= parList[wpx].isLocked();
+//       double speed10;
+//       double Ri = 0;
+//       double dlevel= static_cast<double>(level);
+//       float speed;
+      
 //       for (j=0; j<parList[wpx].Npoints(); j++){
-// 	if (!locked || parList[wpx1].isModified(j,0)){
-// 	  d = parList[wpx1].Data(j,0);
-// 	  parList[wpx].setData(j,0,d);
-// 	}
+// 	speed10 = static_cast<double>(parList[wpx1].Data(j,0));
+// 	profs.editRi(Ri);
+// 	speed = profs.compute(reflevel, speed10, dlevel);
+// 	parList[wpx].setData(j,0,speed);
 //       }
 //       parList[wpx].calcAllProperties();
 //     }
 
-//     // Wind speed (m/s)
-//   } else if (inpid.alias == "FFMS"){
-//     id1.alias = "WVMD";
-
-//     if (findParameter(inpid,wpx,&error) &&
-// 	findParameter(id1,wpx1,&error)){
-//       locked= parList[wpx].isLocked();
-//       for (j=0; j<parList[wpx].Npoints(); j++){
-// 	if (!locked || parList[wpx1].isModified(j,0)){
-// 	  d = parList[wpx1].Data(j,0);
-// 	  parList[wpx].setData(j,0,d);
-// 	}
-//       }
-//       parList[wpx].calcAllProperties();
-//     }
     
     // Wind speed min and max (m/s)
   } else if (inpid.alias == "FFMIX"){
@@ -634,43 +617,46 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       parList[wpx].calcAllProperties();
     }
 
-//     // Wind direction
-//   } else if (inpid.alias == "DD"){
-//     id1.alias = "WVFD";
+    // Gust
+  } else if (inpid.alias == "GU"){
+    id1.alias = "FF";
+    id1.level=0;
+    id2.alias = "STAQ";
+    id2.level=0;
+    level= inpid.level;
+    cerr << "tsData: Updating gust at level:"<<level<<endl;
+    if (level==0) level = 10;
+
+    if (findParameter(inpid,wpx,&error) &&
+	findParameter(id1,wpx1,&error) &&
+	findParameter(id2,wpx2,&error)){
+      for (j=0; j<parList[wpx].Npoints(); j++){
+	float speed10 = parList[wpx1].Data(j,0);
+	float st = parList[wpx2].Data(j,0);
+	float gust  = windCalc.gust(speed10, static_cast<int>(st), level);
+	parList[wpx].setData(j,0,gust);
+      }
+      parList[wpx].calcAllProperties();
+    }
+
+//     // Gust
+//   } else if (inpid.alias == "GU"){
+//     id1.alias = "FF";
+//     level= inpid.level;
+//     cerr << "tsData: Updating gust at level:"<<level<<endl;
+//     if (level==0) level = 10;
+//     float gust;
 
 //     if (findParameter(inpid,wpx,&error) &&
 // 	findParameter(id1,wpx1,&error)){
 //       locked= parList[wpx].isLocked();
 //       for (j=0; j<parList[wpx].Npoints(); j++){
-// 	if (!locked || parList[wpx1].isModified(j,1)){
-// 	  d = parList[wpx1].Data(j,1);
-// 	  parList[wpx].setData(j,0,d);
-// 	}
+// 	d = parList[wpx1].Data(j,0);
+// 	gust  = profs.gust(level, d);
+// 	parList[wpx].setData(j,0,gust);
 //       }
 //       parList[wpx].calcAllProperties();
 //     }
-
-    // Gust
-  } else if (inpid.alias == "GU"){
-    id1.alias = "FF";
-    level= inpid.level;
-//     cerr << "tsData: Updating gust at level:"<<level<<endl;
-    if (level==0) level = 10;
-    //     float speed;
-    float gust;
-
-    if (findParameter(inpid,wpx,&error) &&
-	findParameter(id1,wpx1,&error)){
-      locked= parList[wpx].isLocked();
-      for (j=0; j<parList[wpx].Npoints(); j++){
-// 	if (!locked || parList[wpx1].isModified(j)){
-	  d = parList[wpx1].Data(j,0);
-	  gust  = profs.gust(level, d);
-	  parList[wpx].setData(j,0,gust);
-// 	}
-      }
-      parList[wpx].calcAllProperties();
-    }
 
     // discrete visibility
   } else if (inpid.alias == "VVQ"){
@@ -1033,25 +1019,51 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       }
     }
 
+//     // FF in different level
+//   } else if (inpid.alias == "FF" &&
+// 	     inpid.level != L_UNDEF && inpid.level != 0 ){
+//     level=inpid.level;
+//     //cerr << "Asking for FF at level:"<<level<<endl;
+//     id1.level = 0;
+//     if (!findParameter(id1,idx,&error))
+//       makeOneParameter(id1);
+    
+//     if (copyParameter(id1,wp,&error)){
+//       double speed10;
+//       double Ri = 0;
+//       double dlevel= static_cast<double>(level);
+//       float speed;
+//       for (j=0; j<wp.Npoints(); j++){
+// 	speed10 = static_cast<double>(wp.Data(j,0));
+// 	//  	  profs.setRi(Ri, reflevel, speed10);
+// 	profs.editRi(Ri);
+// 	speed = profs.compute(reflevel, speed10, dlevel);
+// 	wp.setData(j,0,speed);
+//       }
+//       if (newpid.run==R_UNDEF) newpid.run= wp.Id().run;
+//       wp.calcAllProperties();
+//       wp.setId(newpid);
+//       addParameter(wp);
+//     }
+
     // FF in different level
   } else if (inpid.alias == "FF" &&
 	     inpid.level != L_UNDEF && inpid.level != 0 ){
     level=inpid.level;
-    //cerr << "Asking for FF at level:"<<level<<endl;
+    cerr << "Asking for FF at level:"<<level<<endl;
     id1.level = 0;
-    if (!findParameter(id1,idx,&error))
-      makeOneParameter(id1);
-    
-    if (copyParameter(id1,wp,&error)){
-      double speed10;
-      double Ri = 0;
-      double dlevel= static_cast<double>(level);
-      float speed;
+    id2.alias = "STAQ";
+    id2.level = 0;
+
+//     if (!findParameter(id2,wpx2,&error)){
+//     }
+
+    if (copyParameter(id1,wp,&error) &&
+	copyParameter(id2,wp2,&error) ){
       for (j=0; j<wp.Npoints(); j++){
-	speed10 = static_cast<double>(wp.Data(j,0));
-	//  	  profs.setRi(Ri, reflevel, speed10);
-	profs.editRi(Ri);
-	speed = profs.compute(reflevel, speed10, dlevel);
+	float speed10 = wp.Data(j,0);
+	float st   = wp2.Data(j,0);
+	float speed = windCalc.meanWind(speed10, static_cast<int>(st), level);
 	wp.setData(j,0,speed);
       }
       if (newpid.run==R_UNDEF) newpid.run= wp.Id().run;
@@ -1060,30 +1072,53 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       addParameter(wp);
     }
   
-    // Gust (knots)
+    // Gust
   } else if (inpid.alias == "GU"){
     level= inpid.level;
-    //cerr << "Asking for gust at level:"<<level<<endl;
+    cerr << "Asking for gust at level:"<<level<<endl;
     if (level==0) level = 10;
     id1.alias = "FF";
-    if (copyParameter(id1,wp,&error)){
-      float speed;
-      float gust;
-      for (j=0; j<wp.Npoints(); j++)
-	fdata.push_back(wp.Data(j,0));
-      wp.setDims(fdata.size(),1);
+    id1.level = 0;
+    id2.alias = "STAQ";
+    id2.level = 0;
+    if (copyParameter(id1,wp,&error) &&
+	copyParameter(id2,wp2,&error) ){
       for (j=0; j<wp.Npoints(); j++){
-	speed = fdata[j];
-	gust  = profs.gust(level, speed);
+	float speed10 = wp.Data(j,0);
+	float st   = wp2.Data(j,0);
+	float gust = windCalc.gust(speed10, static_cast<int>(st), level);
 	wp.setData(j,0,gust);
       }
-      fdata.erase(fdata.begin(),fdata.end());
-      
       if (newpid.run==R_UNDEF) newpid.run= wp.Id().run;
       wp.calcAllProperties();
       wp.setId(newpid);
       addParameter(wp);
     }
+    
+//     // Gust (knots)
+//   } else if (inpid.alias == "GU"){
+//     level= inpid.level;
+//     //cerr << "Asking for gust at level:"<<level<<endl;
+//     if (level==0) level = 10;
+//     id1.alias = "FF";
+//     if (copyParameter(id1,wp,&error)){
+//       float speed;
+//       float gust;
+//       for (j=0; j<wp.Npoints(); j++)
+// 	fdata.push_back(wp.Data(j,0));
+//       wp.setDims(fdata.size(),1);
+//       for (j=0; j<wp.Npoints(); j++){
+// 	speed = fdata[j];
+// 	gust  = profs.gust(level, speed);
+// 	wp.setData(j,0,gust);
+//       }
+//       fdata.erase(fdata.begin(),fdata.end());
+      
+//       if (newpid.run==R_UNDEF) newpid.run= wp.Id().run;
+//       wp.calcAllProperties();
+//       wp.setId(newpid);
+//       addParameter(wp);
+//     }
     
     // cartesian FFmin and FFmax vector
   } else if (inpid.alias == "FFMIX"){
@@ -2364,7 +2399,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["CUV"] = parameter_info("CUV",0,false,false);
   parInfo["CFD"] = parameter_info("CFD",0,false,false);
   parInfo["STA"] = parameter_info("STA",0,true,false);
-  parInfo["STAQ"] = parameter_info("STAQ",1,false,false);
+  parInfo["STAQ"] = parameter_info("STAQ",0,false,false);
   parInfo["CON"] = parameter_info("CON",100,false,false);
 
   parInfo["CONQ"] = parameter_info("CONQ",0,false,false);
@@ -2914,6 +2949,11 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
 void ptDiagramData::setSHCinfo(const SHCinfo& shc)
 {
   shcinfo= shc;
+}
+
+void ptDiagramData::setWindCalc(const WindCalc& wc)
+{
+  windCalc= wc;
 }
 
 

@@ -2424,7 +2424,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["FFMA"]= parameter_info("FFMA",0,true,false);
   parInfo["ICEA"]= parameter_info("ICEA",0,true,false);
   parInfo["VIS"] = parameter_info("VIS",10,true,false);
-  parInfo["CB"]  = parameter_info("CB", 9,true,false);
+  parInfo["CB"]  = parameter_info("CB",3000,true,false);
 
 }
 

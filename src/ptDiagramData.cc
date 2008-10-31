@@ -680,6 +680,66 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       parList[wpx].calcAllProperties();
     }
       
+    // visibility
+  } else if (inpid.alias == "VIS"){
+    id1.alias = "CWW";
+    if (findParameter(inpid,wpx,&error) &&
+	findParameter(id1,wpx1,&error)){
+      for (j=0; j<parList[wpx].Npoints(); j++){
+	f1 = parList[wpx1].Data(j);
+	int ws = static_cast<int>(f1);
+	float visi = 15.0;
+	if ( ws == 1 )       visi = 15.0; // Sun
+	else if ( ws == 2 )  visi = 15.0; // Lightcloudy
+	else if ( ws == 3 )  visi = 15.0; // Partlycloudy
+	else if ( ws == 4 )  visi = 15.0; // Cloudy
+	else if ( ws == 5 )  visi = 7.0;  // Rainshowers
+	else if ( ws == 6 )  visi = 7.0;  // Rainshowers w/ thunder
+	else if ( ws == 7 )  visi = 2.5;  // Sleetshowers
+	else if ( ws == 8 )  visi = 1.0;  // Snowshowers
+	else if ( ws == 9 )  visi = 6.0;  // Lightrain
+	else if ( ws == 10 ) visi = 4.0;  // Rain
+	else if ( ws == 11 ) visi = 4.0;  // rain w/ thunder
+	else if ( ws == 12 ) visi = 3.0;  // Sleet
+	else if ( ws == 13 ) visi = 2.0;  // Snow
+	else if ( ws == 14 ) visi = 2.0;  // Snow w/ thunder
+	else if ( ws == 15 ) visi = 0.8;  // Fog
+	parList[wpx].setData(j,0,visi);
+      }
+      parList[wpx].calcAllProperties();
+    }
+      
+    // cloudbase
+  } else if (inpid.alias == "CB"){
+    id1.alias = "CWW";
+    if (findParameter(inpid,wpx,&error) &&
+	findParameter(id1,wpx1,&error)){
+      for (j=0; j<parList[wpx].Npoints(); j++){
+	f1 = parList[wpx1].Data(j);
+	int ws = static_cast<int>(f1);
+	float cb = 3000;
+	if ( ws == 1 )       cb = 5000; // 10// Sun
+	else if ( ws == 2 )  cb = 3500; // 10// Lightcloudy
+	else if ( ws == 3 )  cb = 3500; // 10// Partlycloudy
+	else if ( ws == 4 )  cb = 3000; // 9 // Cloudy
+	else if ( ws == 5 )  cb = 1500; // 8 // Rainshowers
+	else if ( ws == 6 )  cb = 1500; // 8 // Rainshowers w/ thunder
+	else if ( ws == 7 )  cb =  800; // 6 // Sleetshowers
+	else if ( ws == 8 )  cb =  500; // 4 // Snowshowers
+	else if ( ws == 9 )  cb = 1500; // 7 // Lightrain
+	else if ( ws == 10 ) cb = 1000; // 7 // Rain
+	else if ( ws == 11 ) cb = 1000; // 7 // rain w/ thunder
+	else if ( ws == 12 ) cb = 1000; // 5 // Sleet
+	else if ( ws == 13 ) cb =  800; // 3 // Snow
+	else if ( ws == 14 ) cb =  800; // 3 // Snow w/ thunder
+	else if ( ws == 15 ) cb =  300; // 1 // Fog
+	//tmpSymbol = wsymbols.getSymbol(static_cast<int>(f1));
+	//visi= sight.findVision(tmpSymbol.vis(), static_cast<int>(f2));
+	parList[wpx].setData(j,0,cb);
+      }
+      parList[wpx].calcAllProperties();
+    }
+      
     // discrete cloudcover
   } else if (inpid.alias == "CCQ"){
     id1.alias = "WW";

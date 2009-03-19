@@ -1097,7 +1097,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // FF in different level
   } else if (inpid.alias == "FF" && inpid.level != L_UNDEF && inpid.level != 0) {
     level = inpid.level;
-    cerr << "Asking for FF at level:" << level << endl;
+    //cerr << "Asking for FF at level:" << level << endl;
     id1.level = 0;
     id2.alias = "STAQ";
     id2.level = 0;
@@ -1122,7 +1122,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // Gust
   } else if (inpid.alias == "GU") {
     level = inpid.level;
-    cerr << "Asking for gust at level:" << level << endl;
+    //cerr << "Asking for gust at level:" << level << endl;
     if (level == 0)
       level = 10;
     id1.alias = "FF";

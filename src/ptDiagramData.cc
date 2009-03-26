@@ -600,7 +600,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
     id2.alias = "STAQ";
     id2.level = 0;
     level = inpid.level;
-    cerr << "tsData: Updating gust at level:" << level << endl;
+    //cerr << "tsData: Updating gust at level:" << level << endl;
     if (level == 0)
       level = 10;
 
@@ -636,7 +636,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 
     // discrete visibility
   } else if (inpid.alias == "VVQ") {
-    id1.alias = "WW";
+    id1.alias = "CWW";
     id2.alias = "XWW";
     int visi;
     if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)
@@ -658,11 +658,24 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
     // visibility
   } else if (inpid.alias == "VIS") {
     id1.alias = "CWW";
+    //id2.alias = "XWW";
+    //findParameter(id2, wpx2, &error);
     if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)) {
       for (j = 0; j < parList[wpx].Npoints(); j++) {
         f1 = parList[wpx1].Data(j);
+        //f2 = ( wpx2 != -1 ? parList[wpx2].Data(j) : 0.0 );
         int ws = static_cast<int> (f1);
+        //int xws = static_cast<int> (f2);
         float visi = 15.0;
+/*
+        if (xws == 2) // Disig
+          visi = 3.0;
+        else if (xws == 1) // Tåkebanker
+          visi = 2.0;
+        else if (xws == -1) // Tåke
+          visi = 1.0;
+        else
+        */
         if (ws == 1)
           visi = 15.0; // Sun
         else if (ws == 2)
@@ -2075,7 +2088,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
     // discrete visibility
   } else if (inpid.alias == "VVQ") {
-    id1.alias = "WW";
+    id1.alias = "CWW";
     id2.alias = "XWW";
     if (!findParameter(id1, idx, &error))
       makeOneParameter(id1);
@@ -2905,8 +2918,8 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
   vector<miTime> curtline;
   vector<bool> locked;
   int tlindex; // index to new timeline
-  int tempindex, subjindex, mainindex, xtraindex; // indices to wp's
-  ParId tempid, destid, subjid, mainid, xtraid;
+  int tempindex, subjindex, mainindex, xtraindex, xtra2index; // indices to wp's
+  ParId tempid, destid, subjid, mainid, xtraid, xtra2id;
 
   if (!inptline.size()) {
     cerr << "ptDiagramData::makeDatasets error: inputtimes.size()==0" << endl;
@@ -2968,12 +2981,21 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
   //   cerr << "   xtraid:" << xtraid << endl;
   //   cerr << "       index:" << xtraindex << endl;
 
+  xtra2index = -1;
+  xtra2id = dsp.tert;
+  if (xtra2id.model != M_UNDEF)
+    findParameter(xtra2id, xtra2index, &error);
+  //   cerr << "   xtra2id:" << xtra2id << endl;
+  //   cerr << "       index:" << xtra2index << endl;
+
   // insert destindex-data
   replaceData(tempindex, subjindex, inptline, locked);
   // insert mainindex-data
   replaceData(tempindex, mainindex, inptline, locked);
   // insert xtraindex-data
   replaceData(tempindex, xtraindex, inptline, locked);
+  // insert xtra2index-data
+  replaceData(tempindex, xtra2index, inptline, locked);
   // fill remaining holes
   interpData(tempindex, locked);
 

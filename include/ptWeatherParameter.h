@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -50,7 +50,7 @@ protected:
   vector<float> data;   // the data-points
   vector<float> cmin;   // data minimum-value
   vector<float> cmax;   // data maximum-value
-  vector<float> cdelta; // data cmax-cmin 
+  vector<float> cdelta; // data cmax-cmin
   bool polar;           // if ndim > 1, true if in polar coordinates
   ParId id;             // parameter id
   ptPrimitiveType type; // suggested plotElement type
@@ -63,12 +63,14 @@ protected:
   bool temp_dirty;
   vector<bool> modified;// timepoints modified
   bool locked;          // WP "locked" for data-modification
+  int starti;           // start index
+  int stopi;            // stop index
 
   // used by assignment operator and copy constructor
   void _copyDataMembers(const WeatherParameter& rhs);
   void setNpoints(const int n) { npoints=n; }
 
-public: 
+public:
   WeatherParameter(); // constructor
   ~WeatherParameter();// destructor
   WeatherParameter(const WeatherParameter& rhs);// copy constructor
@@ -130,13 +132,14 @@ public:
     if (i>=0 && i<npoints && comp>=0 && comp<ndim)
       return modified[npoints*comp + i];
     else return false;
-  }  
+  }
   bool isModified(const int i) const
   {
     if (i>=0 && i<modified.size())
       return modified[i];
     else return false;
   }
+  void setTimeInterval(const int start, const int stop);
   // assignment operator
   WeatherParameter& operator=(const WeatherParameter& rhs);
   // equalness operator
@@ -160,7 +163,7 @@ public:
 // 	return wp[0]->Data(i,comp);
 //       else return UNDEF;
 //     }
-  
+
 // public:
 //   CompositeParameter() : WeatherParameter(),
 //     wpexist(false)
@@ -197,7 +200,7 @@ public:
 // 	return wp[comp]->Data(i,0);
 //       } else return UNDEF;
 //     }
-  
+
 // public:
 //   virtual void setWPvector(const vector<WeatherParameter*>& w)
 //     {

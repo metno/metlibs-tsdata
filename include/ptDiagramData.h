@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -47,7 +47,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
- 
+
 #define MERGE_RAW   0
 #define MERGE_ADAPT 1
 
@@ -63,7 +63,7 @@ struct time_interval
 };
 
 struct Range
-{ 
+{
   int first, last;
 
   friend ostream& operator<<(ostream& out, const Range& rhs)
@@ -76,8 +76,10 @@ struct datasetparam {
   ParId subj;     // subjective input
   ParId prim;     // primary model input
   ParId secu;     // secondary model input
+  ParId tert;     // tertiary model input
   ParId defprim;  // default primary model input
   ParId defsecu;  // default secondary model input
+  ParId deftert;  // default tertiary model input
   bool active;
 };
 
@@ -141,7 +143,7 @@ public:
   ptDiagramData();
   ptDiagramData(symbolMaker& wsym);
   ptDiagramData(const ptDiagramData&);
-  
+
   ptDiagramData& operator=(const ptDiagramData&);
 
   WeatherParameter& operator[](const int i) {
@@ -164,7 +166,7 @@ public:
     { return parList.size(); }
 
   const miPosition& getStation() const
-    { return station; } 
+    { return station; }
   void setStation(const miPosition& stat)
     { station= stat; }
   vector<miString> getAllTextLines();
@@ -215,20 +217,20 @@ public:
   // make dataset with given timepoints; add data from models
   void makeDatasets(const datasetparam&, vector<miTime>&);
   // make a vector from two components
-  bool makeVector(const ParId& comp1, 
+  bool makeVector(const ParId& comp1,
 		  const ParId& comp2,
 		  const ParId& result,
 		  bool polar);
   // make a polar vector from two cartesian components.
   // zangle is startangle and rotsign is sign of rotation (+1=clockwise)
-  bool makePolarVector(const ParId& comp1, 
+  bool makePolarVector(const ParId& comp1,
 		       const ParId& comp2,
 		       const ParId& result,
 		       const float& zangle,
 		       const int& rotsign);
   // make a cartesian vector from two polar components.
   // zangle is startangle and rotsign is sign of rotation (+1=clockwise)
-  bool makeCartesianVector(const ParId& comp1, 
+  bool makeCartesianVector(const ParId& comp1,
 			   const ParId& comp2,
 			   const ParId& result,
 			   const float& zangle,
@@ -242,30 +244,30 @@ public:
 			 const miPosition&, const ParId&,
 			 const miTime&, const miTime&,
 			 const vector<ParId>& inpars,
-			 int* first, int* last, 
-			 vector<ParId>& outPars, 
+			 int* first, int* last,
+			 vector<ParId>& outPars,
 			 bool append, ErrorFlag*);
   // fetch all parameters
   bool fetchDataFromFile(DataStream*,
 			 const miPosition&, const ParId&,
 			 const miTime&, const miTime&,
-			 int* first, int* last, 
-			 vector<ParId>& outPars, 
+			 int* first, int* last,
+			 vector<ParId>& outPars,
 			 bool append, ErrorFlag*);
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);
   bool writeAllToFile(DataStream*, const miString&, ErrorFlag*);
   bool writeWeatherparametersToFile(DataStream*,
-				    const miPosition&, 
-				    const vector<int>& wpindexes, 
+				    const miPosition&,
+				    const vector<int>& wpindexes,
 				    bool append, ErrorFlag*,
 				    bool complete_write= true,
 				    bool write_submodel= false);
-  Range getRange(int i) 
+  Range getRange(int i)
     { return fetchRange[i]; }
   void getTimeLine(vector<miTime>& timePoints);
   void getTimeLine(const int idx, vector<miTime>& timePoints);
-  void getTimeLine(const miTime& start, const miTime& stop, 
+  void getTimeLine(const miTime& start, const miTime& stop,
 		   vector<int>& indexes, vector<miTime>& timePoints,
 		   int skip =1);
   int addTimeLine(vector<miTime>&);  // return index of the new timeLine

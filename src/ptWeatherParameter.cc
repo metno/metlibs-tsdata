@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,19 +30,19 @@
 
 /***************************************************************************
  * SYSTEM:         PETS - Presentation and Editing of Time Series
- * MODULE:         
+ * MODULE:
  * FILE:           ptWeatherParameter.cc
  * VERSION:        0.1 alpha, 1.5
- * RELEASE DATE:   
+ * RELEASE DATE:
  * RELEASED BY:    met.no/FoU '97
- * SPEC. REF:      
- * PLATFORM:       
- * BUILD:          
+ * SPEC. REF:
+ * PLATFORM:
+ * BUILD:
  * DESCRIPTION:    Definition of WeatherParameter member functions
  * CLASS(ES):      WeatherParameter
- * ROUTINES:       
- * AUTHOR:         
- * UPDATES:        
+ * ROUTINES:
+ * AUTHOR:
+ * UPDATES:
  ***************************************************************************/
 #include <math.h>
 #include "ptWeatherParameter.h"
@@ -52,7 +52,7 @@ WeatherParameter::WeatherParameter()
   : polar(false),ndim(0),npoints(0),
     timeLineIndex(0),type(DUM_PRIMITIVE),
     dirty(false), temp_dirty(false),
-    locked(false)
+    locked(false),starti(0), stopi(0)
 {
 }
 
@@ -65,12 +65,12 @@ WeatherParameter::~WeatherParameter()
  * ROUTINE:          WeatherParameter::_copyDataMembers()
  * PURPOSE:          copy all data members except pointer values from rhs to
  *                   this
- * ALGORITHM:        
+ * ALGORITHM:
  * ARGUMENTS:        const WeatherParameter& rhs
- *                   
- * RETURN VALUES:    
- *                   
- * USES/DEPENDS ON:  
+ *
+ * RETURN VALUES:
+ *
+ * USES/DEPENDS ON:
  *
  * UPDATES:          Written 05.06.97
  ***************************************************************************/
@@ -91,19 +91,21 @@ void WeatherParameter::_copyDataMembers(const WeatherParameter& rhs)
   temp_dirty= rhs.temp_dirty;
   modified= rhs.modified;
   locked= rhs.locked;
+  starti= rhs.starti;
+  stopi= rhs.stopi;
 }
 
 /****************************************************************************
  * ROUTINE:          ptWeatherParameter copy constructor
- * PURPOSE:          
- * ALGORITHM:        
- * ARGUMENTS:        
- *                   
- * RETURN VALUES:    
- *                   
- * USES/DEPENDS ON:  
+ * PURPOSE:
+ * ALGORITHM:
+ * ARGUMENTS:
  *
- * UPDATES:          
+ * RETURN VALUES:
+ *
+ * USES/DEPENDS ON:
+ *
+ * UPDATES:
  ***************************************************************************/
 WeatherParameter::WeatherParameter(const WeatherParameter& rhs)
 {
@@ -113,15 +115,15 @@ WeatherParameter::WeatherParameter(const WeatherParameter& rhs)
 
 /****************************************************************************
  * ROUTINE:          assignment operator
- * PURPOSE:          
- * ALGORITHM:        
- * ARGUMENTS:        
- *                   
- * RETURN VALUES:    
- *                   
- * USES/DEPENDS ON:  
+ * PURPOSE:
+ * ALGORITHM:
+ * ARGUMENTS:
  *
- * UPDATES:          
+ * RETURN VALUES:
+ *
+ * USES/DEPENDS ON:
+ *
+ * UPDATES:
  ***************************************************************************/
 WeatherParameter& WeatherParameter::operator=(const WeatherParameter& rhs)
 {
@@ -138,40 +140,40 @@ WeatherParameter& WeatherParameter::operator=(const WeatherParameter& rhs)
 
 /****************************************************************************
  * ROUTINE:          equal operator
- * PURPOSE:          
- * ALGORITHM:        
- * ARGUMENTS:        
- *                   
- * RETURN VALUES:    
- *                   
- * USES/DEPENDS ON:  
+ * PURPOSE:
+ * ALGORITHM:
+ * ARGUMENTS:
  *
- * UPDATES:          
+ * RETURN VALUES:
+ *
+ * USES/DEPENDS ON:
+ *
+ * UPDATES:
  ***************************************************************************/
 bool WeatherParameter::operator==(const WeatherParameter& rhs)
-{ 
-  return id == rhs.id; 
+{
+  return id == rhs.id;
 }
 
 
 /****************************************************************************
  * ROUTINE:          ostream operator
- * PURPOSE:          
- * ALGORITHM:        
- * ARGUMENTS:        
- *                   
- * RETURN VALUES:    
- *                   
- * USES/DEPENDS ON:  
+ * PURPOSE:
+ * ALGORITHM:
+ * ARGUMENTS:
  *
- * UPDATES:          
+ * RETURN VALUES:
+ *
+ * USES/DEPENDS ON:
+ *
+ * UPDATES:
  ***************************************************************************/
 ostream& operator<<(ostream& out, const WeatherParameter& wp)
 {
   out << "Parameter ID: " << wp.id << " type: " << wp.type << endl
       << "timeLineIndex: " << wp.timeLineIndex << " ndim: " << wp.ndim
       << " npoints: " << wp.npoints << endl;
-  
+
   for (int i=0; i<wp.ndim; i++)
     out << i << ".comp> min: " << wp.cmin[i] << " max: " << wp.cmax[i]
 	<< " delta: " << wp.cdelta[i] << endl;
@@ -181,14 +183,32 @@ ostream& operator<<(ostream& out, const WeatherParameter& wp)
   return out;
 }
 
+void WeatherParameter::setTimeInterval(const int start, const int stop)
+{
+  if ( starti != start || stopi != stop){
+    starti = start;
+    stopi  = stop;
+    calcAllProperties();
+  }
+}
+
 
 void WeatherParameter::calcCompProperties(const int icomp)
 {
-  if (icomp>=ndim) return;
+  if (icomp<0 || icomp>=ndim) return;
   float dv;
-  cmin[icomp] = FLT_MAX; 
+  cmin[icomp] = FLT_MAX;
   cmax[icomp] = -FLT_MAX;
-  for (int j=0; j<npoints; j++) {
+  int i1 = 0;
+  int i2 = npoints-1;
+  if (starti != stopi){
+    if (starti >= 0 && starti < npoints) i1 = starti;
+    if (stopi >= 0 && stopi < npoints) i2 = stopi;
+    // if no datapoints, keep at least one!
+    if (starti == stopi && stopi < npoints-1)
+      stopi++;
+  }
+  for (int j=i1; j<=i2; j++) {
     dv = data[j+icomp*npoints];
     if (dv < cmin[icomp]) cmin[icomp] = dv;
     if (dv > cmax[icomp]) cmax[icomp] = dv;
@@ -210,7 +230,7 @@ const float& WeatherParameter::Cmax(const int c) const {
   return ((c>=0 && c<ndim)?cmax[c]:UNDEF);
 }
 
-const float& WeatherParameter::Cdelta(const int c) const { 
+const float& WeatherParameter::Cdelta(const int c) const {
   return ((c>=0 && c<ndim)?cdelta[c]:UNDEF);
 }
 
@@ -223,7 +243,7 @@ void WeatherParameter::setDims(const int nt, const int nd)
   cmax.clear();
   cdelta.clear();
   modified.clear();
-  
+
   for (int i=0; i<ndim; i++){
     cmin.push_back(FLT_MAX);
     cmax.push_back(-FLT_MAX);
@@ -247,7 +267,7 @@ void WeatherParameter::setData(const int i, const float val)
   }
 }
 
-void WeatherParameter::setData(const int i, const int comp, 
+void WeatherParameter::setData(const int i, const int comp,
 			       const float val)
 {
   if (i>=0 && i<npoints && comp>=0 && comp<ndim){
@@ -262,7 +282,7 @@ void WeatherParameter::setData(const int i, const int comp,
 
 void WeatherParameter::clearTempDirty()
 {
-  temp_dirty=false; 
+  temp_dirty=false;
   for (int i=0; i<modified.size(); i++)
     modified[i]= false;
 }
@@ -301,7 +321,7 @@ void WeatherParameter::clearTempDirty()
 //   if (icomp>=ndim || !wpexist) return;
 
 //   float dv;
-//   cmin[icomp] = FLT_MAX; 
+//   cmin[icomp] = FLT_MAX;
 //   cmax[icomp] = -FLT_MAX;
 //   for (int j=0; j<npoints; j++) {
 //     dv = datafunc(j,icomp);
@@ -313,7 +333,7 @@ void WeatherParameter::clearTempDirty()
 
 
 // void CompositeParameter::setWPvector(const vector<WeatherParameter*>& w)
-// { 
+// {
 //   wp = w;
 //   if (wp.size()) {
 //     wpexist = true;

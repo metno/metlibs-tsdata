@@ -40,7 +40,7 @@
 
 using namespace std;
 
-const int MAXTIMELINES = 30;
+const unsigned int MAXTIMELINES = 30;
 
 typedef vector<int> ProgLine;
 
@@ -63,22 +63,22 @@ struct TimeLineItem {
   TimeLineItem(const miTime& t, int tlIndex = 0)
   {
     time = t;
-    for (int i = 0; i < MAXTIMELINES; i++)
+    for (unsigned int i = 0; i < MAXTIMELINES; i++)
       flag[i] = false;
-    if (tlIndex >= 0 && tlIndex < MAXTIMELINES)
+    if (tlIndex >= 0 && tlIndex < (int)MAXTIMELINES)
       flag[tlIndex] = true;
   }
   TimeLineItem(const TimeLineItem& rhs)
   {
     time = rhs.time;
-    for (int i = 0; i < MAXTIMELINES; i++)
+    for (unsigned int i = 0; i < MAXTIMELINES; i++)
       flag[i] = rhs.flag[i];
   }
   TimeLineItem& operator=(const TimeLineItem& rhs)
   {
     if (&rhs != this) {
       time = rhs.time;
-      for (int i = 0; i < MAXTIMELINES; i++)
+      for (unsigned int i = 0; i < MAXTIMELINES; i++)
         flag[i] = rhs.flag[i];
     }
     return *this;
@@ -106,7 +106,7 @@ struct TimeLineItem {
   friend ostream& operator<<(ostream& out, /*const*/TimeLineItem& t)
   {
     ostringstream s;
-    for (int i = 0; i < MAXTIMELINES; i++)
+    for (unsigned int i = 0; i < MAXTIMELINES; i++)
       s << t.flag[i] << ' ';
     return out << t.time << ' ' << s.str();
   }
@@ -130,9 +130,9 @@ public:
   }
   bool flag(int i, int j)
   {
-    if (i < 0 || i >= data.size())
+    if (i < 0 || i >= (int)data.size())
       return false;
-    if (j < 0 || j >= MAXTIMELINES)
+    if (j < 0 || j >= (int)MAXTIMELINES)
       return false;
     return data[i].flag[j];
   }
@@ -144,23 +144,23 @@ public:
   miTime operator[](int i)
   {
     miTime tmp;
-    if (i < 0 || i >= data.size())
+    if (i < 0 || i >= (int)data.size())
       return tmp;
     return data[i].time;
   }
 
   friend ostream& operator<<(ostream& out, /*const*/TimeLine& tl)
   {
-    for (int i = 0; i < tl.data.size(); ++i)
+    for (unsigned int i = 0; i < tl.data.size(); ++i)
       out << i << ": " << tl.data[i] << '\n';
     return out;
   }
 
   void setToFalse(int i, int j)
   {
-    if (i < 0 || i >= data.size())
+    if (i < 0 || i >= (int)data.size())
       return;
-    if (j < 0 || j >= MAXTIMELINES)
+    if (j < 0 || j >= (int)MAXTIMELINES)
       return;
 
     data[i].flag[j] = false;
@@ -172,14 +172,14 @@ public:
   {
     vector<TimeLineItem>::iterator where = find(data.begin(), data.end(),
         TimeLineItem(tp));
-    return where != data.end() ? where - data.begin() : -1;
+    return (where != data.end() ? where - data.begin() : -1);
   }
 
   // returns index of first element whose time is >= tp
   // returns -1 if the data vector is empty or if biggest element < tp
   int find_greater_or_equal(const miTime& tp)
   {
-    for (int i = 0; i < data.size(); ++i) {
+    for (unsigned int i = 0; i < data.size(); ++i) {
       if (data[i].time >= tp)
         return i;
     }
@@ -188,7 +188,7 @@ public:
 
   bool insert(const miTime& tp, int index = 0)
   {
-    if (index < 0 || index >= MAXTIMELINES)
+    if (index < 0 || index >= (int)MAXTIMELINES)
       return false;
     for (vector<TimeLineItem>::iterator i = data.begin(); i < data.end(); ++i) {
       if (tp <= i->time) { // found position
@@ -209,7 +209,7 @@ public:
   bool insert(const vector<miTime>& tl, int index = 0)
   {
     bool ok = true;
-    for (int i = 0; i < tl.size(); i++) {
+    for (unsigned int i = 0; i < tl.size(); i++) {
       ok &= insert(tl[i], index);
     }
     return ok;
@@ -223,8 +223,8 @@ public:
   bool Timeline(const int& index, vector<miTime>& tline)
   {
     tline.erase(tline.begin(), tline.end());
-    if (index >= 0 && index < MAXTIMELINES) {
-      for (int i = 0; i < data.size(); i++)
+    if (index >= 0 && index < (int)MAXTIMELINES) {
+      for (unsigned int i = 0; i < data.size(); i++)
         if (data[i].flag[index])
           tline.push_back(data[i].time);
       return true;
@@ -237,8 +237,9 @@ public:
   {
     if (tline.size() == 0)
       return -1;
-    int i, j, k;
-    vector<int> indices;
+    unsigned int i, j;
+    int k;
+    vector<unsigned int> indices;
     // check first if all timepoints exists
     for (i = 0; i < tline.size(); i++) {
       if ((k = find_equal(tline[i])) == -1)
@@ -252,7 +253,7 @@ public:
         if (i == indices[k]) {
           if (!data[i].flag[j])
             break;
-          if (k < (indices.size() - 1))
+          if (k < (int)(indices.size() - 1))
             k++;
         } else {
           if (data[i].flag[j])
@@ -269,14 +270,14 @@ public:
   // if indices>0, only keep these timelines
   void cleanup(vector<int>& indices)
   {
-    int i, j, k;
+    unsigned int i, j, k;
     if (indices.size() > 0) {
       // sort the indices
       sort(indices.begin(), indices.end());
       // check each separate timeline
       k = 0;
       for (j = 0; j < MAXTIMELINES; j++) {
-        if (j == indices[k]) {
+        if (j == (unsigned int)indices[k]) {
           if (k < (indices.size() - 1))
             k++;
         } else
@@ -310,7 +311,7 @@ public:
   // returns -1 if no free timelines
   int freeIndex()
   {
-    int i, j;
+    unsigned int i, j;
     for (j = 0; j < MAXTIMELINES; j++) {
       bool used = false;
       for (i = 0; i < data.size(); i++) {
@@ -343,9 +344,9 @@ public:
   // delete timeline by index
   void deleteTimeline(const int index)
   {
-    if (index < 0 || index >= MAXTIMELINES)
+    if (index < 0 || index >= (int)MAXTIMELINES)
       return;
-    for (int i = 0; i < data.size(); i++)
+    for (unsigned int i = 0; i < data.size(); i++)
       data[i].flag[index] = false;
 
     // remove any unused times

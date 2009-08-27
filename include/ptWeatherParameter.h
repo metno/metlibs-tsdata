@@ -115,7 +115,7 @@ public:
   // retrieve data-value, index i
   virtual const float& Data(const int i) const
   {
-    if (i>=0 && i<data.size())
+    if (i>=0 && i<(int)data.size())
       return data[i];
     else return UNDEF;
   }
@@ -135,7 +135,7 @@ public:
   }
   bool isModified(const int i) const
   {
-    if (i>=0 && i<modified.size())
+    if (i>=0 && i<(int)modified.size())
       return modified[i];
     else return false;
   }

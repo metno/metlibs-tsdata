@@ -147,7 +147,7 @@ public:
   ptDiagramData& operator=(const ptDiagramData&);
 
   WeatherParameter& operator[](const int i) {
-    if (i>=0 && i<parList.size())
+    if (i>=0 && i<(int)parList.size())
       return parList[i];
     else
       return emptypar;

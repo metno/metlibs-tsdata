@@ -153,7 +153,7 @@ public:
       return emptypar;
   }
   const WeatherParameter& operator[](const int i) const {
-    if (i>=0 && i<parList.size())
+    if (i>=0 && i<(int)parList.size())
       return parList[i];
     else
       return emptypar;

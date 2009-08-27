@@ -47,20 +47,6 @@ using namespace std;
 
 class DataStream {
 public:
-  int numTimeLines;
-  vector<WeatherParameter> parameters;
-  vector<miString> textLines;
-
-  ParameterDefinition pdef; // parameter and model id mappings
-  miString Name;
-  bool IsOpen;
-  bool InfoIsRead;
-  bool IsCleaned;
-  bool DataIsRead;
-  bool TimeLineIsRead;
-  int npar;
-  int npos;
-  int nmod;
   DataStream(const miString& fname) :
     numTimeLines(0), IsOpen(false), InfoIsRead(false), IsCleaned(true),
         DataIsRead(false), TimeLineIsRead(false), npar(0), npos(0), nmod(0)

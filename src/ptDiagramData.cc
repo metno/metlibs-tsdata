@@ -543,7 +543,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 
   } else if (inpid.alias == "FF" && inpid.level != L_UNDEF && inpid.level != 0) {
     level = inpid.level;
-    cerr << "tsData:Updating FF at level:" << level << endl;
+    //cerr << "tsData:Updating FF at level:" << level << endl;
     id1.level = 0;
     id2.alias = "STAQ";
     id2.level = 0;
@@ -3302,9 +3302,9 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 // bug: if no parameters are added (because they don't exist on file),
 // a timeline is still added
 bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
-    const miPosition& stat, const ParId& modelid, const miTime& start,
-    const miTime& stop, const vector<ParId>& inPars, int* first, int* last,
-    vector<ParId>& outPars, bool append, ErrorFlag* ef)
+    const miPosition& stat, const ParId& modelid, const Model& renamemodelid,
+    const miTime& start, const miTime& stop, const vector<ParId>& inPars,
+    int* first, int* last, vector<ParId>& outPars, bool append, ErrorFlag* ef)
 {
   int nread = 0, i;
   WeatherParameter wp;
@@ -3350,6 +3350,11 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
   if (inPars.size() == 0) { // get all parameters
     for (i = 0; i < pfile->numParameters(); i++) {
       if (pfile->getOnePar(i, wp, ef)) {
+        if (renamemodelid != M_UNDEF){
+          ParId id = wp.Id();
+          id.model = renamemodelid;
+          wp.setId(id);
+        }
         // add timeline and progline
         if (!pfile->getTimeLine(wp.TimeLineIndex(), tline, pline, ef))
           break;
@@ -3373,6 +3378,11 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     for (i = 0; i < inPars.size(); i++) {
       if ((parIndex = pfile->findDataPar(inPars[i])) != -1) {
         if (pfile->getOnePar(parIndex, wp, ef)) {
+          if (renamemodelid != M_UNDEF){
+            ParId id = wp.Id();
+            id.model = renamemodelid;
+            wp.setId(id);
+          }
           // add timeline and progline
           if (!pfile->getTimeLine(wp.TimeLineIndex(), tline, pline, ef))
             break;
@@ -3404,7 +3414,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     return false;
   }
 
-  // set the indexex of the first and last elements appended
+  // set the index of the first and last elements appended
   *first = range.first = index + 1 - nread;
   *last = range.last = index;
   fetchRange.push_back(range);
@@ -3421,13 +3431,13 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
 
 // fetch all parameters for first model for this station
 bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
-    const miPosition& stat, const ParId& modelid, const miTime& start,
-    const miTime& stop, int* first, int* last, vector<ParId>& outPars,
-    bool append, ErrorFlag* ef)
+    const miPosition& stat, const ParId& modelid, const Model& renamemodelid,
+    const miTime& start, const miTime& stop, int* first, int* last,
+    vector<ParId>& outPars, bool append, ErrorFlag* ef)
 {
   vector<ParId> emptyvec;
-  return fetchDataFromFile(pfile, stat, modelid, start, stop, emptyvec, first,
-      last, outPars, append, ef);
+  return fetchDataFromFile(pfile, stat, modelid, renamemodelid, start, stop,
+      emptyvec, first, last, outPars, append, ef);
 }
 
 bool ptDiagramData::writeAllToFile(DataStream* pf, const miString& modelName,
@@ -3447,7 +3457,7 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
 
   if (!pfile->isOpen())
     if (!pfile->openStreamForWrite(ef)) {
-      cerr << "Diagramdata: feilet i openFile" << endl;
+      cerr << "DiagramData: feilet i stream->openStreamForWrite" << endl;
       return false;
     }
 

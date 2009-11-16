@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -51,14 +51,14 @@ void out_of_store()
 
 HDFFile::HDFFile(const miString& fname)
   : DataStream(fname), hasposVG(false)
-{ 
+{
 #ifdef DEBUG
   cout << "Inside HDFFile:constructor" << endl;
 #endif
   timeLine.reserve(100);  // We don't expect more than 100 timepoints
   progLine.reserve(100);
   parameters.reserve(20);       // we don't expect more than 20 parameters
-  //  textLines.reserve(0);  
+  //  textLines.reserve(0);
 }
 
 HDFFile::~HDFFile()
@@ -121,7 +121,8 @@ bool HDFFile::getStationSeq(int idx, miPosition& pos){
 #endif
   if (idx >= 0 && idx < npos) {
     miCoordinates c(posList[idx].geopos[1],posList[idx].geopos[0]);
-    pos.setPos(c,0,0,posList[idx].name,0,0,"");
+    int hoh=int(posList[idx].topo);
+    pos.setPos(c,0,0,posList[idx].name,hoh,0,"");
     return true;
   } else {
     return false;
@@ -190,7 +191,7 @@ bool HDFFile::getModelSeq(int idx, Model& mod,
   }
 }
 
-// return index of model 'modelName' and run modelRun 
+// return index of model 'modelName' and run modelRun
 // in modList, -1 if not found
 int HDFFile::findModel(const miString& modelName,
 		       const int& modelRun)
@@ -235,7 +236,7 @@ int HDFFile::findDataPar(const ParId& id)
   }
   return rn;
 }
-      
+
 void HDFFile::clean()
 {
 #ifdef DEBUG
@@ -283,7 +284,7 @@ bool HDFFile::openStreamForWrite(ErrorFlag* ef)
 }
 
 //---------------------------------------------------------------
-// Reads data from file for position "posIndex" and model and 
+// Reads data from file for position "posIndex" and model and
 // modelrun as specified in the ParId "modid"
 // If modid.model is undefined the first model found for "posIndex"
 // is taken.
@@ -292,14 +293,14 @@ bool HDFFile::openStreamForWrite(ErrorFlag* ef)
 // Problems: If multiple runs exists for a given model, the first
 // run will be chosen..
 //---------------------------------------------------------------
-bool HDFFile::readData(const int posIndex, 
+bool HDFFile::readData(const int posIndex,
 		       const ParId& modid,
 		       const miTime& start,
 		       const miTime& stop,
 		       ErrorFlag* ef)
 {
   uint8* dataBuf;
-  char   modelName[VSNAMELENMAX+1]; 
+  char   modelName[VSNAMELENMAX+1];
   int32  nrec;
   int32  nfields;
   vector<miString> nameFields;
@@ -372,7 +373,7 @@ bool HDFFile::readData(const int posIndex,
 	    }
 	    VSdetach(vmod);
 	  }
-      
+
     delete[] tags;
     delete[] refs;
     if (!foundmodel) {
@@ -460,7 +461,7 @@ bool HDFFile::readData(const int posIndex,
     //exit(0);
     return false;
   }
- 
+
   delete[] fields;
 
   VSdetach(vmod);
@@ -646,7 +647,7 @@ bool HDFFile::writeData(const int posIndex,
 
   if (modIndex < 0 || modIndex >= nmod)
     return false;
-  
+
   modname = modList[modIndex].name;
 
   if (!hasposVG){
@@ -895,7 +896,7 @@ bool HDFFile::getTimeLine(const int& index,
       pline = progLines[index];
     *ef = OK;
     return true;
-  } 
+  }
   else {
     *ef = DF_TIMELINE_NOT_READ;
     return false;
@@ -1088,7 +1089,7 @@ bool HDFFile::_readParList(ErrorFlag* ef)
         for (j=0; j<nfields; j++)
           fnsize += strlen(VFfieldname(vdid,j))+1;
         fields = new char[fnsize];
-        
+
 	// find size of each field in bytes
 	pnumSz  = VSsizeof(vdid,FNNUM);
 	nameSz  = VSsizeof(vdid,FNNAME);
@@ -1099,8 +1100,8 @@ bool HDFFile::_readParList(ErrorFlag* ef)
 	orderSz = VSsizeof(vdid,FNORDER);
 	datatSz = VSsizeof(vdid,FNTYPE);
 	plottSz = VSsizeof(vdid,FNPLOT);
-	if (pnumSz<0  || nameSz<0  || aliasSz<0 || 
-	    unitSz<0  || scaleSz<0 || sizeSz<0  || 
+	if (pnumSz<0  || nameSz<0  || aliasSz<0 ||
+	    unitSz<0  || scaleSz<0 || sizeSz<0  ||
 	    orderSz<0 || datatSz<0 || plottSz<0) {
 	  cout << "HDFFile::readParList missing parameter fields!"<<endl;
 	  *ef = DF_DATA_READING_ERROR;
@@ -1341,8 +1342,8 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
       cout << "---- HDF position no:" << i << endl;
       cout << "Ref:" << posList[i].ref << endl;
       cout << "Name:" << posList[i].name << endl;
-      cout << "geopos[0]:" << posList[i].geopos[0] << " geopos[1]:" << 
- 	posList[i].geopos[1] << endl; 
+      cout << "geopos[0]:" << posList[i].geopos[0] << " geopos[1]:" <<
+ 	posList[i].geopos[1] << endl;
       cout << "topo:" << posList[i].topo << endl;
 #endif
     }
@@ -1373,7 +1374,7 @@ bool HDFFile::_prepPosRefs(ErrorFlag* ef)
     for (i=0; i<npairs; i++){
       posList[i].ref=refs[i];
     }
-    
+
     delete[] tags;
     delete[] refs;
     Vdetach(posVG);
@@ -1561,10 +1562,10 @@ bool HDFFile::_readModList(ErrorFlag* ef)
       cout << "Model:" << modList[i].modelid << endl;
       cout << "runid:" << modList[i].runid <<endl;
       cout << "run[0]:" << modList[i].run[0] <<
-	" run[1]:" << modList[i].run[1] << 
-	" run[2]:" << modList[i].run[2] << 
-	" run[3]:" << modList[i].run[3] << 
-	" run[4]:" << modList[i].run[4] << 
+	" run[1]:" << modList[i].run[1] <<
+	" run[2]:" << modList[i].run[2] <<
+	" run[3]:" << modList[i].run[3] <<
+	" run[4]:" << modList[i].run[4] <<
 	" run[5]:" << modList[i].run[5] << endl;
 #endif
     }
@@ -1655,13 +1656,13 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
 
   VSsetfields(vdid,fnall);
   delete[] fnall;
-  
+
   int recsz=sizeof(uint16)+modnsz*sizeof(char)+6*sizeof(uint32)+
     modtxtsz*modtxtn*sizeof(char);
-  
+
   tmp=buf=new uint8[nmod*recsz];
   char *ctmp = new char[modnsz];
-  
+
   for (i=0; i<nmod; i++) {
     memcpy(tmp,&(modList[i].modelPn),inc=sizeof(uint16)); tmp+=inc;
     strcpy(ctmp,modList[i].name.cStr());
@@ -1696,7 +1697,7 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
 
 
 
-void HDFFile::_setData(int index, const miString& shortName, 
+void HDFFile::_setData(int index, const miString& shortName,
 		       const ParId& pid)
 {
 #ifdef DEBUG

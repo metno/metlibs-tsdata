@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -34,6 +34,10 @@
 
 #include <fstream>
 #include <algorithm>
+
+using namespace std;
+using namespace miutil;
+
 
 vector<Parameter> ParameterDefinition::paramList;
 
@@ -84,7 +88,7 @@ miString ParameterDefinition::ParId2Str(ParId p){
   miString alias("x"),level("x"),model("x"),
     run("x"),submodel("x");
 
-  if (p.alias!=A_UNDEF) 
+  if (p.alias!=A_UNDEF)
     alias= p.alias;
   if (p.level!=L_UNDEF)
     level= miString(p.level);
@@ -99,8 +103,8 @@ miString ParameterDefinition::ParId2Str(ParId p){
 
   return tmp;
 }
-		
-		
+
+
 ParId ParameterDefinition::Str2ParId(miString buffer)
 {
   ParId parid = ID_UNDEF;
@@ -131,4 +135,4 @@ ParId ParameterDefinition::Str2ParId(miString buffer)
   }
   return parid;
 }
-		
+

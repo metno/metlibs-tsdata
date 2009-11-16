@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -40,11 +40,11 @@
 
 using namespace std;
 
-typedef miString Alias;
+typedef miutil::miString Alias;
 typedef int Level;
-typedef miString Model;
+typedef miutil::miString Model;
 typedef int Run;
-typedef miString SubModel;
+typedef miutil::miString SubModel;
 
 const Alias    A_UNDEF= "x";
 const Level    L_UNDEF=  INT_MIN;
@@ -67,7 +67,7 @@ struct ParId {
       run(r),
       submodel(s)
   {}
-  
+
   friend bool operator==(const ParId& lhs, const ParId& rhs);
   friend bool operator!=(const ParId& lhs, const ParId& rhs)
   { return !(lhs==rhs);}
@@ -88,13 +88,13 @@ const ParId ID_UNDEF;
 class ParameterDefinition {
 private:
   static vector<Parameter> paramList;
-      
+
 public:
   ParameterDefinition(){}
-  static bool readParameters(const miString);
+  static bool readParameters(const miutil::miString);
   bool getParameter(const Alias& id, Parameter& p) const;
-  miString ParId2Str(ParId);
-  ParId Str2ParId(miString);
+  miutil::miString ParId2Str(ParId);
+  ParId Str2ParId(miutil::miString);
 };
 
 #endif

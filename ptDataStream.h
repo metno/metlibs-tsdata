@@ -44,6 +44,7 @@
 #include <vector>
 
 using namespace std;
+using namespace miutil;
 
 class DataStream {
 public:

@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -32,6 +32,7 @@
 #define _ptParameter_h
 
 #include <string.h>
+#include <puTools/miString.h>
 
 #include <parameter/parameter.h>
 
@@ -57,7 +58,7 @@ public:
     par->datatype=p.datatype;
     par->plottype=p.plottype;
   }
-    
+
   Parameter(const Parameter& p) {
     par=new parameter;
 
@@ -90,7 +91,7 @@ public:
       par->plottype=p.par->plottype;
     }
     return *this;
-  }     
+  }
 
   Parameter& operator=(const parameter& p) {
     delete par;
@@ -114,16 +115,16 @@ public:
     delete par;
   }
 
-  miString alias() const {
+  miutil::miString alias() const {
     return par->alias;
   }
-  miString name() const {
+  miutil::miString name() const {
     return par->name;
   }
-  miString unit() const {
+  miutil::miString unit() const {
     return par->unit;
   }
-  miString robsname() const {
+  miutil::miString robsname() const {
     return par->robsname;
   }
   int num() const {
@@ -146,7 +147,7 @@ public:
   }
 
   void printName() const {
-    cout << par->name << endl;
+    std::cout << par->name << std::endl;
   }
 };
 

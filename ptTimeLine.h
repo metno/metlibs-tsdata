@@ -53,14 +53,14 @@ typedef vector<int> ProgLine;
 // means that timepoint number i exists in timeline number j.
 
 struct TimeLineItem {
-  miTime time;
+  miutil::miTime time;
   bool flag[MAXTIMELINES];
 
   TimeLineItem()
   {
   } // leaves the TimeLineItem in an undefined state
 
-  TimeLineItem(const miTime& t, int tlIndex = 0)
+  TimeLineItem(const miutil::miTime& t, int tlIndex = 0)
   {
     time = t;
     for (unsigned int i = 0; i < MAXTIMELINES; i++)
@@ -87,7 +87,7 @@ struct TimeLineItem {
   {
     return l.time == r.time;
   }
-  friend bool operator==(const TimeLineItem& l, const miTime& r)
+  friend bool operator==(const TimeLineItem& l, const miutil::miTime& r)
   {
     return l.time == r;
   }
@@ -95,11 +95,11 @@ struct TimeLineItem {
   {
     return l.time < r.time;
   }
-  friend bool operator<(const TimeLineItem& l, const miTime& r)
+  friend bool operator<(const TimeLineItem& l, const miutil::miTime& r)
   {
     return l.time < r;
   }
-  friend bool operator<=(const TimeLineItem& l, const miTime& r)
+  friend bool operator<=(const TimeLineItem& l, const miutil::miTime& r)
   {
     return l.time <= r;
   }
@@ -141,9 +141,9 @@ public:
     return data.size();
   }
 
-  miTime operator[](int i)
+  miutil::miTime operator[](int i)
   {
-    miTime tmp;
+    miutil::miTime tmp;
     if (i < 0 || i >= (int)data.size())
       return tmp;
     return data[i].time;
@@ -168,7 +168,7 @@ public:
 
   // returns index of element whose time is tp
   // returns -1 if not found
-  int find_equal(const miTime& tp)
+  int find_equal(const miutil::miTime& tp)
   {
     vector<TimeLineItem>::iterator where = find(data.begin(), data.end(),
         TimeLineItem(tp));
@@ -177,7 +177,7 @@ public:
 
   // returns index of first element whose time is >= tp
   // returns -1 if the data vector is empty or if biggest element < tp
-  int find_greater_or_equal(const miTime& tp)
+  int find_greater_or_equal(const miutil::miTime& tp)
   {
     for (unsigned int i = 0; i < data.size(); ++i) {
       if (data[i].time >= tp)
@@ -186,7 +186,7 @@ public:
     return -1;
   }
 
-  bool insert(const miTime& tp, int index = 0)
+  bool insert(const miutil::miTime& tp, int index = 0)
   {
     if (index < 0 || index >= (int)MAXTIMELINES)
       return false;
@@ -206,7 +206,7 @@ public:
     return true;
   }
 
-  bool insert(const vector<miTime>& tl, int index = 0)
+  bool insert(const vector<miutil::miTime>& tl, int index = 0)
   {
     bool ok = true;
     for (unsigned int i = 0; i < tl.size(); i++) {
@@ -220,7 +220,7 @@ public:
     data.clear();
   }
 
-  bool Timeline(const int& index, vector<miTime>& tline)
+  bool Timeline(const int& index, vector<miutil::miTime>& tline)
   {
     tline.erase(tline.begin(), tline.end());
     if (index >= 0 && index < (int)MAXTIMELINES) {
@@ -233,7 +233,7 @@ public:
   }
 
   // check if the timeline corresponding to tline already exist
-  int Exist(const vector<miTime>& tline)
+  int Exist(const vector<miutil::miTime>& tline)
   {
     if (tline.size() == 0)
       return -1;
@@ -287,7 +287,7 @@ public:
     }
     // check for unused timepoints
     bool used;
-    vector<miTime> toberemoved;
+    vector<miutil::miTime> toberemoved;
     for (i = 0; i < data.size(); i++) {
       used = false;
       for (j = 0; j < MAXTIMELINES; j++)
@@ -327,7 +327,7 @@ public:
   // adds a new timeline and return index.
   // if this timeline already exist only return index to it.
   // if new timeline, and timeline class is full: return -1
-  int addTimeline(const vector<miTime>& tl)
+  int addTimeline(const vector<miutil::miTime>& tl)
   {
     int k;
     k = Exist(tl);

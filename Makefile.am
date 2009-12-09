@@ -1,4 +1,4 @@
-# $Id: Makefile.am 2786 2009-09-23 11:39:02Z dages $
+# $Id$
 
 pkgname = tsData
 

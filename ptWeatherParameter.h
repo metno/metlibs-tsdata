@@ -72,7 +72,7 @@ protected:
 
 public:
   WeatherParameter(); // constructor
-  ~WeatherParameter();// destructor
+  virtual ~WeatherParameter();// destructor
   WeatherParameter(const WeatherParameter& rhs);// copy constructor
 
   // retrieve values of WP variables

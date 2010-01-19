@@ -1707,11 +1707,13 @@ void HDFFile::_setData(int index, const miString& shortName,
 
   // find the parameter in parList corresponding to shortName
   npar= parList.size();
-  for (int i=0;i<npar;++i)
+  int i;
+  for (i=0;i<npar;++i) {
     if (shortName == parList[i].alias) {
       onePar = &parList[i];
       break;
     }
+  }
 #ifdef DEBUG
   if (onePar)
     cout << "_setData: Found parameter with index:" << i << endl;

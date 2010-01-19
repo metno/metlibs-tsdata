@@ -66,3 +66,7 @@ pkg_include_HEADERS = \
 	ptTimeLine.h \
 	ptWeatherParameter.h
 
+if WITH_GRIBFILE
+libtsData_la_SOURCES += ptGribStream.cc
+pkg_include_HEADERS += ptGribStream.h
+endif

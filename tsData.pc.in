@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: tsData
 Description: The tsData Library
 Version: @VERSION@
-Requires: puTools >= 3.1.0 @field_pc@
+Requires: @tsData_pc_requires@
 Libs: -L${libdir} -ltsData
 Cflags: -I${includedir}

@@ -30,6 +30,10 @@
 
 // ptParameterDefinition.cc
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <ptParameterDefinition.h>
 
 #include <fstream>

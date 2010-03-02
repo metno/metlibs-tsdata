@@ -30,6 +30,10 @@
 
 // ptHDFFile.cc
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <hdf.h>
 #include <ptHDFFile.h>
 #include <string.h>

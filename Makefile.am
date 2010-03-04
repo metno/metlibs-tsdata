@@ -48,7 +48,7 @@ libtsData_la_LIBADD = \
 	${PUMET_LIBS} \
 	${PUTOOLS_LIBS}
 
-pkg_includedir = ${prefix}/include/tsData
+pkg_includedir = ${includedir}/tsData
 
 pkg_include_HEADERS = \
 	HDFdefs.h \

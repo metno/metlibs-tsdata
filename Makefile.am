@@ -52,9 +52,7 @@ libtsData_la_LIBADD = \
 	$(PUDATATYPES_LIBS) \
 	$(PUMET_LIBS) \
 	$(PUTOOLS_LIBS) \
- 	$(POSTGRESQL_LIBS)	
- 	
-pkg_includedir = $(prefix)/include/tsData
+	$(POSTGRESQL_LIBS)	
 
 pkg_includedir = ${includedir}/tsData
 

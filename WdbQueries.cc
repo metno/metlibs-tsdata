@@ -44,6 +44,8 @@ static string quote= "\'";
 
 static string quoted(string token)
 {
+  if(token=="NULL") return token;
+
   return quote+token+quote;
 }
 
@@ -79,36 +81,102 @@ string READ(string token)
 string REFERENCETIMES( std::string providerName)
 {
   ostringstream query;
-  query << "ARRAY["
-      << quoted(providerName)
-      << "],NULL, NULL,NULL, NULL,NULL, NULL, NULL::wci.browsereferencetime";
+  query << "ARRAY["  << quoted(providerName) << "],NULL, NULL,NULL, NULL,NULL, NULL,NULL::wci.browsereferencetime";
 
-  return BROWSE(query.str());
+  return BROWSE(query.str() );
+}
+
+
+string PARAMETERS(std::string providerName,miutil::miTime referencetime)
+{
+  ostringstream query;
+  query << "ARRAY["  << quoted(providerName)
+        << "],NULL," << quoted(referencetime.isoTime())
+        << ",NULL, NULL, NULL, NULL, NULL::wci.browsevalueparameter";
+
+  return BROWSE( query.str());
+}
+
+
+string TIMESERIES( string model,
+    miutil::miTime run,
+    vector<string> parameters,
+    float  lat,
+    float  lon,
+    string height)
+{
+
+
+  ostringstream query;
+  query << "ARRAY["
+      << quoted(model)         << "],"
+      << quote                 <<  "bilinear POINT(" << lon << " " << lat  << ")" << quote  << ","
+      << quote << run << quote << ",NULL, ARRAY[";
+
+  for( int i=0;i < parameters.size();i++)
+    query  << (i ? "," : "" )  << quoted(parameters[i]);
+
+  query<< "],"
+       << quoted(height)        << ","
+       << "ARRAY[-1], NULL::wci.returnfloat";
+
+  return READ(query.str());
+}
+std::string CACHEQUERY(std::string model, std::string run, std::vector<std::string> parameters, std::string height)
+{
+   ostringstream query;
+   query << " SELECT  wci.cachequery(ARRAY["  << quoted(model) << "],NULL,"<< quoted(run) << ",NULL,";
+
+   if(parameters.empty())
+     query << "NULL";
+   else {
+     query << "ARRAY[";
+     for( int i=0;i < parameters.size();i++)
+       query  << (i ? "," : "" )  << quoted(parameters[i]);
+     query << "]";
+   }
+   query<< "," << quoted(height) << ",ARRAY[-1])";
+
+   return query.str();
 }
 
 
 
 
 
+string LEVELS(std::string providerName, miutil::miTime referencetime)
+{
+  ostringstream query;
+  query << "ARRAY["
+        << quoted(providerName)
+        << "],NULL," << quoted(referencetime.isoTime())
+        << ",NULL, NULL, NULL, NULL, NULL::wci.browselevelparameter";
 
-string TIMESERIES( string model,
-    string run,
-    string parameter,
-    float  lat,
-    float  lon,
-    string height)
+   return BROWSE(query.str());
+}
+
+
+std::string GRIDNAME(std::string providerName)
+{
+  ostringstream query;
+  query << "ARRAY[" << quoted(providerName) << "],NULL, NULL,NULL, NULL,NULL, NULL, NULL::wci.browseplace";
+  return BROWSE(query.str());
+}
+
+
+std::string GEOMETRY(std::string gridName)
 {
 
   ostringstream query;
-  query << "ARRAY["
-        << quoted(model)     << ","
-        << quote             <<  "bilinear POINT(" << lat << " " << lon  << ")" << quote  << ","
-        << quoted(run)       << ",NULL, ARRAY["
-        << quoted(parameter) << "],"
-        << quoted(height)    << ","
-        << "ARRAY[-1], NULL::wci.returnfloat);";
+  query << "SELECT astext(placegeometry) FROM wci.getPlaceDefinition(" << quoted(gridName) <<")";
+  return query.str();
 
-  return READ(query.str());
+}
+
+std::string PROJECTION(std::string gridName) {
+  ostringstream query;
+  query << "select projdefinition,startx,starty from wci.getplaceregulargrid(" << quoted(gridName) <<")";
+  return query.str();
 }
 
 } // << QUERY

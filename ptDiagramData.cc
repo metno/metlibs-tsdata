@@ -42,12 +42,12 @@
 #include <math.h>
 
 ptDiagramData::ptDiagramData() :
-  nfetches(0), new_symbolmaker(false)
+nfetches(0), new_symbolmaker(false)
 {
 }
 
 ptDiagramData::ptDiagramData(symbolMaker& wsym) :
-  nfetches(0), wsymbols(wsym), new_symbolmaker(false)
+      nfetches(0), wsymbols(wsym), new_symbolmaker(false)
 {
   makedefaultParInfo();
 }
@@ -137,7 +137,7 @@ ostream& operator<<(ostream& out, /*const*/ptDiagramData& dd)
     for (itr = dd.textLines.begin(); itr != dd.textLines.end(); itr++)
       for (j = 0; j < itr->second.size(); j++)
         out << "model " << itr->first << " line " << j << ": "
-            << (itr->second)[j] << '\n';
+        << (itr->second)[j] << '\n';
   }
   out << "Puh! Finished printing of ptDiagramData\n";
 
@@ -256,6 +256,7 @@ float ptDiagramData::precip_state(float& tt, float& rr)
 // update weatherparameter
 void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 {
+
   const float ktms = float(1847.0 / 3600.0);
   int j, n;
   ErrorFlag error;
@@ -273,7 +274,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 
   id1 = id2 = id3 = inpid;
 
-  //   cerr << "Update one parameter:" << inpid << endl;
+//    cerr << "Update one parameter:" << inpid << endl;
 
   // Hmax
   if (inpid.alias == "HSX") {
@@ -671,7 +672,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
         int ws = static_cast<int> (f1);
         //int xws = static_cast<int> (f2);
         float visi = 15.0;
-/*
+        /*
         if (xws == 2) // Disig
           visi = 3.0;
         else if (xws == 1) // Tåkebanker
@@ -679,7 +680,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
         else if (xws == -1) // Tåke
           visi = 1.0;
         else
-        */
+         */
         if (ws == 1)
           visi = 15.0; // Sun
         else if (ws == 2)
@@ -797,7 +798,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       id3.alias = "CH";
       if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)
           && findParameter(id2, wpx2, &error) && findParameter(id3, wpx3,
-          &error)) {
+              &error)) {
         for (j = 0; j < parList[wpx].Npoints(); j++) {
           f1 = parList[wpx1].Data(j);
           f2 = parList[wpx2].Data(j);
@@ -982,6 +983,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 // make weatherparameter from existing wp's
 void ptDiagramData::makeOneParameter(const ParId& inpid)
 {
+
   int j, idx, idx2;
   ErrorFlag error;
   ParId id1, id2, id3, id4, newpid;
@@ -1000,7 +1002,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
   id1 = id2 = id3 = newpid = inpid;
 
-  //   cerr << "Make one parameter:" << inpid << endl;
+  //cerr << "Make one parameter:" << inpid << endl;
 
   // polar wind-vector
   if (inpid.alias == "WVFD") {
@@ -1329,11 +1331,11 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
         id4.alias = "STRA"; // stratiform rain
         if (copyParameter(id1, wp, &error) && copyParameter(id2, wp2, &error)
             && copyParameter(id3, wp3, &error) && copyParameter(id4, wp4,
-            &error)) {
+                &error)) {
           //cerr << "Found COSN + CORA + STSN + STRA" << endl;
           for (j = 0; j < wp.Npoints(); j++) {
             float rr = wp.Data(j, 0) + wp2.Data(j, 0) + wp3.Data(j, 0)
-                + wp4.Data(j, 0);
+                    + wp4.Data(j, 0);
             wp.setData(j, 0, rr);
           }
 
@@ -3157,7 +3159,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
       int cn = symbols[i].customNumber();
       if (cn == 999) {
         cerr << i << " Symbolmaker Error:" << symbols[i].customName()
-            << " number:" << symbols[i].customNumber() << endl;
+                << " number:" << symbols[i].customNumber() << endl;
         cn = 0;
       }
       termin.push_back(symbols[i].getTime());
@@ -3499,7 +3501,7 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
       }
       if (!pfile->putOnePar(parList[wpindexes[i]], ef)) {
         cerr << "Kunne ikke skrive ut parameter:" << parList[wpindexes[i]]
-            << endl;
+                                                             << endl;
       }
     }
   }
@@ -3803,3 +3805,90 @@ vector<miString> ptDiagramData::getTextLines(const miString modelname)
   vector<miString> str = textLines[modelname];
   return str;
 }
+
+
+
+bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
+      miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
+      unsigned long& readtime)
+{
+
+  int nread = 0, i;
+
+  vector<miTime> tline;
+  vector<int> pline;
+  int index = 0;
+  Range range;
+
+  cleanDataStructure_();
+
+
+  wdb->clean();
+
+  // find station and read in data block
+  try {
+    if (!wdb->readWdbData(lat,lon, model,run,inpars,outpars,readtime))
+      return false;
+  } catch(exception& e) {
+    cerr << "WDB::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+
+  vector<int> newtimelines;
+  int tlIndex;
+  // get all parameters
+  for (i = 0; i < wdb->numParameters(); i++) {
+    WeatherParameter wp;
+    if (wdb->getOnePar(i, wp)) {
+
+      // add timeline and progline
+      if (!wdb->getTimeLine(wp.TimeLineIndex(), tline, pline))
+        break;
+
+      if ((tlIndex = timeLine.Exist(tline)) == -1) {
+        tlIndex = addTimeLine(tline);
+        if (tlIndex == -1) {
+          cerr << "Too many timelines! giving up this parameter" << endl;
+          continue;
+        }
+        progLines.push_back(pline);
+        newtimelines.push_back(tlIndex);
+      }
+      wp.setTimeLineIndex(tlIndex);
+      index = addParameter(wp);
+      ++nread;
+    }
+  }
+
+  // if no parameters are found, delete the timeline we added previously
+  if (nread == 0) {
+    for (i = 0; i < newtimelines.size(); i++) {
+      deleteTimeLine(newtimelines[i]);
+      progLines.pop_back();
+    }
+    return false;
+  }
+
+  // set the index of the first and last elements appended
+  //*first = range.first = index + 1 - nread;
+  //*last = range.last = index;
+  range.first = index + 1 - nread;
+  range.last = index;
+
+  fetchRange.push_back(range);
+  ++nfetches;
+
+  station.setLat(lat);
+  station.setLon(lon);
+  miCoordinates c=station.Coordinates();
+  station.setName( c.str() );
+
+  return true;
+}
+
+
+
+
+
+

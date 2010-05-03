@@ -36,6 +36,7 @@
 #include "ptParameterDefinition.h"
 #include "ptError.h"
 #include "ptSHCinfo.h"
+#include "WdbStream.h"
 
 #include <puDatatypes/miPosition.h>
 #include <puTools/miString.h>
@@ -238,6 +239,13 @@ public:
   bool fetchDataFromFile(DataStream*, const miPosition&, const ParId&,
       const Model&, const miTime&, const miTime&, int* first, int* last,
       vector<ParId>& outPars, bool append, ErrorFlag*);
+
+
+ bool fetchDataFromWDB(pets::WdbStream*,float lat, float lon,
+     miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars, unsigned long& readtime);
+
+
+
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);
   bool writeAllToFile(DataStream*, const miString&, ErrorFlag*);

@@ -17,7 +17,9 @@ libtsData_la_SOURCES = \
 	ptSHCinfo.cc \
 	ptWeatherParameter.cc \
 	WdbStream.cc          \
-	WdbQueries.cc
+	WdbQueries.cc         \
+	WdbCacheQuery.cc      \
+	DynamicFunction.cc
 
 libtsData_la_CPPFLAGS = \
 	$(HDF4_CPPFLAGS) \
@@ -28,6 +30,7 @@ libtsData_la_CPPFLAGS = \
 	$(PUDATATYPES_CPPFLAGS) \
 	$(PUMET_CPPFLAGS) \
 	$(PUTOOLS_CPPFLAGS) \
+	$(DIFIELD_CPPFLAGS) \
 	$(POSTGRESQL_CPPFLAGS)
 
 
@@ -41,6 +44,7 @@ libtsData_la_LDFLAGS = \
 	$(PUDATATYPES_LDFLAGS) \
 	$(PUMET_LDFLAGS) \
 	$(PUTOOLS_LDFLAGS) \
+	$(DIFIELD_LDFLAGS) \
 	$(POSTGRESQL_LDFLAGS) 
 
 libtsData_la_LIBADD = \
@@ -52,6 +56,7 @@ libtsData_la_LIBADD = \
 	$(PUDATATYPES_LIBS) \
 	$(PUMET_LIBS) \
 	$(PUTOOLS_LIBS) \
+	$(DIFIELD_LIBS) \
 	$(POSTGRESQL_LIBS)	
 
 pkg_includedir = ${includedir}/tsData

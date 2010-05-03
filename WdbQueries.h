@@ -39,6 +39,7 @@
 
 #include <string>
 #include <sstream>
+#include <puTools/miTime.h>
 
 // collection of all wdb-queries performed by the pets::WdbStream
 
@@ -46,13 +47,18 @@ namespace pets
 {
 namespace QUERY
 {
-  std::string BEGIN(     std::string user                            );
-  std::string CONNECT(   std::string host,  std::string user         );
-  std::string BROWSE(    std::string browse                          );
-  std::string READ(      std::string query                           );
-  std::string REFERENCETIMES( std::string providerName);
-  std::string TIMESERIES(std::string model, std::string run,
-      std::string parameter, float lat, float lon, std::string height);
+std::string BEGIN(     std::string user                     );
+std::string CONNECT(   std::string host,  std::string user  );
+std::string BROWSE(    std::string browse                   );
+std::string READ(      std::string query                    );
+std::string GRIDNAME(  std::string providerName             );
+std::string GEOMETRY(  std::string gridName                 );
+std::string PROJECTION(std::string gridName                 );
+std::string LEVELS(    std::string providerName, miutil::miTime referencetime);
+std::string TIMESERIES(std::string model, miutil::miTime run, std::vector<std::string> parameters, float lat, float lon, std::string height);
+std::string CACHEQUERY(std::string model, std::string run, std::vector<std::string> parameters, std::string height="NULL");
+std::string REFERENCETIMES( std::string providerName);
+std::string PARAMETERS(std::string providerName, miutil::miTime referencetime);
 };
 
 };

@@ -3810,7 +3810,7 @@ vector<miString> ptDiagramData::getTextLines(const miString modelname)
 
 bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
       miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
-      unsigned long& readtime)
+      unsigned long& readtime, miString stationname)
 {
 
   int nread = 0, i;
@@ -3882,7 +3882,10 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
   station.setLat(lat);
   station.setLon(lon);
   miCoordinates c=station.Coordinates();
-  station.setName( c.str() );
+  if(stationname.exists())
+    station.setName(stationname);
+  else
+    station.setName( c.str() );
 
   return true;
 }

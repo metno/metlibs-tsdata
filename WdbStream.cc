@@ -234,10 +234,8 @@ void WdbStream::rotate2geo(float x,float y, std::vector<float>& xdata ,std::vect
 
   for(int i=0;i<xdata.size();i++) {
 
-  //  cout << "BEFORE - UU: " << xdata[i] << " - VV " << ydata[i] << "     FF: " << sqrt(xdata[i]*xdata[i] + ydata[i]* ydata[i]) << endl;
     geoGrid.convertVectors(currentGrid,1, &x, &y, &xdata[i], &ydata[i]);
-  //  cout << "AFTER - UU:  " << xdata[i] << " - VV " << ydata[i] << "     FF: " << sqrt(xdata[i]*xdata[i] + ydata[i]* ydata[i]) << endl;
-   }
+  }
 }
 
 
@@ -432,8 +430,8 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
 
 
 
-    boost::posix_time::ptime before = boost::posix_time::microsec_clock::universal_time();
 
+    boost::posix_time::ptime before  = boost::posix_time::microsec_clock::universal_time();
     pqxx::result   res = query.exec(querystring);
 
     boost::posix_time::ptime after  = boost::posix_time::microsec_clock::universal_time();

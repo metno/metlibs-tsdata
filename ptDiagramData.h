@@ -242,7 +242,7 @@ public:
 
 
  bool fetchDataFromWDB(pets::WdbStream*,float lat, float lon,
-     miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars, unsigned long& readtime);
+     miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars, unsigned long& readtime,miString stationname);
 
 
 

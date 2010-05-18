@@ -35,7 +35,7 @@
 #include "ptParameterDefinition.h"
 
 #include <math.h>
-#include <values.h>
+#include <float.h>
 
 #include <vector>
 

@@ -72,6 +72,12 @@ pkg_include_HEADERS = \
 
 
 if WITH_GRIBFILE
+libtsData_la_LDFLAGS += \
+	${DIFIELD_CPPFLAGS}
+	
+libtsData_la_LIBADD += \
+	${DIFIELD_LIBS}
+
 libtsData_la_SOURCES += ptGribStream.cc
 pkg_include_HEADERS += ptGribStream.h
 endif

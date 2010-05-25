@@ -74,8 +74,9 @@ public:
 private:
   struct transformIdx {
     std::string wdbName;
+    std::string level;
     pets::math::DynamicFunction * transform;
-    transformIdx() : transform(NULL) {}
+    transformIdx() : transform(NULL) , level("NULL") {}
     ~transformIdx() { if ( transform ) delete transform; }
   };
 

@@ -38,6 +38,7 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -114,11 +115,25 @@ WdbStream::WdbStream(std::string host, map<string, string> parlist, vector<strin
     }
 
     vector<string> tokens;
+    vector<string> levels;
     boost::split(tokens,token, boost::algorithm::is_any_of(":") );
+    boost::split(levels,tokens[0], boost::algorithm::is_any_of("|") );
+
 
     transformIdx trans;
     transformIndex[key]         = trans;
-    transformIndex[key].wdbName = tokens[0];
+
+
+    transformIndex[key].wdbName = levels[0];
+    boost::algorithm::trim(transformIndex[key].wdbName);
+
+    if(levels.size() > 1 ) {
+      transformIndex[key].level = levels[1];
+      boost::algorithm::trim(transformIndex[key].level);
+    }
+
+
+
     if(tokens.size() > 1)
       transformIndex[key].transform = new pets::math::DynamicFunction(tokens[1]);
   }
@@ -126,7 +141,6 @@ WdbStream::WdbStream(std::string host, map<string, string> parlist, vector<strin
   setRotateToGeo(vectorFunctionList);
 
   setDataProviders();
-
 }
 
 
@@ -216,7 +230,7 @@ WdbStream::BoundaryBox WdbStream::getGeometry()
 
 
   for (pqxx::result::size_type i = 0; i != projres.size(); ++i)
-      projres.at(i).at(0).to( newProjString );
+    projres.at(i).at(0).to( newProjString );
 
 
   cout << "Using proj definition:  [ " << newProjString << " ] " <<  endl;
@@ -256,7 +270,7 @@ bool WdbStream::setReferenceTimes()
     res.at(i).at(0).to( reftime );
     if(!reftime.empty())
       referenceTimes.insert(miTime(reftime));
-   }
+  }
 
   if(referenceTimes.empty()) return false;
 
@@ -277,39 +291,39 @@ bool WdbStream::setCurrentReferenceTime(miutil::miTime newReferenceTime)
     return false;
 
   currentReferenceTime = newReferenceTime;
-//  setLevels();
+  //  setLevels();
   setParameters();
 }
 
 bool WdbStream::setLevels()
- {
-   // TODO: setLevels is not good enough implemented in  WDB
-   // WDB gives only min and max level, but we need any level at a time and model
-   // to readjust the gui... A bug has been notified to the wdb team to solve this problem
-   // until then the level is skipped.
+{
+  // TODO: setLevels is not good enough implemented in  WDB
+  // WDB gives only min and max level, but we need any level at a time and model
+  // to readjust the gui... A bug has been notified to the wdb team to solve this problem
+  // until then the level is skipped.
 
-   if(!dataProviders.count(currentProvider))       return false;
-   if(!referenceTimes.count(currentReferenceTime)) return false;
-     levels.clear();
-     pqxx::work query(wdb,"getLevel");
-     query.exec(QUERY::BEGIN(user));
-     int lvl;
+  if(!dataProviders.count(currentProvider))       return false;
+  if(!referenceTimes.count(currentReferenceTime)) return false;
+  levels.clear();
+  pqxx::work query(wdb,"getLevel");
+  query.exec(QUERY::BEGIN(user));
+  int lvl;
 
-     pqxx::result res = query.exec(QUERY::LEVELS(currentProvider,currentReferenceTime));
+  pqxx::result res = query.exec(QUERY::LEVELS(currentProvider,currentReferenceTime));
 
-     for (pqxx::result::size_type i = 0; i != res.size(); ++i) {
-       res.at(i).at(0).to( lvl );
-       levels.insert(lvl);
-      }
+  for (pqxx::result::size_type i = 0; i != res.size(); ++i) {
+    res.at(i).at(0).to( lvl );
+    levels.insert(lvl);
+  }
 
-     if(referenceTimes.empty()) return false;
+  if(referenceTimes.empty()) return false;
 
-     if(!setCurrentReferenceTime(currentReferenceTime))
-       setCurrentReferenceTime(*referenceTimes.begin());
+  if(!setCurrentReferenceTime(currentReferenceTime))
+    setCurrentReferenceTime(*referenceTimes.begin());
 
-     return true;
+  return true;
 
- }
+}
 
 bool  WdbStream::setParameters()
 {
@@ -321,8 +335,9 @@ bool  WdbStream::setParameters()
   pqxx::result res = query.exec(QUERY::PARAMETERS(currentProvider,currentReferenceTime));
 
   for (pqxx::result::size_type i = 0; i != res.size(); ++i) {
-       res.at(i).at(0).to(   parametername );
-       parametersFound.insert( parametername );
+    res.at(i).at(0).to(   parametername );
+    parametersFound.insert( parametername );
+    parametersFound.insert(parametername+ QUERY::RAW());
   }
 
   return !parametersFound.empty();
@@ -404,6 +419,8 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
 
 
     string wdbName =  transformIndex[petsName].wdbName;
+    string level   =  transformIndex[petsName].level;
+
 
     if(!parametersFound.count(wdbName)) {
       // we know the parameter, but we cannot find it in wdb - skipping
@@ -414,49 +431,48 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
     datafromWdb[wdbName]=dwdb;
     datafromWdb[wdbName].transform=transformIndex[petsName].transform;
     datafromWdb[wdbName].petsName = petsName;
-
     wdbNames.push_back(wdbName);
+
+
+    // get the data .....
+
+    pqxx::work query(wdb,"getTimeseries");
+    query.exec(QUERY::BEGIN(user));
+
+
+    string querystring = QUERY::TIMESERIES(currentProvider,currentReferenceTime,wdbName,lat,lon,level);
+
+    try {
+
+      boost::posix_time::ptime before  = boost::posix_time::microsec_clock::universal_time();
+
+      pqxx::result   res = query.exec(querystring);
+
+      boost::posix_time::ptime after  = boost::posix_time::microsec_clock::universal_time();
+
+      boost::posix_time::time_duration duration = after-before;
+      readtime += duration.total_milliseconds();
+
+
+
+      // fetch the wdb result ....
+      for (pqxx::result::size_type ii = 0; ii != res.size(); ++ii) {
+        double value;
+        string validstr;
+        res.at(ii).at(0).to( value );
+        res.at(ii).at(6).to( validstr );
+
+        miTime valid(validstr.c_str());
+
+        datafromWdb[wdbName].setData(valid,value);
+      }
+    } catch (exception& e) {
+      cerr <<  endl << "No Data " << e.what() << endl;
+      return false;
+    }
   }
 
-  // get the data .....
-
-  pqxx::work query(wdb,"getTimeseries");
-  query.exec(QUERY::BEGIN(user));
-
-
-  string querystring = QUERY::TIMESERIES(currentProvider,currentReferenceTime,wdbNames,lat,lon,"NULL");
-
-  try {
-
-
-
-
-    boost::posix_time::ptime before  = boost::posix_time::microsec_clock::universal_time();
-    pqxx::result   res = query.exec(querystring);
-
-    boost::posix_time::ptime after  = boost::posix_time::microsec_clock::universal_time();
-    boost::posix_time::time_duration duration = after-before;
-    readtime = duration.total_milliseconds();
-
-
-
-  // fetch the wdb result ....
-  for (pqxx::result::size_type ii = 0; ii != res.size(); ++ii) {
-    double value;
-    string validstr;
-    string parname;
-    res.at(ii).at(0).to( value );
-    res.at(ii).at(6).to( validstr );
-    res.at(ii).at(8).to( parname );
-
-    miTime valid(validstr.c_str());
-
-    datafromWdb[parname].setData(valid,value);
-  }
-  } catch (exception& e) {
-    cerr <<  endl << "No Data " << e.what() << endl;
-    return false;
-  }
+  cerr << "READTIME:  " << readtime << " ms " <<  endl;
 
   map<string, DataFromWdb>::iterator itr= datafromWdb.begin();
   for(;itr!=datafromWdb.end();itr++)
@@ -540,7 +556,7 @@ bool WdbStream::getTimeLine(const int& index, vector<miTime>& tline, vector<int>
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
     if (index<progLines.size())
       pline = progLines[index];
-     return true;
+    return true;
   }
   return false;
 }
@@ -621,7 +637,7 @@ bool WdbStream::readData(const int posIndex, const ParId&,
 
 
 bool WdbStream::getTimeLine(const int& index, vector<miTime>& tline,
-      vector<int>& pline, ErrorFlag* e)
+    vector<int>& pline, ErrorFlag* e)
 {
   unimplemented("getTimeLine");
   return true;

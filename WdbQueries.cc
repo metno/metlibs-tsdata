@@ -1,3 +1,4 @@
+
 /*
  * WdbQueries.cc
  *
@@ -33,14 +34,24 @@
  along with Tseries; if not, write to the Free Software
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include <boost/algorithm/string/find.hpp>
+#include <boost/algorithm/string/erase.hpp>
+#include <set>
 
 #include "WdbQueries.h"
+
 using namespace std;
 
 namespace pets  {
 namespace QUERY   {
 
 static string quote= "\'";
+
+string RAW()
+{
+  return " (RAW)";
+}
+
 
 static string quoted(string token)
 {
@@ -100,44 +111,60 @@ string PARAMETERS(std::string providerName,miutil::miTime referencetime)
 
 string TIMESERIES( string model,
     miutil::miTime run,
-    vector<string> parameters,
+    string parameter,
     float  lat,
     float  lon,
     string height)
 {
 
+  bool isRaw = bool(boost::find_first(parameter,RAW()));
+
+  if(isRaw)
+    boost::erase_all(parameter,RAW());
 
   ostringstream query;
   query << "ARRAY["
       << quoted(model)         << "],"
       << quote                 <<  "bilinear POINT(" << lon << " " << lat  << ")" << quote  << ","
-      << quote << run << quote << ",NULL, ARRAY[";
-
-  for( int i=0;i < parameters.size();i++)
-    query  << (i ? "," : "" )  << quoted(parameters[i]);
-
-  query<< "],"
-       << quoted(height)        << ","
-       << "ARRAY[-1], NULL::wci.returnfloat";
+      << quote << run << quote << ",NULL, ARRAY["    << quoted(parameter)  << "],"
+      << quoted(height)        << ",ARRAY["
+      << (isRaw ? 0 : -1 )
+      << "], NULL::wci.returnfloat";
 
   return READ(query.str());
 }
 std::string CACHEQUERY(std::string model, std::string run, std::vector<std::string> parameters, std::string height)
 {
-   ostringstream query;
-   query << " SELECT  wci.cachequery(ARRAY["  << quoted(model) << "],NULL,"<< quoted(run) << ",NULL,";
+  set<string> par;
 
-   if(parameters.empty())
-     query << "NULL";
-   else {
-     query << "ARRAY[";
-     for( int i=0;i < parameters.size();i++)
-       query  << (i ? "," : "" )  << quoted(parameters[i]);
-     query << "]";
-   }
-   query<< "," << quoted(height) << ",ARRAY[-1])";
+  bool hasRaw=false;
+  ostringstream query;
+  query << " SELECT  wci.cachequery(ARRAY["  << quoted(model) << "],NULL,"<< quoted(run) << ",NULL,";
 
-   return query.str();
+  if(parameters.empty())
+    query << "NULL";
+  else {
+    query << "ARRAY[";
+    bool first=true;
+    for( int i=0 ; i < parameters.size();i++) {
+
+      if(boost::find_first(parameters[i],RAW())){
+        hasRaw=true;
+        boost::erase_all(parameters[i],RAW());
+        if(par.count(parameters[i]))
+          continue;
+        par.insert(parameters[i]);
+      }
+
+      query  << ( !first ? "," : "" )  << quoted(parameters[i]);
+      first=false;
+
+    }
+    query << "]";
+  }
+  query<< "," << quoted(height) << "," <<  ( hasRaw ? "NULL" : "ARRAY[-1]" )  << ")";
+
+  return query.str();
 }
 
 

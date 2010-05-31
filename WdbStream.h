@@ -40,6 +40,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <list>
 #include <map>
 #include <puTools/miTime.h>
 
@@ -47,6 +48,7 @@
 
 #include "WdbQueries.h"
 #include "ptDataStream.h"
+#include "ptParameterDefinition.h"
 #include "DynamicFunction.h"
 #include <diField/diProjection.h>
 
@@ -73,6 +75,7 @@ public:
 
 private:
   struct transformIdx {
+    ParId       parid;
     std::string wdbName;
     std::string level;
     pets::math::DynamicFunction * transform;
@@ -83,7 +86,7 @@ private:
   struct rotateParameters { std::string x; std::string y; };
 
   struct DataFromWdb {
-    std::string petsName;
+    ParId                       parid;
     std::vector<float>          data;
     std::vector<miutil::miTime> times;
     std::map<miutil::miTime,float> rawdata;
@@ -100,20 +103,20 @@ private:
   };
 
 private:
-  Projection               currentGrid;
-  Projection               geoGrid;
+  Projection                currentGrid;
+  Projection                geoGrid;
 
-  vector<rotateParameters> rot;
-  WdbStream::BoundaryBox   boundaries;
-  std::set<std::string>    dataProviders;
-  std::string              currentProvider;
-  std::set<miutil::miTime> referenceTimes;
-  std::set<std::string>    parametersFound;
-  miutil::miTime           currentReferenceTime;
-  std::set<int>            levels;
-  int                      currentLevel;
-  std::string              currentGridName;
-  std::map<std::string,transformIdx>  transformIndex;
+  vector<rotateParameters>  rot;
+  WdbStream::BoundaryBox    boundaries;
+  std::set<std::string>     dataProviders;
+  std::string               currentProvider;
+  std::set<miutil::miTime>  referenceTimes;
+  std::set<std::string>     parametersFound;
+  miutil::miTime            currentReferenceTime;
+  std::set<int>             levels;
+  int                       currentLevel;
+  std::string               currentGridName;
+  std::list<transformIdx>   transformIndex;
 
   pqxx::connection wdb;
   std::string      user;

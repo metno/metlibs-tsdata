@@ -98,10 +98,11 @@ WdbStream::WdbStream(std::string host, map<string, string> parlist, vector<strin
     wdb( QUERY::CONNECT(host,u) ) , user(u), DataStream("WdbStream")
 {
   geoGrid.setGeographic();
-
+  transformIndex.clear();
 
   map<string,string>::iterator itr=parlist.begin();
 
+  int i=-1;
   for(;itr!=parlist.end();itr++){
 
     string key   = itr->first;
@@ -109,33 +110,29 @@ WdbStream::WdbStream(std::string host, map<string, string> parlist, vector<strin
 
     if(token.empty()) continue;
 
-    if(transformIndex.count(key)) {
-      cerr << "TransformIndex for " << key << " Already exists - ignored" << endl;
-      continue;
-    }
-
     vector<string> tokens;
     vector<string> levels;
+
     boost::split(tokens,token, boost::algorithm::is_any_of(":") );
     boost::split(levels,tokens[0], boost::algorithm::is_any_of("|") );
 
 
     transformIdx trans;
-    transformIndex[key]         = trans;
-
-
-    transformIndex[key].wdbName = levels[0];
-    boost::algorithm::trim(transformIndex[key].wdbName);
+    transformIndex.push_back(trans);
+    transformIndex.back().transform = NULL;
+    transformIndex.back().level     = "NULL";
+    transformIndex.back().wdbName   = levels[0];
+    transformIndex.back().parid.setFromString(key);
+    boost::algorithm::trim(transformIndex.back().wdbName);
 
     if(levels.size() > 1 ) {
-      transformIndex[key].level = levels[1];
-      boost::algorithm::trim(transformIndex[key].level);
+      transformIndex.back().level = levels[1];
+      boost::algorithm::trim(transformIndex.back().level);
     }
 
-
-
-    if(tokens.size() > 1)
-      transformIndex[key].transform = new pets::math::DynamicFunction(tokens[1]);
+    if(tokens.size() > 1) {
+      transformIndex.back().transform = new pets::math::DynamicFunction(tokens[1]);
+    }
   }
 
   setRotateToGeo(vectorFunctionList);
@@ -350,25 +347,45 @@ void WdbStream::setRotateToGeo(vector<std::string> str)
 
   for(int i=0; i< str.size();i++) {
     vector<string> xy;
-    boost::split(xy,str[i], boost::algorithm::is_any_of(",") );
+    boost::split(xy,str[i], boost::algorithm::is_any_of(":") );
     if(xy.size() < 2 ) {
       cerr << "parse error : invalid pair of x,y in vector definition in setup file " << str[i] << endl;
       continue;
     }
 
-    if(!transformIndex.count(xy[0])) {
-      cerr << "parse error : unknown Parameter x= " << xy[0] << " in vector definition in setup file " << endl;
-      continue;
-    }
-    if(!transformIndex.count(xy[1])) {
-      cerr << "parse error : unknown Parameter y= " << xy[1] << " in vector definition in setup file " << endl;
-      continue;
-    }
+    ParId xid,yid;
+    xid.setFromString(xy[0]);
+    yid.setFromString(xy[1]);
 
     rotateParameters rotpar;
-    rotpar.x=transformIndex[xy[0]].wdbName;
-    rotpar.y=transformIndex[xy[1]].wdbName;
+    rotpar.x="";
+    rotpar.y="";
 
+
+    list<transformIdx>::iterator ritr=transformIndex.begin();
+
+    for(; ritr!= transformIndex.end();ritr++) {
+      if(ritr->parid.wdbCompare(xid)) {
+        rotpar.x = ritr->wdbName;
+        continue;
+      }
+      if(ritr->parid.wdbCompare(yid)) {
+        rotpar.y = ritr->wdbName;
+        continue;
+      }
+      if( !rotpar.x.empty() && !rotpar.y.empty() )
+        break;
+    }
+
+    if(rotpar.x.empty()) {
+      cerr << "parse error : unknown Parameter x= " << xid << " in vector definition in setup file " << endl;
+      continue;
+    }
+
+    if(rotpar.y.empty()) {
+      cerr << "parse error : unknown Parameter x= " << yid << " in vector definition in setup file " << endl;
+      continue;
+    }
     rot.push_back(rotpar);
   }
 }
@@ -403,23 +420,31 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
   map<string, DataFromWdb> datafromWdb;
   // check the parameterlist - what to get and what not....
   for(int i=0;i<inpar.size();i++) {
+    ParId parid=inpar[i];
 
-    string  petsName = inpar[i].alias;
+    list<transformIdx>::iterator trans=transformIndex.begin();
+    bool foundpid=false;
 
-    if(!transformIndex.count(petsName)) {
+    for(; trans != transformIndex.end();trans++) {
+      if (parid.wdbCompare(trans->parid) ) {
+        foundpid=true;
+        break;
+      }
+    }
+
+    if(!foundpid) {
       // we dont know what this is in WDB - skipping
-      ParId outId=inpar[i];
-
+      ParId outId = parid;
+      outId.level = 0;
       outId.run   = run.hour();
-      outId.level = 0; // < temporary
       outId.model = model;
       outpar.push_back(outId);
       continue;
     }
 
 
-    string wdbName =  transformIndex[petsName].wdbName;
-    string level   =  transformIndex[petsName].level;
+    string wdbName =  trans->wdbName;
+    string level   =  trans->level;
 
 
     if(!parametersFound.count(wdbName)) {
@@ -429,8 +454,8 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
     }
 
     datafromWdb[wdbName]=dwdb;
-    datafromWdb[wdbName].transform=transformIndex[petsName].transform;
-    datafromWdb[wdbName].petsName = petsName;
+    datafromWdb[wdbName].transform= trans->transform;
+    datafromWdb[wdbName].parid = parid;
     wdbNames.push_back(wdbName);
 
 
@@ -500,9 +525,10 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
   for(;itr!=datafromWdb.end();itr++) {
     WeatherParameter wp;
 
-    ParId pid = ID_UNDEF;
+    ParId pid = itr->second.parid;
     pid.model = model;
     pid.run   = run.hour();
+    pid.level = 0;
 
     //timeLine= dataList[didx].times;
     TimeLineIsRead = true;
@@ -521,11 +547,6 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
       timeLines.insert(itr->second.times,tlindex);
       numTimeLines++;
     }
-
-    pid.alias = itr->second.petsName;
-    pid.level = 0; // < temporary
-
-
 
     parameters[ipar].setTimeLineIndex(tlindex);
     parameters[ipar].setId(pid);

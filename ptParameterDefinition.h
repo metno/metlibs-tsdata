@@ -68,15 +68,24 @@ struct ParId {
       submodel(s)
   {}
 
+  bool wdbCompare(const ParId& lhs);
+
+  void reset();
+
   friend bool operator==(const ParId& lhs, const ParId& rhs);
   friend bool operator!=(const ParId& lhs, const ParId& rhs)
   { return !(lhs==rhs);}
+
 
   friend ostream& operator<<(ostream& out, const ParId& pi) {
     return out << " alias: " << pi.alias << " level: " << pi.level
 	       << " model: " << pi.model << " run: " << pi.run
 	       << " submodel: " << pi.submodel;
   }
+
+  miutil::miString toString();
+  void setFromString(miutil::miString);
+
 };
 
 const ParId ID_UNDEF;

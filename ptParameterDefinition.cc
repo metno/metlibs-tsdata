@@ -59,6 +59,64 @@ bool operator==(const ParId& lhs, const ParId& rhs) {
   return true;
 }
 
+bool ParId::wdbCompare(const ParId& lhs)
+{
+
+  if (lhs.alias != alias)
+    return false;
+
+  if(lhs.submodel != submodel ) {
+    // special case! the raw submodel (dataversion 0 ) has to match exactly
+    if (lhs.submodel ==  "RAW" || submodel == "RAW" )
+      return false;
+    // in any other case, the UNDEF
+    if (lhs.submodel !=  M_UNDEF && submodel != M_UNDEF )
+      return false;
+  }
+
+  if (lhs.model !=  M_UNDEF && model != M_UNDEF  && lhs.model != model )
+    return false;
+  return true;
+
+}
+
+miutil::miString ParId::toString()
+{
+  miString palias    =  ( alias    != A_UNDEF ? alias           : "x");
+  miString plevel    =  ( level    != L_UNDEF ? miString(level) : "x");
+  miString pmodel    =  ( model    != M_UNDEF ? model           : "x");
+  miString prun      =  ( run      != R_UNDEF ? miString(run)   : "x");
+  miString psubmodel =  ( submodel != S_UNDEF ? submodel        : "x");
+  return palias + "," + plevel + "," + pmodel + "," + prun + "," + psubmodel;
+}
+
+void  ParId::reset()
+{
+  alias    = A_UNDEF;
+  level    = L_UNDEF;
+  model    = M_UNDEF;
+  run      = R_UNDEF;
+  submodel = S_UNDEF;
+
+}
+void ParId::setFromString(miutil::miString buffer)
+{
+  reset();
+  vector<miString> parts= buffer.split(',',true);
+  int n= parts.size();
+  if ( n < 1 ) return;
+  if ( parts[0] != "x"    ) alias   = parts[0];
+  if ( n < 2 ) return;
+  if ( parts[1].isNumber()) level   = atoi(parts[1].cStr());
+  if ( n < 3 ) return;
+  if ( parts[2] != "x"    ) model    = parts[2];
+  if ( n < 4 ) return;
+  if ( parts[3].isNumber()) run      = atoi(parts[3].cStr());
+  if ( n < 5 ) return;
+  if ( parts[4] != "x"    ) submodel = parts[4];
+}
+
+
 bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
 {
   for (int i=0; i<paramList.size(); i++)
@@ -68,8 +126,6 @@ bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
     }
   return false;
 }
-
-
 
 bool ParameterDefinition::readParameters(const miString paramdef)
 {
@@ -87,56 +143,16 @@ bool ParameterDefinition::readParameters(const miString paramdef)
   return true;
 }
 
-miString ParameterDefinition::ParId2Str(ParId p){
-  miString tmp;
-  miString alias("x"),level("x"),model("x"),
-    run("x"),submodel("x");
-
-  if (p.alias!=A_UNDEF)
-    alias= p.alias;
-  if (p.level!=L_UNDEF)
-    level= miString(p.level);
-  if (p.model!=M_UNDEF)
-    model= p.model;
-  if (p.run!=R_UNDEF)
-    run= miString(p.run);
-  if (p.submodel!=S_UNDEF)
-    run= miString(p.submodel);
-
-  tmp= alias + "," + level + "," + model + "," + run + "," + submodel;
-
-  return tmp;
+miString ParameterDefinition::ParId2Str(ParId p)
+{
+  return p.toString();
 }
 
 
 ParId ParameterDefinition::Str2ParId(miString buffer)
 {
-  ParId parid = ID_UNDEF;
-  vector<miString> parts= buffer.split(',');
-  int n= parts.size();
-  if (n > 0){
-    parts[0].trim();
-    if (parts[0]!="x")
-      parid.alias = parts[0];
-    if (n > 1){
-      if (parts[1].isNumber())
-	parid.level = atoi(parts[1].cStr());
-      if (n > 2){
-	parts[2].trim();
-	if (parts[2]!="x")
-	  parid.model = parts[2];
-	if (n > 3){
-	  if (parts[3].isNumber())
-	    parid.run = atoi(parts[3].cStr());
-	  if (n > 4){
-	    parts[4].trim();
-	    if (parts[4]!="x")
-	      parid.submodel = parts[4];
-	  }
-	}
-      }
-    }
-  }
+  ParId parid;
+  parid.setFromString(buffer);
   return parid;
 }
 

@@ -1,32 +1,31 @@
 /*
-  libtsData - Time Series Data
-  
-  $Id$
+ libtsData - Time Series Data
 
-  Copyright (C) 2006 met.no
+ $Id$
 
-  Contact information:
-  Norwegian Meteorological Institute
-  Box 43 Blindern
-  0313 OSLO
-  NORWAY
-  email: diana@met.no
-  
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ Copyright (C) 2006 met.no
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ Contact information:
+ Norwegian Meteorological Institute
+ Box 43 Blindern
+ 0313 OSLO
+ NORWAY
+ email: diana@met.no
 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #ifndef _HDFdefs_h
 #define _HDFdefs_h
@@ -36,7 +35,7 @@ extern "C" {
 #endif
 
 /** HDFdefs.h
- ** 
+ **
  ** Definitions for standard pets HDF file.
  **
  ** LBS  5 Dec 1996
@@ -50,38 +49,38 @@ extern "C" {
  */
 
 /* Vgroups, vdatas */
-#define VGPOSNAME  "List of positions"
-#define VGPARNAME  "Parameters"
-#define VGMODNAME  "Models"
-#define VGPOSGROUP "Positions"
+const char * VGPOSNAME = "List of positions";
+const char * VGPARNAME = "Parameters";
+const char * VGMODNAME = "Models";
+const char * VGPOSGROUP = "Positions";
 /* #define VGLEV1NAME "Level 1" */
 
 /* Field names */
-#define FNPOSNAME  "Name"
-#define FNGEOPOS   "Position"
-#define FNPOSREF   "Reference"
-#define FNTOPOGRAPHY "Topography"
+const char * FNPOSNAME = "Name";
+const char * FNGEOPOS = "Position";
+const char * FNPOSREF = "Reference";
+const char * FNTOPOGRAPHY = "Topography";
 
-#define FNMODID    "Model ID"
-#define FNMODNAME  "Name"
-#define FNMODRUN   "Run"
-#define FNMODTXT   "Info"
+const char * FNMODID = "Model ID";
+const char * FNMODNAME = "Name";
+const char * FNMODRUN = "Run";
+const char * FNMODTXT = "Info";
 
-#define FNALIAS    "Short parameter name"
-#define FNNAME     "Parameter name"
-#define FNUNIT     "Parameter unit"
-#define FNNUM      "Parameter number"
-#define FNSCALE    "Scale"
-#define FNSIZE     "Size"
-#define FNORDER    "Order"
-#define FNTYPE     "Data type"
-#define FNPLOT     "Plot type"
+const char * FNALIAS = "Short parameter name";
+const char * FNNAME = "Parameter name";
+const char * FNUNIT = "Parameter unit";
+const char * FNNUM = "Parameter number";
+const char * FNSCALE = "Scale";
+const char * FNSIZE = "Size";
+const char * FNORDER = "Order";
+const char * FNTYPE = "Data type";
+const char * FNPLOT = "Plot type";
 
-#define FNTIME     "Time"
-#define FNPROG     "Prog"
-#define FNLEV      "Level"
-#define FNSMOD     "Submodel"
-#define FNDATA     "Data"
+const char * FNTIME = "Time";
+const char * FNPROG = "Prog";
+const char * FNLEV = "Level";
+const char * FNSMOD = "Submodel";
+const char * FNDATA = "Data";
 
 /*
  * Other constants

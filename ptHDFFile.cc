@@ -1095,15 +1095,15 @@ bool HDFFile::_readParList(ErrorFlag* ef)
         fields = new char[fnsize];
 
 	// find size of each field in bytes
-	pnumSz  = VSsizeof(vdid,FNNUM);
-	nameSz  = VSsizeof(vdid,FNNAME);
-	aliasSz = VSsizeof(vdid,FNALIAS);
-	unitSz  = VSsizeof(vdid,FNUNIT);
-	scaleSz = VSsizeof(vdid,FNSCALE);
-	sizeSz  = VSsizeof(vdid,FNSIZE);
-	orderSz = VSsizeof(vdid,FNORDER);
-	datatSz = VSsizeof(vdid,FNTYPE);
-	plottSz = VSsizeof(vdid,FNPLOT);
+	pnumSz  = VSsizeof(vdid,const_cast<char*>(FNNUM));
+	nameSz  = VSsizeof(vdid,const_cast<char*>(FNNAME));
+	aliasSz = VSsizeof(vdid,const_cast<char*>(FNALIAS));
+	unitSz  = VSsizeof(vdid,const_cast<char*>(FNUNIT));
+	scaleSz = VSsizeof(vdid,const_cast<char*>(FNSCALE));
+	sizeSz  = VSsizeof(vdid,const_cast<char*>(FNSIZE));
+	orderSz = VSsizeof(vdid,const_cast<char*>(FNORDER));
+	datatSz = VSsizeof(vdid,const_cast<char*>(FNTYPE));
+	plottSz = VSsizeof(vdid,const_cast<char*>(FNPLOT));
 	if (pnumSz<0  || nameSz<0  || aliasSz<0 ||
 	    unitSz<0  || scaleSz<0 || sizeSz<0  ||
 	    orderSz<0 || datatSz<0 || plottSz<0) {
@@ -1308,10 +1308,10 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
         fields = new char[fnsize]; // allocate space for field-list
 
 	// find size of each field in bytes
-	refSz  = VSsizeof(vdin,FNPOSREF);
-	nameSz = VSsizeof(vdin,FNPOSNAME);
-	posSz  = VSsizeof(vdin,FNGEOPOS);
-	topoSz = VSsizeof(vdin,FNTOPOGRAPHY);
+	refSz  = VSsizeof(vdin,const_cast<char*>(FNPOSREF));
+	nameSz = VSsizeof(vdin,const_cast<char*>(FNPOSNAME));
+	posSz  = VSsizeof(vdin,const_cast<char*>(FNGEOPOS));
+	topoSz = VSsizeof(vdin,const_cast<char*>(FNTOPOGRAPHY));
 
 	// retrieve number of records, size of each record etc.
         VSinquire(vdin,&nrec,&interlace,fields,&recsz,vdname);
@@ -1506,10 +1506,10 @@ bool HDFFile::_readModList(ErrorFlag* ef)
         fields = new char[fnsize]; // allocate space for field-list
 
 	// find size of each field in bytes
-	idSz   = VSsizeof(vdin,FNMODID);
-	nameSz = VSsizeof(vdin,FNMODNAME);
-	runSz  = VSsizeof(vdin,FNMODRUN);
-	txtSz  = VSsizeof(vdin,FNMODTXT);
+	idSz   = VSsizeof(vdin,const_cast<char*>(FNMODID));
+	nameSz = VSsizeof(vdin,const_cast<char*>(FNMODNAME));
+	runSz  = VSsizeof(vdin,const_cast<char*>(FNMODRUN));
+	txtSz  = VSsizeof(vdin,const_cast<char*>(FNMODTXT));
 
 	// retrieve number of records, size of each record etc.
         VSinquire(vdin,&nrec,&interlace,fields,&recsz,vdname);

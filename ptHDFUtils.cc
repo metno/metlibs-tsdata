@@ -1,6 +1,6 @@
 /*
   libtsData - Time Series Data
-  
+
   $Id$
 
   Copyright (C) 2006 met.no
@@ -11,7 +11,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -53,7 +53,7 @@ void rtrim(char *s)
    Search sequentially for vgroup named `name' and return its
    reference number. */
 
-int32 findVG(int32 fid, char *name)
+int32 findVG(int32 fid, const char *name)
 {
   int32 vgref=-1, vgid;
   char  vgname[VGNAMELENMAX+1];
@@ -105,7 +105,7 @@ void copyVGtree(int32 infid, int32 innode, int32 outfid, int32 outnode)
        VSdetach(vdin);
      }
   }
-  
+
   Vdetach(outnode);
   Vdetach(innode);
   free(refs);

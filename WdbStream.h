@@ -79,7 +79,7 @@ private:
     std::string wdbName;
     std::string level;
     pets::math::DynamicFunction * transform;
-    transformIdx() : transform(NULL) , level("NULL") {}
+    transformIdx() : level("NULL"), transform(NULL) {}
     ~transformIdx() { if ( transform ) delete transform; }
   };
 

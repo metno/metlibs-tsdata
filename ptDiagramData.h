@@ -133,6 +133,7 @@ private:
   void makeWeatherSymbols_(ParId);
   void makeWeatherSymbols_new_(ParId p, bool update);
   float calcHec_(float hst, float hs);
+  float calcCMC_(float hst, float hs, float tm01, float tm02);
   bool makeSHC_(const int diridx, WeatherParameter& wp, const int level);
   void copyMembers(const ptDiagramData&);
   bool parameterInfo(const ParId&, float&, bool&, bool&);

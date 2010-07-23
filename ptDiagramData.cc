@@ -260,8 +260,8 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
   const float ktms = float(1847.0 / 3600.0);
   int j, n;
   ErrorFlag error;
-  ParId id1, id2, id3;
-  int wpx, wpx1, wpx2, wpx3;
+  ParId id1, id2, id3, id4;
+  int wpx, wpx1, wpx2, wpx3, wpx4;
   float d, f1, f2, f3;
   int level;
   Uprofile profs;
@@ -428,12 +428,60 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 
     if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)
         && findParameter(id2, wpx2, &error)) {
+
+      // check for identical timelines
+      int n = parList[wpx].Npoints();
+      if (n != parList[wpx1].Npoints() || n != parList[wpx2].Npoints()) {
+        return;
+      }
+
       locked = parList[wpx].isLocked();
       for (j = 0; j < parList[wpx].Npoints(); j++) {
         if (!locked || parList[wpx1].isModified(j) || parList[wpx2].isModified(
             j)) {
           float hec = calcHec_(parList[wpx1].Data(j), parList[wpx2].Data(j));
           parList[wpx].setData(j, hec);
+        }
+      }
+      parList[wpx].calcAllProperties();
+    }
+
+    // CMC
+  } else if (inpid.alias == "CMC") {
+    id1.alias = "HST";
+    id2.alias = "HS";
+    id3.alias = "TM01";
+    id4.alias = "TST";
+
+    if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)
+        && findParameter(id2, wpx2, &error)) {
+      locked = parList[wpx].isLocked();
+      findParameter(id3, wpx3, &error);
+      findParameter(id4, wpx4, &error);
+
+      // check for identical timelines
+      int n = parList[wpx].TimeLineIndex();
+      if (n != parList[wpx1].TimeLineIndex() || n != parList[wpx2].TimeLineIndex() || (wpx3
+          != -1 && n != parList[wpx3].TimeLineIndex()) || (wpx4 != -1 && n
+          != parList[wpx4].TimeLineIndex())) {
+        return;
+      }
+
+/*
+      cerr << "--- updateParameter:" << inpid << " TM01:" << wpx3 << " TM02:" << wpx4 << endl;
+      if (wpx3 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM01:" << parList[wpx3].Npoints() << endl;
+      if (wpx4 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM02:" << parList[wpx4].Npoints() << endl;
+*/
+
+      for (j = 0; j < parList[wpx].Npoints(); j++) {
+        if (!locked || parList[wpx1].isModified(j) ||
+            parList[wpx2].isModified(j)) {
+          float hst = parList[wpx1].Data(j);
+          float hs = parList[wpx2].Data(j);
+          float tm01 = (wpx3 != -1 ? parList[wpx3].Data(j) : -1);
+          float tm02 = (wpx4 != -1 ? parList[wpx4].Data(j) : -1);
+          float cmc = calcCMC_(hst, hs, tm01, tm02);
+          parList[wpx].setData(j, cmc);
         }
       }
       parList[wpx].calcAllProperties();
@@ -469,10 +517,9 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
     id2.alias = "SHC";
 
     if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)) {
-      //       locked= parList[wpx].isLocked();
-
-      for (j = 0; j < parList[wpx].Npoints(); j++)
+      for (j = 0; j < parList[wpx].Npoints(); j++){
         parList[wpx].setData(j, 0.0);
+      }
 
       int l1 = shcinfo.lowLevel();
       int l2 = shcinfo.highLevel();
@@ -1282,11 +1329,17 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       }
     }
 
+/*
     // HEC
   } else if (inpid.alias == "HEC") {
     id1.alias = "HST";
     id2.alias = "HS";
     if (copyParameter(id1, wp, &error) && copyParameter(id2, wp2, &error)) {
+      cerr << "--- makeParameter:" << inpid << endl;
+      // check for identical timelines
+      if (wp.TimeLineIndex() != wp2.TimeLineIndex()) {
+        return;
+      }
 
       for (j = 0; j < wp.Npoints(); j++) {
         float hec = calcHec_(wp.Data(j), wp2.Data(j));
@@ -1297,6 +1350,46 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       wp.setId(inpid);
       addParameter(wp);
     }
+*/
+
+/*
+    // CMC
+  } else if (inpid.alias == "CMC") {
+    id1.alias = "HST";
+    id2.alias = "HS";
+    id3.alias = "TM01";
+    id4.alias = "TST";
+
+    if (copyParameter(id1, wp, &error) && copyParameter(id2, wp2, &error)) {
+
+      bool btm01 = copyParameter(id3, wp3, &error);
+      bool btm02 = copyParameter(id4, wp4, &error);
+
+      int n = wp.Npoints();
+      if (n != wp2.Npoints() || (btm01 && n != wp3.Npoints()) || (btm02 && n
+          != wp4.Npoints())) {
+        return;
+      }
+
+      cerr << "--- makeParameter:" << inpid << " TM01:" << btm01 << " TM02:" << btm02 << endl;
+      cerr << " size of cmc:" << wp.Npoints() << " size of HS:" << wp2.Npoints() << endl;
+      if (btm01) cerr << " size of cmc:" << wp.Npoints() << " size of TM01:" << wp3.Npoints() << endl;
+      if (btm02) cerr << " size of cmc:" << wp.Npoints() << " size of TM02:" << wp4.Npoints() << endl;
+
+      for (j = 0; j < wp.Npoints(); j++) {
+        float hst = wp.Data(j);
+        float hs = wp2.Data(j);
+        float tm01 = (btm01 ? wp3.Data(j) : -1);
+        float tm02 = (btm02 ? wp4.Data(j) : -1);
+        float cmc = calcCMC_(hst, hs, tm01, tm02);
+        wp.setData(j, cmc);
+      }
+
+      wp.calcAllProperties();
+      wp.setId(inpid);
+      addParameter(wp);
+    }
+*/
 
     // RR
   } else if (inpid.alias == "RR") {
@@ -2462,6 +2555,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["TPT"] = parameter_info("TPT", 1, true, false);
   parInfo["DDPT"] = parameter_info("DDPT", 1, 0, 360, 360, true, false, false); //
   parInfo["TST"] = parameter_info("TST", 1, true, false);
+  parInfo["TM01"] = parameter_info("TM01", 1, true, false);
   parInfo["HSP"] = parameter_info("HSP", 0, true, false);
   parInfo["TSP"] = parameter_info("TSP", 1, true, false);
   parInfo["DDPP"] = parameter_info("DDPP", 1, 0, 360, 360, true, false, false); //
@@ -2490,6 +2584,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["CONQ"] = parameter_info("CONQ", 0, false, false);
   parInfo["XWW"] = parameter_info("XWW", 0, false, false);
   parInfo["HEC"] = parameter_info("HEC", 0.01, -15, 50, 0, false, true, false);//
+  parInfo["CMC"] = parameter_info("CMC", 0.01, -15, 50, 0, false, true, false);//
   parInfo["SHC"] = parameter_info("SHC", 0, false, false);
   parInfo["CWW"] = parameter_info("CWW", 0, false, false);
   parInfo["AGR"] = parameter_info("AGR", 0, false, false);
@@ -2521,59 +2616,6 @@ bool ptDiagramData::parameterInfo(const ParId& pid, float& def, bool& interpok,
 //      interpok= ok to interpolate values
 //      spreadok= if !interpok, spread datavalues
 {
-  //   const int numalias=68;
-  //   const miString aliass[numalias]=
-  //     { "TD",  "RR1", "RR2", "RR",  "CC",  "CC8", "TT",  "RH",
-  //       "UU",  "VV",  "WV",  "FG",  "CL",  "CM",  "CH",  "VVC",
-  //       "VVQ", "WW",  "MSLP","HST", "HSX", "HSTX","HSTE","HSEX",
-  //       "HSXF","HEXF","TPT", "DDPT","TST", "HSP", "TSP", "DDPP",
-  //       "HSD", "TSD", "DDPD","FF",  "DD",  "GU",  "WVFD","WVMD",
-  //       "HS",  "CU",  "CV",  "CUV", "CFD", "STA", "STAQ","CON",
-  //       "CONQ","XWW", "HEC", "SHC", "CWW", "AGR", "LII", "SHL",
-  //       "DDPE","FOI","FFMS", "CL8", "CM8", "CH8", "PS",  "SST",
-  //       "FFMI","FFMA","ICEA","VIS"
-  //     };
-
-  //   // default value for parameter
-  //   const float defs[numalias]=
-  //     { 0,   0,   0,   0,   0,   0,   0,   0,
-  //       0,   0,   0,   0,   0,   0,   0,  10,
-  //       9,   0,1000,   0,   0,   0,   0,   0,
-  //       1.65,1,   1, 360,   1,   0,   1, 360,
-  //       0,   1, 360,   0,   0,   0,   0,   0,
-  //       0,   0,   0,   0,   0,   0,   1, 100,
-  //       0,   0,   0,   0,   0,   2,   0,   0,
-  //       0,   0,   0,   0,   0,   0,   0,   0,
-  //       0,   0,   0,  10
-  //     };
-
-  //   // can parameter be interpolated between timepoints
-  //   const bool interp[numalias]=
-  //     {  true,  true,  true,  true,  true,  true,  true,  true,
-  //        false, false, false, true,  true,  true,  true,  true,
-  //        false, false, true,  true,  true,  true,  true,  true,
-  //        true,  true,  true,  false, true,  true,  true,  false,
-  //        true,  true,  false, true,  false, true,  false, false,
-  //        true,  false, false, false, false, true,  false, false,
-  //        false, false, true,  false, false, false, false, false,
-
-  //        false, false, true,  true,  true,  true,  false, true,
-  //        true,  true,  true,  true
-  //     };
-
-  //   // can parameter be eavenly spread between timepoints
-  //   const bool spread[numalias]=
-  //     { false,  true,  true,  true, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false, false, false, false, false,
-  //       false, false, false, false
-  //     };
-
   if (pid.alias == A_UNDEF)
     return false;
   miString alias = pid.alias;
@@ -3087,6 +3129,57 @@ float ptDiagramData::calcHec_(float hst, float hs)
 
   // Height Ekofisk Crest
   return -0.0197 * hst * hst + 1.115 * hst + hlat / 1.5;
+}
+
+// calculate Characteristic Maximum Crest from:
+// hst: Total Wave Height
+// hs:  sealevel (stormsurge+tide)
+// tm01
+// tm02
+float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
+{
+  const float d = 75.0;
+  const float t = 3600.0;
+  const float pi = 4 * atanf(1.0);
+  const float g = 9.81;
+
+  //const float deltah = 0.67;
+  //hs += deltah;
+
+  //if (tm01 < 0 || tm02 < 0) {
+    //cerr << "incoming tm01:" <<  tm01 << " tm02:" << tm02;
+    // calculate median of tm01 (tm)
+  float a1 = 0.4211;
+  float a2 = 1.1133;
+  float a3 = 0.2477;
+  float a8 = 0.0;
+  float a9 = 1.0;
+  tm01 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+  // calculate median of tm02 (tz)
+  a1 = 0.9;
+  a2 = -0.093;
+  a3 = 0.8947;
+  a8 = 2.0781;
+  a9 = 0.6331;
+  tm02 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+    //cerr << "  .. calculated tm01:" << tm01 << " tm02:" << tm02 << endl;
+  //} else {
+  //  //cerr << " tm01 and tm02 FOUND! tm01:" <<  tm01 << " tm02:" << tm02 << endl;
+  //}
+  // calculate steepness (s1)
+  float s1 = 2 * pi * hst / g / (tm01*tm01);
+  // calculate deep water wave number (k1)
+  float k1 = 4 * pi*pi / g / (tm01*tm01);
+  // calculate Ursell number (urs)
+  float urs = hst / (k1 * k1) / powf(d, 3);
+  // calculate Weibull parameters
+  float afc = 0.3536 + 0.2568 * s1 + 0.08 * urs;
+  float bfc = 2.0 - 1.7912 * s1 - 0.5302 * urs + 0.284 * urs * urs;
+  // calculate number of waves in one hour
+  float xn = t / tm02;
+  // calculate characteristic largest crest
+  float crx = hs + afc * hst * powf(logf(xn), (1. / bfc));
+  return crx;
 }
 
 void ptDiagramData::makeWeatherSymbols_(ParId p)

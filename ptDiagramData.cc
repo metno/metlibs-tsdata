@@ -446,6 +446,28 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       parList[wpx].calcAllProperties();
     }
 
+    // TM01
+  } else if (inpid.alias == "TM01") {
+    id1.alias = "HST";
+    if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)) {
+
+      // check for identical timelines
+      int n = parList[wpx].Npoints();
+      if (n != parList[wpx1].Npoints()) {
+        return;
+      }
+      //cerr << "Updating " << inpid << endl;
+
+      locked = parList[wpx].isLocked();
+      for (j = 0; j < n; j++) {
+        if (!locked || parList[wpx1].isModified(j)) {
+          float tm01 = calcMedianTM01(parList[wpx1].Data(j));
+          parList[wpx].setData(j, tm01);
+        }
+      }
+      parList[wpx].calcAllProperties();
+    }
+
     // CMC
   } else if (inpid.alias == "CMC") {
     id1.alias = "HST";
@@ -454,32 +476,32 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
     id4.alias = "TST";
 
     if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)
-        && findParameter(id2, wpx2, &error)) {
+        && findParameter(id2, wpx2, &error) && findParameter(id3, wpx3, &error)
+        && findParameter(id4, wpx4, &error)) {
       locked = parList[wpx].isLocked();
-      findParameter(id3, wpx3, &error);
-      findParameter(id4, wpx4, &error);
 
       // check for identical timelines
       int n = parList[wpx].TimeLineIndex();
-      if (n != parList[wpx1].TimeLineIndex() || n != parList[wpx2].TimeLineIndex() || (wpx3
-          != -1 && n != parList[wpx3].TimeLineIndex()) || (wpx4 != -1 && n
-          != parList[wpx4].TimeLineIndex())) {
+      if (n != parList[wpx1].TimeLineIndex() || n
+          != parList[wpx2].TimeLineIndex() || n
+          != parList[wpx3].TimeLineIndex() || n
+          != parList[wpx4].TimeLineIndex()) {
         return;
       }
 
-/*
-      cerr << "--- updateParameter:" << inpid << " TM01:" << wpx3 << " TM02:" << wpx4 << endl;
-      if (wpx3 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM01:" << parList[wpx3].Npoints() << endl;
-      if (wpx4 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM02:" << parList[wpx4].Npoints() << endl;
-*/
+
+      //cerr << "--- updateParameter:" << inpid << " TM01:" << wpx3 << " TM02:" << wpx4 << endl;
+      //if (wpx3 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM01:" << parList[wpx3].Npoints() << endl;
+      //if (wpx4 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM02:" << parList[wpx4].Npoints() << endl;
+
 
       for (j = 0; j < parList[wpx].Npoints(); j++) {
-        if (!locked || parList[wpx1].isModified(j) ||
-            parList[wpx2].isModified(j)) {
+        if (!locked || parList[wpx1].isModified(j) || parList[wpx2].isModified(j) ||
+            parList[wpx3].isModified(j) || parList[wpx4].isModified(j)) {
           float hst = parList[wpx1].Data(j);
           float hs = parList[wpx2].Data(j);
-          float tm01 = (wpx3 != -1 ? parList[wpx3].Data(j) : -1);
-          float tm02 = (wpx4 != -1 ? parList[wpx4].Data(j) : -1);
+          float tm01 = parList[wpx3].Data(j);
+          float tm02 = parList[wpx4].Data(j);
           float cmc = calcCMC_(hst, hs, tm01, tm02);
           parList[wpx].setData(j, cmc);
         }
@@ -1133,33 +1155,6 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       }
     }
 
-    //     // FF in different level
-    //   } else if (inpid.alias == "FF" &&
-    // 	     inpid.level != L_UNDEF && inpid.level != 0 ){
-    //     level=inpid.level;
-    //     //cerr << "Asking for FF at level:"<<level<<endl;
-    //     id1.level = 0;
-    //     if (!findParameter(id1,idx,&error))
-    //       makeOneParameter(id1);
-
-    //     if (copyParameter(id1,wp,&error)){
-    //       double speed10;
-    //       double Ri = 0;
-    //       double dlevel= static_cast<double>(level);
-    //       float speed;
-    //       for (j=0; j<wp.Npoints(); j++){
-    // 	speed10 = static_cast<double>(wp.Data(j,0));
-    // 	//  	  profs.setRi(Ri, reflevel, speed10);
-    // 	profs.editRi(Ri);
-    // 	speed = profs.compute(reflevel, speed10, dlevel);
-    // 	wp.setData(j,0,speed);
-    //       }
-    //       if (newpid.run==R_UNDEF) newpid.run= wp.Id().run;
-    //       wp.calcAllProperties();
-    //       wp.setId(newpid);
-    //       addParameter(wp);
-    //     }
-
     // FF in different level
   } else if (inpid.alias == "FF" && inpid.level != L_UNDEF && inpid.level != 0) {
     level = inpid.level;
@@ -1208,31 +1203,6 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       wp.setId(newpid);
       addParameter(wp);
     }
-
-    //     // Gust (knots)
-    //   } else if (inpid.alias == "GU"){
-    //     level= inpid.level;
-    //     //cerr << "Asking for gust at level:"<<level<<endl;
-    //     if (level==0) level = 10;
-    //     id1.alias = "FF";
-    //     if (copyParameter(id1,wp,&error)){
-    //       float speed;
-    //       float gust;
-    //       for (j=0; j<wp.Npoints(); j++)
-    // 	fdata.push_back(wp.Data(j,0));
-    //       wp.setDims(fdata.size(),1);
-    //       for (j=0; j<wp.Npoints(); j++){
-    // 	speed = fdata[j];
-    // 	gust  = profs.gust(level, speed);
-    // 	wp.setData(j,0,gust);
-    //       }
-    //       fdata.erase(fdata.begin(),fdata.end());
-
-    //       if (newpid.run==R_UNDEF) newpid.run= wp.Id().run;
-    //       wp.calcAllProperties();
-    //       wp.setId(newpid);
-    //       addParameter(wp);
-    //     }
 
     // cartesian FFmin and FFmax vector
   } else if (inpid.alias == "FFMIX") {
@@ -1390,6 +1360,19 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       addParameter(wp);
     }
 */
+
+    // TM01
+  } else if (inpid.alias == "TM01") {
+    //cerr << "Making " << inpid << endl;
+    id1.alias = "HST";
+    if (copyParameter(id1, wp, &error)) {
+      for (j = 0; j < wp.Npoints(); j++){
+        wp.setData(j, calcMedianTM01(wp.Data(j)));
+      }
+      wp.calcAllProperties();
+      wp.setId(newpid);
+      addParameter(wp);
+    }
 
     // RR
   } else if (inpid.alias == "RR") {
@@ -3117,6 +3100,32 @@ bool ptDiagramData::makeSHC_(const int diridx, WeatherParameter& wp,
   return true;
 }
 
+float ptDiagramData::calcMedianTM01(float hst)
+{
+   // calculate median of TM01 period from wave-height
+ float a1 = 0.4211;
+ float a2 = 1.1133;
+ float a3 = 0.2477;
+ float a8 = 0.0;
+ float a9 = 1.0;
+ float tm01 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+ //cerr << "  .. calculated tm01:" << tm01 << endl;
+ return tm01;
+}
+
+float ptDiagramData::calcMedianTM02(float hst)
+{
+  // calculate median of TM02 period from wave-height
+  float a1 = 0.9;
+  float a2 = -0.093;
+  float a3 = 0.8947;
+  float a8 = 2.0781;
+  float a9 = 0.6331;
+  float tm02 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+  //cerr << "  .. calculated tm02:" << tm02 << endl;
+  return tm02;
+}
+
 // calculate Height Ekofisk Crest from:
 // hst: Total Wave Height
 // hs:  sealevel (stormsurge+tide)
@@ -3143,25 +3152,16 @@ float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
   const float pi = 4 * atanf(1.0);
   const float g = 9.81;
 
+  //cerr << ".";
   //const float deltah = 0.67;
   //hs += deltah;
 
   //if (tm01 < 0 || tm02 < 0) {
     //cerr << "incoming tm01:" <<  tm01 << " tm02:" << tm02;
-    // calculate median of tm01 (tm)
-  float a1 = 0.4211;
-  float a2 = 1.1133;
-  float a3 = 0.2477;
-  float a8 = 0.0;
-  float a9 = 1.0;
-  tm01 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+  // calculate median of tm01 (tm)
+  //tm01 = calcMedianTM01(hst);
   // calculate median of tm02 (tz)
-  a1 = 0.9;
-  a2 = -0.093;
-  a3 = 0.8947;
-  a8 = 2.0781;
-  a9 = 0.6331;
-  tm02 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+  //tm02 = calcMedianTM02(hst);
     //cerr << "  .. calculated tm01:" << tm01 << " tm02:" << tm02 << endl;
   //} else {
   //  //cerr << " tm01 and tm02 FOUND! tm01:" <<  tm01 << " tm02:" << tm02 << endl;

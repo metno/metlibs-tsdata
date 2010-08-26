@@ -132,6 +132,8 @@ private:
   void cleanDataStructure_();
   void makeWeatherSymbols_(ParId);
   void makeWeatherSymbols_new_(ParId p, bool update);
+  float calcMedianTM01(float hst);
+  float calcMedianTM02(float hst);
   float calcHec_(float hst, float hs);
   float calcCMC_(float hst, float hs, float tm01, float tm02);
   bool makeSHC_(const int diridx, WeatherParameter& wp, const int level);

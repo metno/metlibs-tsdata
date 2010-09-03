@@ -2,6 +2,7 @@
 #include "DynamicFunction.h"
 #include <iostream>
 #include <math.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -33,48 +34,48 @@ DynamicFunction::DynamicFunction(string nf, double f) : next(NULL) , factor(f)
       if( opr=='/' ) next = new Divide(    nxt, fac );
       if( opr=='+' ) next = new Add(       nxt, fac );
       if( opr=='-' ) next = new Substract( nxt, fac );
-    }	  
-  }   
+    }
+  }
 }
 
 
 
-void DynamicFunction::calc(double& res) 
-{ 
+void DynamicFunction::calc(double& res)
+{
   if(next)
     next->calc(res);
 }
 
 
-void Add::calc(double& res) 
+void Add::calc(double& res)
 {
   res+=factor;
   if(next)
-    next->calc(res); 
+    next->calc(res);
 }
 
 
-void Divide::calc(double& res) 
+void Divide::calc(double& res)
 {
   res/=factor;
   if(next)
-    next->calc(res); 
+    next->calc(res);
 }
 
 
-void Multiply::calc(double& res) 
+void Multiply::calc(double& res)
 {
   res*=factor;
   if(next)
-    next->calc(res); 
+    next->calc(res);
 }
 
 
-void Substract::calc(double& res) 
+void Substract::calc(double& res)
 {
   res-=factor;
   if(next)
-    next->calc(res); 
+    next->calc(res);
 }
 
 

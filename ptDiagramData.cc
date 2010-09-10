@@ -468,8 +468,8 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       parList[wpx].calcAllProperties();
     }
 
-    // CMC
-  } else if (inpid.alias == "CMC") {
+    // EMC
+  } else if (inpid.alias == "EMC") {
     id1.alias = "HST";
     id2.alias = "HS";
     id3.alias = "TM01";
@@ -491,8 +491,8 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 
 
       //cerr << "--- updateParameter:" << inpid << " TM01:" << wpx3 << " TM02:" << wpx4 << endl;
-      //if (wpx3 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM01:" << parList[wpx3].Npoints() << endl;
-      //if (wpx4 >= 0) cerr << " size of cmc:" << parList[wpx].Npoints() << " size of TM02:" << parList[wpx4].Npoints() << endl;
+      //if (wpx3 >= 0) cerr << " size of emc:" << parList[wpx].Npoints() << " size of TM01:" << parList[wpx3].Npoints() << endl;
+      //if (wpx4 >= 0) cerr << " size of emc:" << parList[wpx].Npoints() << " size of TM02:" << parList[wpx4].Npoints() << endl;
 
 
       for (j = 0; j < parList[wpx].Npoints(); j++) {
@@ -502,8 +502,8 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
           float hs = parList[wpx2].Data(j);
           float tm01 = parList[wpx3].Data(j);
           float tm02 = parList[wpx4].Data(j);
-          float cmc = calcCMC_(hst, hs, tm01, tm02);
-          parList[wpx].setData(j, cmc);
+          float emc = calcCMC_(hst, hs, tm01, tm02);
+          parList[wpx].setData(j, emc);
         }
       }
       parList[wpx].calcAllProperties();
@@ -1323,8 +1323,8 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 */
 
 /*
-    // CMC
-  } else if (inpid.alias == "CMC") {
+    // EMC
+  } else if (inpid.alias == "EMC") {
     id1.alias = "HST";
     id2.alias = "HS";
     id3.alias = "TM01";
@@ -1342,17 +1342,17 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       }
 
       cerr << "--- makeParameter:" << inpid << " TM01:" << btm01 << " TM02:" << btm02 << endl;
-      cerr << " size of cmc:" << wp.Npoints() << " size of HS:" << wp2.Npoints() << endl;
-      if (btm01) cerr << " size of cmc:" << wp.Npoints() << " size of TM01:" << wp3.Npoints() << endl;
-      if (btm02) cerr << " size of cmc:" << wp.Npoints() << " size of TM02:" << wp4.Npoints() << endl;
+      cerr << " size of emc:" << wp.Npoints() << " size of HS:" << wp2.Npoints() << endl;
+      if (btm01) cerr << " size of emc:" << wp.Npoints() << " size of TM01:" << wp3.Npoints() << endl;
+      if (btm02) cerr << " size of emc:" << wp.Npoints() << " size of TM02:" << wp4.Npoints() << endl;
 
       for (j = 0; j < wp.Npoints(); j++) {
         float hst = wp.Data(j);
         float hs = wp2.Data(j);
         float tm01 = (btm01 ? wp3.Data(j) : -1);
         float tm02 = (btm02 ? wp4.Data(j) : -1);
-        float cmc = calcCMC_(hst, hs, tm01, tm02);
-        wp.setData(j, cmc);
+        float emc = calcEMC_(hst, hs, tm01, tm02);
+        wp.setData(j, emc);
       }
 
       wp.calcAllProperties();
@@ -2567,7 +2567,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["CONQ"] = parameter_info("CONQ", 0, false, false);
   parInfo["XWW"] = parameter_info("XWW", 0, false, false);
   parInfo["HEC"] = parameter_info("HEC", 0.01, -15, 50, 0, false, true, false);//
-  parInfo["CMC"] = parameter_info("CMC", 0.01, -15, 50, 0, false, true, false);//
+  parInfo["EMC"] = parameter_info("EMC", 0.01, -15, 50, 0, false, true, false);//
   parInfo["SHC"] = parameter_info("SHC", 0, false, false);
   parInfo["CWW"] = parameter_info("CWW", 0, false, false);
   parInfo["AGR"] = parameter_info("AGR", 0, false, false);
@@ -3140,7 +3140,7 @@ float ptDiagramData::calcHec_(float hst, float hs)
   return -0.0197 * hst * hst + 1.115 * hst + hlat / 1.5;
 }
 
-// calculate Characteristic Maximum Crest from:
+// calculate Ekofisk (Characteristic) Maximum Crest from:
 // hst: Total Wave Height
 // hs:  sealevel (stormsurge+tide)
 // tm01

@@ -315,7 +315,7 @@ public:
     for (j = 0; j < MAXTIMELINES; j++) {
       bool used = false;
       for (i = 0; i < data.size(); i++) {
-        if (used = data[i].flag[j])
+        if ((used = data[i].flag[j]))
           break;
       }
       if (!used)

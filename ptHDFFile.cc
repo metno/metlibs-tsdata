@@ -37,6 +37,7 @@
 #include <hdf.h>
 #include "ptHDFFile.h"
 #include "ptHDFUtils.h"
+#include "HDFdefs.h"
 #include <string.h>
 #include <math.h>
 #include <float.h>

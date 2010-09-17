@@ -32,7 +32,6 @@
 #define _ptHDFFile_h
 
 #include "ptDataStream.h"
-#include "HDFdefs.h" 
 
 #include <puCtools/porttypes.h>  
 

@@ -34,12 +34,12 @@
 #include "config.h"
 #endif
 
+#include "ptHDFFile.h"
+#include "ptHDFUtils.h"
 #include <hdf.h>
-#include <ptHDFFile.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "ptHDFUtils.h"
 #include <puCtools/puMath.h>
 
 #include <algorithm>

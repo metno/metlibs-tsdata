@@ -54,9 +54,9 @@ private:
   struct AsciiData{
     AsciiMod model;           // current model
     miPosition pos;           // current position
-    set<int> levels;          // unique levels
-    set<int> submodels;       // unique submodels
-    set<miutil::miTime> times;        // unique times
+    std::set<int> levels;          // unique levels
+    std::set<int> submodels;       // unique submodels
+    std::set<miutil::miTime> times;        // unique times
     std::vector<miutil::miString> params;  // all param-names
     std::vector<AsciiLine> pardata;// one time/data line
   };

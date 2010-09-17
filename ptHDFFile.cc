@@ -54,6 +54,7 @@ void out_of_store()
 #endif
 
 using namespace miutil;
+using namespace std;
 
 HDFFile::HDFFile(const miString& fname)
   : DataStream(fname), hasposVG(false)

@@ -38,6 +38,7 @@
 #include "ptMIROS22File.h"
 
 using namespace miutil;
+using namespace std;
 
 // --------------- MIROS22File -------------------------------
 

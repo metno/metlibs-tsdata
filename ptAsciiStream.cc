@@ -42,6 +42,7 @@
 #include <puCtools/puMath.h>
 
 using namespace miutil;
+using namespace std;
 
 AsciiStream::AsciiStream(const miutil::miString& fname)
   : DataStream(fname)

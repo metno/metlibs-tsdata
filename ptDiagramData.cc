@@ -41,6 +41,8 @@
 
 #include <math.h>
 
+using namespace miutil;
+
 ptDiagramData::ptDiagramData() :
 nfetches(0), new_symbolmaker(false)
 {

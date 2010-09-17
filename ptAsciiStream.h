@@ -38,34 +38,32 @@
 #include "ptDataStream.h"
 #include <set>
 
-using namespace std; 
-
 class AsciiStream : public DataStream {
 private:
   struct AsciiLine{
-    miTime time;
+    miutil::miTime time;
     int prog;
     int level;
     int submodel;
-    vector<float> data;
+    std::vector<float> data;
   };
   struct AsciiMod{
-    miString name;
-    miTime run;
+    miutil::miString name;
+    miutil::miTime run;
   };
   struct AsciiData{
     AsciiMod model;           // current model
     miPosition pos;           // current position
     set<int> levels;          // unique levels
     set<int> submodels;       // unique submodels
-    set<miTime> times;        // unique times
-    vector<miString> params;  // all param-names
-    vector<AsciiLine> pardata;// one time/data line
+    set<miutil::miTime> times;        // unique times
+    std::vector<miutil::miString> params;  // all param-names
+    std::vector<AsciiLine> pardata;// one time/data line
   };
 
-  vector<AsciiData> dataList;
-  vector<miPosition> posList;
-  vector<AsciiMod> modList;
+  std::vector<AsciiData> dataList;
+  std::vector<miPosition> posList;
+  std::vector<AsciiMod> modList;
 
   bool _openFile(ErrorFlag*);
 //   bool _readParList(ErrorFlag*);
@@ -81,36 +79,36 @@ private:
   
 
 public:
-  AsciiStream(const miString&);
+  AsciiStream(const miutil::miString&);
   ~AsciiStream();
 
-    int  findStation(const miString& posName); // return index in posList
-  int  findModel(const miString& modelName,
+    int  findStation(const miutil::miString& posName); // return index in posList
+  int  findModel(const miutil::miString& modelName,
 		 const int& modelRun);       // return index in modList
   int  findDataPar(const ParId&);            // return index in parList
   void clean();
   bool openStream(ErrorFlag*);
   bool openStreamForWrite(ErrorFlag*);
   bool readData(const int posIndex, const ParId&,
-		const miTime&, const miTime&,
+		const miutil::miTime&, const miutil::miTime&,
 		ErrorFlag*);
   bool getTimeLine(const int& index,
-		   vector<miTime>& tline, vector<int>& pline,
+		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
   bool putTimeLine(const int& index,
-		   vector<miTime>& tline, vector<int>& pline,
+		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
-  bool putTimeLine(TimeLine& tl, vector<int>& pline,
+  bool putTimeLine(TimeLine& tl, std::vector<int>& pline,
 		   ErrorFlag*);
   bool getOnePar(int,WeatherParameter&,ErrorFlag*);
   bool putOnePar(WeatherParameter&,ErrorFlag*);
-  bool getStations(vector<miPosition>&);
+  bool getStations(std::vector<miPosition>&);
   bool getStationSeq(int, miPosition&);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id,
-		   vector<miString>& vtl)
+		   std::vector<miutil::miString>& vtl)
   {return getModelSeq(idx,mod,run,id);}
   int  putStation(const miPosition& s, //adds station to posList
 		  ErrorFlag*);

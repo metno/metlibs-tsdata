@@ -106,7 +106,7 @@ private:
   Projection                currentGrid;
   Projection                geoGrid;
 
-  vector<rotateParameters>  rot;
+  std::vector<rotateParameters>  rot;
   WdbStream::BoundaryBox    boundaries;
   std::set<std::string>     dataProviders;
   std::string               currentProvider;
@@ -134,23 +134,23 @@ public:
     bool openStream(ErrorFlag*);
 
     bool writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel);    // unimplemented
-    bool getModelSeq(int, Model&, Run&, int&, vector<miString>&);                              // unimplemented
-    bool readData(const int posIndex, const ParId&, const miTime&, const miTime&, ErrorFlag*); // unimplemented
-    bool getTimeLine(const int& index, vector<miTime>& tline, vector<int>& pline, ErrorFlag*); // unimplemented
-    bool putTimeLine(const int& index, vector<miTime>& tline, vector<int>& pline, ErrorFlag*); // unimplemented
-    bool putTimeLine(TimeLine& tl, vector<int>& pline, ErrorFlag*);                            // unimplemented
-    int findStation(const miString&);                      // unimplemented
+    bool getModelSeq(int, Model&, Run&, int&, std::vector<miutil::miString>&);                              // unimplemented
+    bool readData(const int posIndex, const ParId&, const miutil::miTime&, const miutil::miTime&, ErrorFlag*); // unimplemented
+    bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*); // unimplemented
+    bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*); // unimplemented
+    bool putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*);                            // unimplemented
+    int findStation(const miutil::miString&);                      // unimplemented
     int findDataPar(const ParId&);                         // unimplemented
     void clean();                                          // unimplemented
     void cleanParData();                                   // unimplemented
     bool openStreamForWrite(ErrorFlag*);                   // unimplemented
     bool getOnePar(int, WeatherParameter&, ErrorFlag*);    // unimplemented
     bool putOnePar(WeatherParameter&, ErrorFlag*);         // unimplemented
-    bool getStations(vector<miPosition>&);                 // unimplemented
+    bool getStations(std::vector<miPosition>&);                 // unimplemented
     bool getStationSeq(int, miPosition&);                  // unimplemented
     bool getModelSeq(int, Model&, Run&, int&);             // unimplemented
     int  putStation(const miPosition& s, ErrorFlag*);      // unimplemented
-    void getTextLines(const ParId p, vector<miString>& tl);// unimplemented
+    void getTextLines(const ParId p, std::vector<miutil::miString>& tl);// unimplemented
     bool close();                                          // unimplemented
 
 
@@ -180,10 +180,10 @@ public:
   // get the names of all valid parameters of the last query
   std::vector<std::string> getWdbParameterNames() const { return wdbNames; }
 
-  bool readWdbData(float lat, float lon,miString model, const miTime& run,std::vector<ParId>& inpar,
+  bool readWdbData(float lat, float lon,miutil::miString model, const miutil::miTime& run,std::vector<ParId>& inpar,
       std::vector<ParId>& outpar, unsigned long& readtime);
   bool getOnePar(int, WeatherParameter&);
-  bool getTimeLine(const int& index, vector<miTime>& tline, vector<int>& pline);
+  bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline);
 };
 }
 

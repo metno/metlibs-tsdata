@@ -40,8 +40,6 @@
 
 #include <parameter/parameter.h> 
 
-using namespace std; 
-using miutil::SetupParser; 
 class FieldManager;
 class SetupParser;
 
@@ -51,9 +49,9 @@ class SetupParser;
    list of strings with references to original linenumbers and filesources
 */
 struct SetupSection {
-  vector<miString> strlist;
-  vector<int> linenum;
-  vector<int> filenum;
+  std::vector<miutil::miString> strlist;
+  std::vector<int> linenum;
+  std::vector<int> filenum;
 };
 
 
@@ -73,22 +71,22 @@ public:
 		const miTime&, const miTime&,
 		ErrorFlag*);
   bool getTimeLine(const int& index,
-		   vector<miTime>& tline, vector<int>& pline,
+		   std::vector<miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
   bool putTimeLine(const int& index,
-		   vector<miTime>& tline, vector<int>& pline,
+		   std::vector<miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
-  bool putTimeLine(TimeLine& tl, vector<int>& pline,
+  bool putTimeLine(TimeLine& tl, std::vector<int>& pline,
 		   ErrorFlag*);
   bool getOnePar(int,WeatherParameter&,ErrorFlag*);
   bool putOnePar(WeatherParameter&,ErrorFlag*);
-  bool getStations(vector<miPosition>&);
+  bool getStations(std::vector<miPosition>&);
   bool getStationSeq(int, miPosition&);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id,
-		   vector<miString>& vtl);
+		   std::vector<miString>& vtl);
   int  putStation(const miPosition& s, //adds station to posList
 		  ErrorFlag*);
   bool writeData(const int posIndex,      //write data to file
@@ -97,15 +95,15 @@ public:
 		 bool complete_write,
 		 bool write_submodel);
   bool close(); // close file
-  void getTextLines(const ParId p, vector<miString>& tl);
+  void getTextLines(const ParId p, std::vector<miString>& tl);
 private:
 
   FieldManager  *fieldm; // FieldManager handles gribfiles
   SetupParser  *sp; // SetupParser handles all related .grib and other setup files
   miString stFileName;   // Stationlist file name
   miString parmodFileName;  // SMHI's setupfile i Diana for grib parameters and models  
-  vector<miTime> validTime; // times from gribfiles 
-  vector<int> forecastHour; // forecast hours from gribfiles
+  std::vector<miTime> validTime; // times from gribfiles
+  std::vector<int> forecastHour; // forecast hours from gribfiles
   std::map<miString,std::vector<float> > data; //map with a key as  from 
 
   /// Setuptext hashed by Section name
@@ -141,12 +139,12 @@ private:
     int   run[6];  // year,month,day,hour,minute,second
     Model    modelid; // model id
     Run      runid;   // run id
-    vector<miString> textlines;
+    std::vector<miString> textlines;
   };
 
-  vector<GribPar> parList;
-  vector<GribPos> posList;
-  vector<GribMod> modList;
+  std::vector<GribPar> parList;
+  std::vector<GribPos> posList;
+  std::vector<GribMod> modList;
 
   bool _openFile(ErrorFlag*);
   bool _readParList(ErrorFlag*);

@@ -38,11 +38,9 @@
 #include <vector>
 #include <algorithm>
 
-using namespace std;
-
 const unsigned int MAXTIMELINES = 30;
 
-typedef vector<int> ProgLine;
+typedef std::vector<int> ProgLine;
 
 // The timeline class is actually several timelines in one,
 // the idea being that there should be a timeline for each
@@ -103,9 +101,9 @@ struct TimeLineItem {
   {
     return l.time <= r;
   }
-  friend ostream& operator<<(ostream& out, /*const*/TimeLineItem& t)
+  friend std::ostream& operator<<(std::ostream& out, /*const*/TimeLineItem& t)
   {
-    ostringstream s;
+    std::ostringstream s;
     for (unsigned int i = 0; i < MAXTIMELINES; i++)
       s << t.flag[i] << ' ';
     return out << t.time << ' ' << s.str();
@@ -115,7 +113,7 @@ struct TimeLineItem {
 
 class TimeLine {
 private:
-  vector<TimeLineItem> data;
+  std::vector<TimeLineItem> data;
 
 public:
   TimeLine()
@@ -149,7 +147,7 @@ public:
     return data[i].time;
   }
 
-  friend ostream& operator<<(ostream& out, /*const*/TimeLine& tl)
+  friend std::ostream& operator<<(std::ostream& out, /*const*/TimeLine& tl)
   {
     for (unsigned int i = 0; i < tl.data.size(); ++i)
       out << i << ": " << tl.data[i] << '\n';
@@ -170,7 +168,7 @@ public:
   // returns -1 if not found
   int find_equal(const miutil::miTime& tp)
   {
-    vector<TimeLineItem>::iterator where = find(data.begin(), data.end(),
+    std::vector<TimeLineItem>::iterator where = find(data.begin(), data.end(),
         TimeLineItem(tp));
     return (where != data.end() ? where - data.begin() : -1);
   }
@@ -190,7 +188,7 @@ public:
   {
     if (index < 0 || index >= (int)MAXTIMELINES)
       return false;
-    for (vector<TimeLineItem>::iterator i = data.begin(); i < data.end(); ++i) {
+    for (std::vector<TimeLineItem>::iterator i = data.begin(); i < data.end(); ++i) {
       if (tp <= i->time) { // found position
         if (tp == i->time) // does this timepoint exist?
           i->flag[index] = true;
@@ -206,7 +204,7 @@ public:
     return true;
   }
 
-  bool insert(const vector<miutil::miTime>& tl, int index = 0)
+  bool insert(const std::vector<miutil::miTime>& tl, int index = 0)
   {
     bool ok = true;
     for (unsigned int i = 0; i < tl.size(); i++) {
@@ -220,7 +218,7 @@ public:
     data.clear();
   }
 
-  bool Timeline(const int& index, vector<miutil::miTime>& tline)
+  bool Timeline(const int& index, std::vector<miutil::miTime>& tline)
   {
     tline.erase(tline.begin(), tline.end());
     if (index >= 0 && index < (int)MAXTIMELINES) {
@@ -233,13 +231,13 @@ public:
   }
 
   // check if the timeline corresponding to tline already exist
-  int Exist(const vector<miutil::miTime>& tline)
+  int Exist(const std::vector<miutil::miTime>& tline)
   {
     if (tline.size() == 0)
       return -1;
     unsigned int i, j;
     int k;
-    vector<unsigned int> indices;
+    std::vector<unsigned int> indices;
     // check first if all timepoints exists
     for (i = 0; i < tline.size(); i++) {
       if ((k = find_equal(tline[i])) == -1)
@@ -268,7 +266,7 @@ public:
 
   // remove unused timepoints from the timeline
   // if indices>0, only keep these timelines
-  void cleanup(vector<int>& indices)
+  void cleanup(std::vector<int>& indices)
   {
     unsigned int i, j, k;
     if (indices.size() > 0) {
@@ -287,7 +285,7 @@ public:
     }
     // check for unused timepoints
     bool used;
-    vector<miutil::miTime> toberemoved;
+    std::vector<miutil::miTime> toberemoved;
     for (i = 0; i < data.size(); i++) {
       used = false;
       for (j = 0; j < MAXTIMELINES; j++)
@@ -298,7 +296,7 @@ public:
     // remove them
     if (toberemoved.size())
       for (i = 0; i < toberemoved.size(); i++) {
-        for (vector<TimeLineItem>::iterator p = data.begin(); p < data.end(); ++p) {
+        for (std::vector<TimeLineItem>::iterator p = data.begin(); p < data.end(); ++p) {
           if (toberemoved[i] == p->time) {// found position
             data.erase(p);
             break;
@@ -327,7 +325,7 @@ public:
   // adds a new timeline and return index.
   // if this timeline already exist only return index to it.
   // if new timeline, and timeline class is full: return -1
-  int addTimeline(const vector<miutil::miTime>& tl)
+  int addTimeline(const std::vector<miutil::miTime>& tl)
   {
     int k;
     k = Exist(tl);
@@ -350,7 +348,7 @@ public:
       data[i].flag[index] = false;
 
     // remove any unused times
-    vector<int> dummy;
+    std::vector<int> dummy;
     cleanup(dummy);
   }
 

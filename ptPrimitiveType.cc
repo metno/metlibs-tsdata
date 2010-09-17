@@ -31,7 +31,7 @@
 #include "config.h"
 #endif
 
-#include <ptPrimitiveType.h>
+#include "ptPrimitiveType.h"
 
 using namespace std;
 using namespace miutil;

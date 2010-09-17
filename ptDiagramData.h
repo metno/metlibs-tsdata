@@ -51,13 +51,11 @@
 #define MERGE_RAW   0
 #define MERGE_ADAPT 1
 
-using namespace std;
-
 //typedef vector<miString> StringVector;
 
 struct time_interval {
-  miTime from;
-  miTime until;
+  miutil::miTime from;
+  miutil::miTime until;
   int step;
 };
 
@@ -84,7 +82,7 @@ struct datasetparam {
 };
 
 struct parameter_info {
-  miString alias;
+  miutil::miString alias;
   float step;
   float min;
   float max;
@@ -97,13 +95,13 @@ struct parameter_info {
         interpok(true), spreadok(false)
   {
   }
-  parameter_info(miString a, float st, float mi, float ma, float de, bool wr,
+  parameter_info(miutil::miString a, float st, float mi, float ma, float de, bool wr,
       bool in, bool sp) :
     alias(a), step(st), min(mi), max(ma), def(de), wrap(wr), interpok(in),
         spreadok(sp)
   {
   }
-  parameter_info(miString a, float de, bool in, bool sp) :
+  parameter_info(miutil::miString a, float de, bool in, bool sp) :
     alias(a), step(1), min(-10000000), max(10000000), def(de), wrap(false),
         interpok(in), spreadok(sp)
   {
@@ -115,11 +113,11 @@ class ptDiagramData {
 private:
   miPosition station;
   TimeLine timeLine;
-  vector<ProgLine> progLines;
+  std::vector<ProgLine> progLines;
   int nfetches;
-  vector<Range> fetchRange;
-  vector<WeatherParameter> parList;
-  map<miString, vector<miString> > textLines;
+  std::vector<Range> fetchRange;
+  std::vector<WeatherParameter> parList;
+  std::map<miutil::miString, std::vector<miutil::miString> > textLines;
 
   WeatherParameter emptypar;
   symbolMaker wsymbols;
@@ -127,7 +125,7 @@ private:
   SHCinfo shcinfo;
   WindCalc windCalc;
 
-  map<miString, parameter_info> parInfo;
+  std::map<miutil::miString, parameter_info> parInfo;
 
   void cleanDataStructure_();
   void makeWeatherSymbols_(ParId);
@@ -180,8 +178,8 @@ public:
   {
     station = stat;
   }
-  vector<miString> getAllTextLines();
-  vector<miString> getTextLines(const miString modelname);
+  std::vector<miutil::miString> getAllTextLines();
+  std::vector<miutil::miString> getTextLines(const miutil::miString modelname);
 
   void setSHCinfo(const SHCinfo& shc);
   void setWindCalc(const WindCalc& wc);
@@ -201,26 +199,26 @@ public:
   // calculate one wp from existing ones
   void makeOneParameter(const ParId&);
   // calculate wp's from existing ones
-  void makeParameters(const vector<ParId>&, bool doupdate);
+  void makeParameters(const std::vector<ParId>&, bool doupdate);
   // make a wp from scratch, return index
   int makeOneParameter(const ParId&, const int, const int);
   // remove unused timepoints from the timeline
   void cleanUpTimeline();
   // add data by extrapolation
-  void addData(const int&, const miTime&, const int, vector<miTime>&);
+  void addData(const int&, const miutil::miTime&, const int, std::vector<miutil::miTime>&);
   // merge two datasets
-  void mergeData(const int&, const int&, const miTime&, vector<miTime>&,
+  void mergeData(const int&, const int&, const miutil::miTime&, std::vector<miutil::miTime>&,
       const int method = 0);
   // interpolate wp's data to remove gaps of default values
-  void interpData(const int, vector<bool>&);
+  void interpData(const int, std::vector<bool>&);
   // replace wp's data for matching timepoints
-  void replaceData(const int, const int, const vector<miTime> , vector<bool>&);
+  void replaceData(const int, const int, const std::vector<miutil::miTime> , std::vector<bool>&);
   // make datasets with given timepoints; add data from models
-  void makeDatasets(const vector<ParId>& tempmod, const vector<ParId>& destmod,
-      const vector<ParId>& subjmod, const vector<ParId>& mainmod, const vector<
-          ParId>& xtramod, const vector<time_interval>&);
+  void makeDatasets(const std::vector<ParId>& tempmod, const std::vector<ParId>& destmod,
+      const std::vector<ParId>& subjmod, const std::vector<ParId>& mainmod, const std::vector<
+          ParId>& xtramod, const std::vector<time_interval>&);
   // make dataset with given timepoints; add data from models
-  void makeDatasets(const datasetparam&, vector<miTime>&);
+  void makeDatasets(const datasetparam&, std::vector<miutil::miTime>&);
   // make a vector from two components
   bool makeVector(const ParId& comp1, const ParId& comp2, const ParId& result,
       bool polar);
@@ -236,37 +234,37 @@ public:
   bool splitVector(const ParId& vect, const ParId& comp1, const ParId& comp2);
   // fetch parameters specified by inpars
   bool fetchDataFromFile(DataStream*, const miPosition&, const ParId&,
-      const Model&, const miTime&, const miTime&, const vector<ParId>& inpars,
-      int* first, int* last, vector<ParId>& outPars, bool append, ErrorFlag*);
+      const Model&, const miutil::miTime&, const miutil::miTime&, const std::vector<ParId>& inpars,
+      int* first, int* last, std::vector<ParId>& outPars, bool append, ErrorFlag*);
   // fetch all parameters
   bool fetchDataFromFile(DataStream*, const miPosition&, const ParId&,
-      const Model&, const miTime&, const miTime&, int* first, int* last,
-      vector<ParId>& outPars, bool append, ErrorFlag*);
+      const Model&, const miutil::miTime&, const miutil::miTime&, int* first, int* last,
+      std::vector<ParId>& outPars, bool append, ErrorFlag*);
 
 
  bool fetchDataFromWDB(pets::WdbStream*,float lat, float lon,
-     miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars, unsigned long& readtime,miString stationname);
+     miutil::miString model, miutil::miTime run,std::vector<ParId>& inpars, std::vector<ParId>& outpars, unsigned long& readtime,miutil::miString stationname);
 
 
 
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);
-  bool writeAllToFile(DataStream*, const miString&, ErrorFlag*);
+  bool writeAllToFile(DataStream*, const miutil::miString&, ErrorFlag*);
   bool writeWeatherparametersToFile(DataStream*, const miPosition&,
-      const vector<int>& wpindexes, bool append, ErrorFlag*,
+      const std::vector<int>& wpindexes, bool append, ErrorFlag*,
       bool complete_write = true, bool write_submodel = false);
   Range getRange(int i)
   {
     return fetchRange[i];
   }
-  void getTimeLine(vector<miTime>& timePoints);
-  void getTimeLine(const int idx, vector<miTime>& timePoints);
-  void getTimeLine(const miTime& start, const miTime& stop,
-      vector<int>& indexes, vector<miTime>& timePoints, int skip = 1);
-  int addTimeLine(vector<miTime>&); // return index of the new timeLine
+  void getTimeLine(std::vector<miutil::miTime>& timePoints);
+  void getTimeLine(const int idx, std::vector<miutil::miTime>& timePoints);
+  void getTimeLine(const miutil::miTime& start, const miutil::miTime& stop,
+      std::vector<int>& indexes, std::vector<miutil::miTime>& timePoints, int skip = 1);
+  int addTimeLine(std::vector<miutil::miTime>&); // return index of the new timeLine
   void deleteTimeLine(int);
-  bool getProgLine(int index, vector<int>& prog, ErrorFlag*);
-  bool addTimePoint(const miTime& tp, int tlIndex, ErrorFlag*);
+  bool getProgLine(int index, std::vector<int>& prog, ErrorFlag*);
+  bool addTimePoint(const miutil::miTime& tp, int tlIndex, ErrorFlag*);
 
   bool tobeplotted(int i, int j)
   {

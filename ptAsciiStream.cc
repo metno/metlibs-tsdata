@@ -31,7 +31,7 @@
 #include "config.h"
 #endif
 
-#include <ptAsciiStream.h>
+#include "ptAsciiStream.h"
 
 #include <fstream>
 
@@ -41,8 +41,9 @@
 
 #include <puCtools/puMath.h>
 
+using namespace miutil;
 
-AsciiStream::AsciiStream(const miString& fname)
+AsciiStream::AsciiStream(const miutil::miString& fname)
   : DataStream(fname)
 { 
 #ifdef DEBUG

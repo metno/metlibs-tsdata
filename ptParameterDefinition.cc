@@ -34,7 +34,7 @@
 #include "config.h"
 #endif
 
-#include <ptParameterDefinition.h>
+#include "ptParameterDefinition.h"
 
 #include <fstream>
 #include <algorithm>

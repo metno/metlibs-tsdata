@@ -43,12 +43,9 @@
 
 #include <vector>
 
-using namespace std;
-using namespace miutil;
-
 class DataStream {
 public:
-  DataStream(const miString& fname) :
+  DataStream(const miutil::miString& fname) :
     numTimeLines(0), IsOpen(false), InfoIsRead(false), IsCleaned(true),
         DataIsRead(false), TimeLineIsRead(false), npar(0), npos(0), nmod(0)
   {
@@ -59,7 +56,7 @@ public:
   {
   }
 
-  const miString& name()
+  const miutil::miString& name()
   {
     return Name;
   }
@@ -92,7 +89,7 @@ public:
     return nmod;
   }
 
-  virtual int findStation(const miString&)=0; // find station index
+  virtual int findStation(const miutil::miString&)=0; // find station index
   virtual int findDataPar(const ParId&)=0;
   virtual void clean()=0;
   virtual void cleanParData()
@@ -102,16 +99,16 @@ public:
   }
   virtual bool openStream(ErrorFlag*)=0;
   virtual bool openStreamForWrite(ErrorFlag*)=0;
-  virtual bool readData(const int posIndex, const ParId&, const miTime&,
-      const miTime&, ErrorFlag*)=0;
-  virtual bool getTimeLine(const int& index, vector<miTime>& tline,
-      vector<int>& pline, ErrorFlag*)=0;
-  virtual bool putTimeLine(const int& index, vector<miTime>& tline,
-      vector<int>& pline, ErrorFlag*)
+  virtual bool readData(const int posIndex, const ParId&, const miutil::miTime&,
+      const miutil::miTime&, ErrorFlag*)=0;
+  virtual bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline,
+      std::vector<int>& pline, ErrorFlag*)=0;
+  virtual bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline,
+      std::vector<int>& pline, ErrorFlag*)
   {
     return false;
   }
-  virtual bool putTimeLine(TimeLine& tl, vector<int>& pline, ErrorFlag*)
+  virtual bool putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
   {
     return false;
   }
@@ -120,7 +117,7 @@ public:
   {
     return false;
   }
-  virtual bool getStations(vector<miPosition>&)
+  virtual bool getStations(std::vector<miPosition>&)
   {
     return false;
   }
@@ -128,7 +125,7 @@ public:
   virtual bool getModelSeq(int, Model&, // fetch model info
       Run&, int&)=0;
   virtual bool getModelSeq(int, Model&, // fetch model info
-      Run&, int&, vector<miString>&)=0;
+      Run&, int&, std::vector<miutil::miString>&)=0;
   virtual int putStation(const miPosition& s, //adds station to posList
       ErrorFlag*)
   {
@@ -140,21 +137,21 @@ public:
     return false;
   }
   virtual bool close() = 0;
-  virtual void getTextLines(const ParId p, vector<miString>& tl)
+  virtual void getTextLines(const ParId p, std::vector<miutil::miString>& tl)
   {
     tl = textLines;
   }
 protected:
-  vector<miTime> timeLine; // temp. storing variables
-  vector<int> progLine; // "
-  vector<ProgLine> progLines; // List of proglines
+  std::vector<miutil::miTime> timeLine; // temp. storing variables
+  std::vector<int> progLine; // "
+  std::vector<ProgLine> progLines; // List of proglines
   TimeLine timeLines; // Full timeline
   int numTimeLines;
-  vector<WeatherParameter> parameters;
-  vector<miString> textLines;
+  std::vector<WeatherParameter> parameters;
+  std::vector<miutil::miString> textLines;
 
   ParameterDefinition pdef; // parameter and model id mappings
-  miString Name;
+  miutil::miString Name;
   bool IsOpen;
   bool InfoIsRead;
   bool IsCleaned;

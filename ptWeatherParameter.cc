@@ -52,6 +52,8 @@
 #include <math.h>
 #include "ptWeatherParameter.h"
 
+using namespace std;
+
 // constructor
 WeatherParameter::WeatherParameter()
   : polar(false),ndim(0),npoints(0),

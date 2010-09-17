@@ -34,9 +34,6 @@
 #include <puTools/miString.h>
 #include <vector>
 
-using namespace std;
-using namespace miutil;
-
 class SHCdir {
 public:
   float low;
@@ -47,14 +44,14 @@ public:
 class SHClevel {
 public:
   int level;
-  vector<SHCdir> dirs;
+  std::vector<SHCdir> dirs;
   int dirIndex(const float& angle);
 };
 
 class SHCinfo {
 public:
-  miString name;
-  vector<SHClevel> levels;
+  miutil::miString name;
+  std::vector<SHClevel> levels;
   int levelIndex(const int& level);
   int lowLevel();
   int highLevel();
@@ -62,9 +59,9 @@ public:
 
 class SHCcollection {
 public:
-  vector<SHCinfo> list;
+  std::vector<SHCinfo> list;
   SHCinfo total;
-  bool readList(const miString& filename);
+  bool readList(const miutil::miString& filename);
   SHCinfo totalSHC(){return total;}
 };
 

@@ -39,18 +39,16 @@
 
 #include <vector>
 
-using namespace std;
-
 const float UNDEF = FLT_MAX;
 const int MAXDIM = 100;
 
 class WeatherParameter
 {
 protected:
-  vector<float> data;   // the data-points
-  vector<float> cmin;   // data minimum-value
-  vector<float> cmax;   // data maximum-value
-  vector<float> cdelta; // data cmax-cmin
+  std::vector<float> data;   // the data-points
+  std::vector<float> cmin;   // data minimum-value
+  std::vector<float> cmax;   // data maximum-value
+  std::vector<float> cdelta; // data cmax-cmin
   bool polar;           // if ndim > 1, true if in polar coordinates
   ParId id;             // parameter id
   ptPrimitiveType type; // suggested plotElement type
@@ -61,7 +59,7 @@ protected:
 
   bool dirty;           // dirty flags for editing etc.
   bool temp_dirty;
-  vector<bool> modified;// timepoints modified
+  std::vector<bool> modified;// timepoints modified
   bool locked;          // WP "locked" for data-modification
   int starti;           // start index
   int stopi;            // stop index
@@ -102,7 +100,7 @@ public:
   // total size of data-vector
   int size() const { return npoints*ndim;}
   // retrieve a copy of the data-vector
-  virtual const vector<float>& copyDataVector() const
+  virtual const std::vector<float>& copyDataVector() const
     { return data; }
   // calc. data's min, max and delta for one component
   virtual void calcCompProperties(const int icomp);
@@ -145,7 +143,7 @@ public:
   // equalness operator
   bool operator==(const WeatherParameter& rhs);
   // ostream operator
-  friend ostream& operator<<(ostream& out, const WeatherParameter& wp);
+  friend std::ostream& operator<<(std::ostream& out, const WeatherParameter& wp);
 };
 
 

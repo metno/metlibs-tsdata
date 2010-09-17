@@ -35,12 +35,12 @@
 #endif
 
 #include <hdf.h>
-#include <ptHDFFile.h>
-#include <ptGribStream.h>
+#include "ptHDFFile.h"
+#include "ptGribStream.h"
+#include "ptHDFUtils.h"
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include "ptHDFUtils.h"
 #include <puCtools/puMath.h>
 #include <fstream>
 #include <algorithm>
@@ -56,7 +56,8 @@ const miString SectGribParMod= 	"PARAMETERS_MODELS";
 //map<miString,SetupSection> GribStream::sectionm;
 //map<miString,miString>     GribStream::substitutions;
 
-
+using namespace std;
+using miutil::SetupParser;
 
 bool GribStream::_parseGrib()
 {

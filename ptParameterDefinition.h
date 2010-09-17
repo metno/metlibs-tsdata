@@ -38,8 +38,6 @@
 #include <puTools/miString.h>
 #include "ptParameter.h"
 
-using namespace std;
-
 typedef miutil::miString Alias;
 typedef int Level;
 typedef miutil::miString Model;
@@ -77,7 +75,7 @@ struct ParId {
   { return !(lhs==rhs);}
 
 
-  friend ostream& operator<<(ostream& out, const ParId& pi) {
+  friend std::ostream& operator<<(std::ostream& out, const ParId& pi) {
     return out << " alias: " << pi.alias << " level: " << pi.level
 	       << " model: " << pi.model << " run: " << pi.run
 	       << " submodel: " << pi.submodel;
@@ -96,7 +94,7 @@ const ParId ID_UNDEF;
 // values
 class ParameterDefinition {
 private:
-  static vector<Parameter> paramList;
+  static std::vector<Parameter> paramList;
 
 public:
   ParameterDefinition(){}

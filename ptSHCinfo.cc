@@ -33,7 +33,10 @@
 
 #include <fstream>
 #include <iostream>
-#include <ptSHCinfo.h>
+#include "ptSHCinfo.h"
+
+using namespace miutil;
+using namespace std;
 
 int SHClevel::dirIndex(const float& angle)
 {

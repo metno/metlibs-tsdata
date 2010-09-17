@@ -34,9 +34,9 @@
 #include "config.h"
 #endif
 
+#include <hdf.h>
 #include "ptHDFFile.h"
 #include "ptHDFUtils.h"
-#include <hdf.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>

@@ -471,7 +471,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
     }
 
     // EMC
-  } else if (inpid.alias == "EMC") {
+  } else if (inpid.alias == "CMC") {
     id1.alias = "HST";
     id2.alias = "HS";
     id3.alias = "TM01";
@@ -2569,7 +2569,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["CONQ"] = parameter_info("CONQ", 0, false, false);
   parInfo["XWW"] = parameter_info("XWW", 0, false, false);
   parInfo["HEC"] = parameter_info("HEC", 0.01, -15, 50, 0, false, true, false);//
-  parInfo["EMC"] = parameter_info("EMC", 0.01, -15, 50, 0, false, true, false);//
+  parInfo["CMC"] = parameter_info("CMC", 0.01, -15, 50, 0, false, true, false);//
   parInfo["SHC"] = parameter_info("SHC", 0, false, false);
   parInfo["CWW"] = parameter_info("CWW", 0, false, false);
   parInfo["AGR"] = parameter_info("AGR", 0, false, false);

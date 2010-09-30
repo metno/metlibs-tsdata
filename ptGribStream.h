@@ -32,14 +32,22 @@
 #define _ptGribStream_h
 
 #include "ptDataStream.h"
+#include <puCtools/porttypes.h>
+#include <puTools/miSetupParser.h>
+
+#include <parameter/parameter.h>
+
 #include <set>
 #include <map>
 #include <vector>
-#include <puCtools/porttypes.h>  
-#include <puTools/miSetupParser.h>  
 
-#include <parameter/parameter.h> 
+#define MAXLEV 100
 
+<<<<<<< .mine
+using namespace std;
+using miutil::SetupParser;
+=======
+>>>>>>> .r3386
 class FieldManager;
 class SetupParser;
 

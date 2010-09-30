@@ -43,11 +43,10 @@
 
 #define MAXLEV 100
 
-<<<<<<< .mine
 using namespace std;
+using namespace miutil;
 using miutil::SetupParser;
-=======
->>>>>>> .r3386
+
 class FieldManager;
 class SetupParser;
 

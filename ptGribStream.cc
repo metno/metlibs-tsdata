@@ -35,7 +35,6 @@
 #endif
 
 #include <hdf.h>
-<<<<<<< .mine
 
 //#include "ptHDFFile.h"
 #include "ptGribStream.h"
@@ -44,18 +43,9 @@
 #include <puCtools/puMath.h>
 #include <diField/diFieldManager.h>  //added
 
-=======
-#include "ptHDFFile.h"
-#include "ptGribStream.h"
-#include "ptHDFUtils.h"
->>>>>>> .r3386
 #include <string.h>
 #include <math.h>
 #include <float.h>
-<<<<<<< .mine
-=======
-#include <puCtools/puMath.h>
->>>>>>> .r3386
 #include <fstream>
 #include <algorithm>
 #include <list>

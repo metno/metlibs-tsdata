@@ -47,18 +47,6 @@ libtsData_la_LDFLAGS = \
 	$(DIFIELD_LDFLAGS) \
 	$(POSTGRESQL_LDFLAGS) 
 
-libtsData_la_LIBADD = \
-	$(HDF4_LIBS) \
-	$(LOG4CXX_LIBS) \
-	$(MILOGGER_LIBS) \
-	$(PARAMETER_LIBS) \
-	$(PUCTOOLS_LIBS) \
-	$(PUDATATYPES_LIBS) \
-	$(PUMET_LIBS) \
-	$(PUTOOLS_LIBS) \
-	$(DIFIELD_LIBS) \
-	$(POSTGRESQL_LIBS)	
-
 pkg_includedir = ${includedir}/tsData
 
 
@@ -74,9 +62,6 @@ pkg_include_HEADERS = \
 if WITH_GRIBFILE
 libtsData_la_LDFLAGS += \
 	${DIFIELD_CPPFLAGS}
-	
-libtsData_la_LIBADD += \
-	${DIFIELD_LIBS}
 
 libtsData_la_SOURCES += ptGribStream.cc
 pkg_include_HEADERS += ptGribStream.h

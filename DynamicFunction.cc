@@ -1,8 +1,7 @@
 
 #include "DynamicFunction.h"
+#include <cstdlib>
 #include <iostream>
-#include <math.h>
-#include <stdlib.h>
 
 using namespace std;
 

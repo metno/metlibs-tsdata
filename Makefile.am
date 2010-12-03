@@ -59,7 +59,7 @@ pkg_include_HEADERS = \
 	ptTimeLine.h
 
 
-if WITH_GRIBFILE
+if ENABLE_GRIBFILE
 libtsData_la_LDFLAGS += \
 	${DIFIELD_CPPFLAGS}
 

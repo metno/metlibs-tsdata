@@ -19,7 +19,8 @@ libtsData_la_SOURCES = \
 	WdbStream.cc          \
 	WdbQueries.cc         \
 	WdbCacheQuery.cc      \
-	DynamicFunction.cc
+	DynamicFunction.cc    \
+	KlimaStream.cc
 
 libtsData_la_CPPFLAGS = \
 	$(HDF4_CPPFLAGS) \
@@ -31,7 +32,8 @@ libtsData_la_CPPFLAGS = \
 	$(PUMET_CPPFLAGS) \
 	$(PUTOOLS_CPPFLAGS) \
 	$(DIFIELD_CPPFLAGS) \
-	$(POSTGRESQL_CPPFLAGS)
+	$(POSTGRESQL_CPPFLAGS) \
+	$(CURL_CPPFLAGS)
 
 
 libtsData_la_LDFLAGS = \
@@ -45,7 +47,8 @@ libtsData_la_LDFLAGS = \
 	$(PUMET_LDFLAGS) \
 	$(PUTOOLS_LDFLAGS) \
 	$(DIFIELD_LDFLAGS) \
-	$(POSTGRESQL_LDFLAGS) 
+	$(POSTGRESQL_LDFLAGS) \
+	$(CURL_LDFLAGS)
 
 pkg_includedir = ${includedir}/tsData
 

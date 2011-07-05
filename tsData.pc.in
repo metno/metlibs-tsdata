@@ -7,5 +7,5 @@ Name: tsData
 Description: The tsData Library
 Version: @VERSION@
 Requires: @tsData_pc_requires@
-Libs: -L${libdir} -ltsData @HDF4_LDFLAGS@ @HDF4_LIBS@
-Cflags: -I${includedir}  @HDF4_CPPFLAGS@
+Libs: -L${libdir} -ltsData @HDF4_LDFLAGS@ @HDF4_LIBS@ @CURL_LDFLAGS@ @CURL_LIBS@
+Cflags: -I${includedir}  @HDF4_CPPFLAGS@ @CURL_CPPFLAGS@

@@ -31,6 +31,7 @@
 #include "config.h"
 #endif
 
+
 #include <ptDiagramData.h>
 
 #include <puMet/ptStatistics.h>
@@ -44,12 +45,12 @@
 using namespace miutil;
 
 ptDiagramData::ptDiagramData() :
-nfetches(0), new_symbolmaker(false)
+    nfetches(0), new_symbolmaker(false)
 {
 }
 
 ptDiagramData::ptDiagramData(symbolMaker& wsym) :
-      nfetches(0), wsymbols(wsym), new_symbolmaker(false)
+          nfetches(0), wsymbols(wsym), new_symbolmaker(false)
 {
   makedefaultParInfo();
 }
@@ -113,7 +114,7 @@ void ptDiagramData::cleanDataStructure_()
 
 ostream& operator<<(ostream& out, /*const*/ptDiagramData& dd)
 {
-  int i, j;
+  unsigned int i, j;
 
   out << "Printing of ptDiagramData:\n" << "Station : " << dd.station << '\n';
   out << "The timeLine elements :\n";
@@ -151,7 +152,7 @@ ostream& operator<<(ostream& out, /*const*/ptDiagramData& dd)
 bool ptDiagramData::findParameter(const ParId& id, int& index, ErrorFlag* ef)
 {
   index = -1;
-  for (int i = 0; i < parList.size(); i++)
+  for (unsigned int i = 0; i < parList.size(); i++)
     if (id == parList[i].Id())
       index = i;
   *ef = index != -1 ? OK : DD_PARAMETER_NOT_FOUND;
@@ -196,7 +197,7 @@ int ptDiagramData::addParameter(const WeatherParameter& wp)
 // remove weatherparameters matching ParId
 void ptDiagramData::deleteParameter(const ParId& id)
 {
-  for (int i = 0; i < parList.size(); i++)
+  for (unsigned int i = 0; i < parList.size(); i++)
     if (id == parList[i].Id()) {
       vector<WeatherParameter>::iterator p = parList.begin() + i;
       parList.erase(p);
@@ -207,7 +208,7 @@ void ptDiagramData::deleteParameter(const ParId& id)
 // remove weatherparameters not matching ParId
 void ptDiagramData::deleteNegParameter(const ParId& id)
 {
-  for (int i = 0; i < parList.size(); i++)
+  for (unsigned int i = 0; i < parList.size(); i++)
     if (id != parList[i].Id()) {
       vector<WeatherParameter>::iterator p = parList.begin() + i;
       parList.erase(p);
@@ -227,7 +228,7 @@ void ptDiagramData::deleteParameter(const int index)
 // Clear the dirty flags of all weather parameters
 void ptDiagramData::clearDirty()
 {
-  for (int i = 0; i < parList.size(); i++)
+  for (unsigned int i = 0; i < parList.size(); i++)
     parList[i].clearTempDirty();
 }
 
@@ -276,7 +277,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 
   id1 = id2 = id3 = inpid;
 
-//    cerr << "Update one parameter:" << inpid << endl;
+  //    cerr << "Update one parameter:" << inpid << endl;
 
   // Hmax
   if (inpid.alias == "HSX") {
@@ -1301,7 +1302,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       }
     }
 
-/*
+    /*
     // HEC
   } else if (inpid.alias == "HEC") {
     id1.alias = "HST";
@@ -1322,9 +1323,9 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       wp.setId(inpid);
       addParameter(wp);
     }
-*/
+     */
 
-/*
+    /*
     // EMC
   } else if (inpid.alias == "EMC") {
     id1.alias = "HST";
@@ -1361,7 +1362,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       wp.setId(inpid);
       addParameter(wp);
     }
-*/
+     */
 
     // TM01
   } else if (inpid.alias == "TM01") {
@@ -1413,7 +1414,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
           //cerr << "Found COSN + CORA + STSN + STRA" << endl;
           for (j = 0; j < wp.Npoints(); j++) {
             float rr = wp.Data(j, 0) + wp2.Data(j, 0) + wp3.Data(j, 0)
-                    + wp4.Data(j, 0);
+                        + wp4.Data(j, 0);
             wp.setData(j, 0, rr);
           }
 
@@ -2061,7 +2062,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // FX 5,25,50,75,95 decils
   } else if (inpid.alias == "AFX") {
     id1.alias = "FX";
-    int m, i, j;
+    int m=0, i, j;
     for (i = 1; i < 6; i++) {
       id1.submodel = miString(i);
 
@@ -2085,7 +2086,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // FX 5,25,50,75,95 decils
   } else if (inpid.alias == "FXQT-6h") {
     miString name = "fx10-6h_Q";
-    int m, i, j;
+    int m=0, i, j;
     const miString q[5] = { "5", "25", "50", "75", "95" };
     for (i = 0; i < 5; i++) {
       id1.alias = name + q[i];
@@ -2110,7 +2111,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // RR 5,25,50,75,95 decils
   } else if (inpid.alias == "RRQT") {
     miString name = "rr24_Q";
-    int m, i, j;
+    int m=0, i, j;
     const miString q[5] = { "5", "25", "50", "75", "95" };
     for (i = 0; i < 5; i++) {
       id1.alias = name + q[i];
@@ -2135,7 +2136,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // t2m 5,25,50,75,95 decils
   } else if (inpid.alias == "t2mQT") {
     miString name = "t2m_Q";
-    int m, i, j;
+    int m=0, i, j;
     const miString q[5] = { "5", "25", "50", "75", "95" };
     for (i = 0; i < 5; i++) {
       id1.alias = name + q[i];
@@ -2382,11 +2383,11 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 // make named weatherparameters from existing wp's
 void ptDiagramData::makeParameters(const vector<ParId>& pars, bool doupdate)
 {
-  int i, idx;
+  int  idx;
   ErrorFlag error;
 
   // Lets see if can make the missing params
-  for (i = 0; i < pars.size(); i++) {
+  for (unsigned int i = 0; i < pars.size(); i++) {
     if (!findParameter(pars[i], idx, &error))
       makeOneParameter(pars[i]);
     else if (doupdate)
@@ -2398,7 +2399,7 @@ void ptDiagramData::makeParameters(const vector<ParId>& pars, bool doupdate)
 void ptDiagramData::cleanUpTimeline()
 {
   vector<int> usedTimeIdx;
-  int i, j, timeidx;
+  unsigned int i,timeidx;
   bool used;
 
   for (i = 0; i < parList.size(); i++) {
@@ -2452,10 +2453,6 @@ void ptDiagramData::addData(const int& id1, const miTime& until,
 void ptDiagramData::mergeData(const int& id1, const int& id2,
     const miTime& until, vector<miTime>& timeline, const int method)
 {
-  const int num_adaptable = 7;
-  const miString adapt_alias[num_adaptable] = { "TT", "RH", "MSLP", "HST",
-      "HSP", "HSD", "HS" };
-
   WeatherParameter cwp;
   vector<miTime> tl1, tl2;
   int tlid2 = parList[id2].TimeLineIndex();
@@ -2640,12 +2637,10 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
   ParameterDefinition parDef;
   WeatherParameter wp;
   int index = -1;
-  float value = 0;
   int i, j;
   miString alias = pid.alias;
   Parameter pp;
   parameter_info pai;
-  bool dum, dum2;
 
   if (parDef.getParameter(pid.alias, pp)) {
     parameterInfo(pid, pai);
@@ -2669,18 +2664,18 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
 void ptDiagramData::interpData(const int idx, vector<bool>& locked)
 {
   // 1. find undefined timepoints
-  // 2. find neighbouring defined timepoints
-  // 3. if two neighbours: linear interpolation
-  //    only one neighbour: raw copy
+  // 2. find neighboring defined timepoints
+  // 3. if two neighbors: linear interpolation
+  //    only one neighbor: raw copy
   if (idx == -1)
     return; // illegal index
-  int j, l, m;
+  unsigned int j, l, m;
   parameter_info pai;
   //   float dum;
   //   bool interp= false, spread= false;
   ParId pid = parList[idx].Id();
-  int np = parList[idx].Npoints();
-  int nd = parList[idx].Ndim();
+  unsigned int np = parList[idx].Npoints();
+  unsigned int nd = parList[idx].Ndim();
   if (np != locked.size())
     return; // locked-array and data doesn't match
 
@@ -2696,9 +2691,9 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
   for (j = 0; j < np; j++) {
     if (locked[j])
       continue;
-    // left neighbour
+    // left neighbor
     left = j - 1;
-    // find right neighbour
+    // find right neighbor
     for (right = j + 1; right < np; right++)
       if (locked[right])
         break;
@@ -2751,7 +2746,7 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
 void ptDiagramData::replaceData(const int oldidx, const int newidx,
     const vector<miTime> inptline, vector<bool>& locked)
 {
-  int j, k, l;
+ unsigned  int j, k, l;
   vector<miTime> curtline;
   parameter_info pai;
 
@@ -2791,7 +2786,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
 {
   ErrorFlag error;
   WeatherParameter inpwp, curwp;
-  int i, j;
+  unsigned int i, j;
   miTime ct;
   vector<miTime> inptline, curtline;
   vector<bool> locked;
@@ -2947,7 +2942,7 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
 {
   ErrorFlag error;
   WeatherParameter inpwp, curwp;
-  int i, j;
+  unsigned int i, j;
   miTime ct;
   vector<miTime> curtline;
   vector<bool> locked;
@@ -3104,15 +3099,15 @@ bool ptDiagramData::makeSHC_(const int diridx, WeatherParameter& wp,
 
 float ptDiagramData::calcMedianTM01(float hst)
 {
-   // calculate median of TM01 period from wave-height
- float a1 = 0.4211;
- float a2 = 1.1133;
- float a3 = 0.2477;
- float a8 = 0.0;
- float a9 = 1.0;
- float tm01 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
- //cerr << "  .. calculated tm01:" << tm01 << endl;
- return tm01;
+  // calculate median of TM01 period from wave-height
+  float a1 = 0.4211;
+  float a2 = 1.1133;
+  float a3 = 0.2477;
+  float a8 = 0.0;
+  float a9 = 1.0;
+  float tm01 = expf(a1 + a2 * powf(hst, a3)) + a8 * powf(hst, a9);
+  //cerr << "  .. calculated tm01:" << tm01 << endl;
+  return tm01;
 }
 
 float ptDiagramData::calcMedianTM02(float hst)
@@ -3133,8 +3128,6 @@ float ptDiagramData::calcMedianTM02(float hst)
 // hs:  sealevel (stormsurge+tide)
 float ptDiagramData::calcHec_(float hst, float hs)
 {
-  // DeltaH= z(MSLP) - z(LAT)
-  const float deltah = 0.67;
   // H(stormsurge+tide) + DeltaH
   float hlat = hs;// + deltah;
 
@@ -3159,12 +3152,12 @@ float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
   //hs += deltah;
 
   //if (tm01 < 0 || tm02 < 0) {
-    //cerr << "incoming tm01:" <<  tm01 << " tm02:" << tm02;
+  //cerr << "incoming tm01:" <<  tm01 << " tm02:" << tm02;
   // calculate median of tm01 (tm)
   //tm01 = calcMedianTM01(hst);
   // calculate median of tm02 (tz)
   //tm02 = calcMedianTM02(hst);
-    //cerr << "  .. calculated tm01:" << tm01 << " tm02:" << tm02 << endl;
+  //cerr << "  .. calculated tm01:" << tm01 << " tm02:" << tm02 << endl;
   //} else {
   //  //cerr << " tm01 and tm02 FOUND! tm01:" <<  tm01 << " tm02:" << tm02 << endl;
   //}
@@ -3186,9 +3179,10 @@ float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
 
 void ptDiagramData::makeWeatherSymbols_(ParId p)
 {
-  int i, j;
+  unsigned int i;
+  int j;
   int tlidx;
-  const int numparams = 7;
+  const unsigned int numparams = 7;
   ErrorFlag error;
   TimeLine times;
   vector<miTime> termin, tline;
@@ -3199,6 +3193,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
   map<miTime, float> modelIn;
   vector<paramet> modelVec;
   paramet modelUse;
+
 
   float glat;
   WeatherParameter wp;
@@ -3254,7 +3249,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
       int cn = symbols[i].customNumber();
       if (cn == 999) {
         cerr << i << " Symbolmaker Error:" << symbols[i].customName()
-                << " number:" << symbols[i].customNumber() << endl;
+                    << " number:" << symbols[i].customNumber() << endl;
         cn = 0;
       }
       termin.push_back(symbols[i].getTime());
@@ -3275,9 +3270,10 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
 
 void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 {
-  int i, j;
+  unsigned int i;
+  int j;
   int tlidx;
-  const int numparams = 5;
+  const unsigned int numparams = 5;
   ErrorFlag error;
   TimeLine times;
   vector<miTime> termin, tline;
@@ -3904,8 +3900,8 @@ vector<miString> ptDiagramData::getTextLines(const miString modelname)
 
 
 bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
-      miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
-      unsigned long& readtime, miString stationname)
+    miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
+    unsigned long& readtime, miString stationname)
 {
 
   int nread = 0, i;
@@ -3982,6 +3978,87 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
   else
     station.setName( c.str() );
 
+  return true;
+}
+
+bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima, int stationid,
+    vector<ParId>& inpars, vector<ParId>& outpars, miTime fromTime, miTime toTime)
+{
+
+ // int nread = 0,i;
+
+  vector<miTime> tline;
+  vector<int> pline;
+ // int index = 0;
+ // Range range;
+
+
+  klima->clean();
+
+  // find station and read in data block
+  try {
+    if (!klima->readKlimaData(stationid,inpars,outpars,fromTime,toTime))
+      return false;
+  } catch(exception& e) {
+    cerr << "KLIMA::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+
+/*
+  vector<int> newtimelines;
+  int tlIndex;
+  // get all parameters
+  for (i = 0; i < wdb->numParameters(); i++) {
+    WeatherParameter wp;
+    if (wdb->getOnePar(i, wp)) {
+
+      // add timeline and progline
+      if (!wdb->getTimeLine(wp.TimeLineIndex(), tline, pline))
+        break;
+
+      if ((tlIndex = timeLine.Exist(tline)) == -1) {
+        tlIndex = addTimeLine(tline);
+        if (tlIndex == -1) {
+          cerr << "Too many timelines! giving up this parameter" << endl;
+          continue;
+        }
+        progLines.push_back(pline);
+        newtimelines.push_back(tlIndex);
+      }
+      wp.setTimeLineIndex(tlIndex);
+      index = addParameter(wp);
+      ++nread;
+    }
+  }
+
+  // if no parameters are found, delete the timeline we added previously
+  if (nread == 0) {
+    for (i = 0; i < newtimelines.size(); i++) {
+      deleteTimeLine(newtimelines[i]);
+      progLines.pop_back();
+    }
+    return false;
+  }
+
+  // set the index of the first and last elements appended
+  //first = range.first = index + 1 - nread;
+  //last = range.last = index;
+  range.first = index + 1 - nread;
+  range.last = index;
+
+  fetchRange.push_back(range);
+  ++nfetches;
+//
+//  station.setLat(lat);
+//  station.setLon(lon);
+//  miCoordinates c=station.Coordinates();
+//  if(stationname.exists())
+//    station.setName(stationname);
+//  else
+//    station.setName( c.str() );
+
+*/
   return true;
 }
 

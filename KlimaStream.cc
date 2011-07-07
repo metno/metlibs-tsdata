@@ -39,12 +39,11 @@
 
 using namespace std;
 
-
 namespace pets {
 
 static const string STATIONREPORT = "16";
-static const string DATAFORMAT="&ddel=dot&ct=text/plain&nod=line";
-static const string DATAREPORT="17";
+static const string DATAFORMAT = "&ddel=dot&ct=text/plain&nod=line";
+static const string DATAREPORT = "17";
 
 void KlimaStation::clear()
 {
@@ -54,7 +53,24 @@ void KlimaStation::clear()
   stationid = 0;
   wmo = 0;
 }
-;
+
+KlimaParameter & KlimaParameter::operator=(const KlimaParameter & rhs)
+{
+  if (this != &rhs) {
+
+    parid = rhs.parid;
+    klimaName = rhs.klimaName;
+
+    if (transform) {
+      delete transform;
+      transform = NULL;
+    }
+    if (rhs.transform) {
+      transform = new pets::math::DynamicFunction(rhs.transform->text(), rhs.transform->getFactor());
+    }
+  }
+  return *this;
+}
 
 size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
 {
@@ -117,6 +133,7 @@ void KlimaStream::initialize(std::string h, std::map<std::string, std::string> p
     string parameterkey = kpar.parid.alias;
 
     parameterDefinitions[parameterkey] = kpar;
+    knownKlimaParameters[kpar.klimaName] = parameterkey;
 
     if (tokens.size() > 1) {
       parameterDefinitions[parameterkey].transform = new pets::math::DynamicFunction(tokens[1]);
@@ -136,12 +153,11 @@ bool KlimaStream::read(string report, string query)
 
   string url = host + "&re=" + report + query;
 
-  cerr << "READING FROM: " << url <<  endl;
+  cerr << "READING FROM: " << url << endl;
 
   vector<string> lines = getFromHttp(url);
   vector<string> data;
   vector<string> header;
-
 
   if (lines.empty())
     return false;
@@ -170,6 +186,7 @@ bool KlimaStream::setStationsFromResult(vector<string>& data, vector<string>& he
 {
   int NAME = 0, STNR = 0, AMSL = 0, LAT = 0, LON = 0, WMO = 0;
 
+  // Create index
   for (unsigned int i = 0; i < header.size(); i++) {
 
     if (header[i] == "ST_NAME")
@@ -217,50 +234,64 @@ bool KlimaStream::setStationsFromResult(vector<string>& data, vector<string>& he
 
 bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header)
 {
-  cerr << __FUNCTION__ << endl;
+  klimaData.clear();
 
+  // Create index
 
-  data.clear();
+  int STNR, YEAR, MONTH, DAY, TIME;
 
-//  Stnr;Year;Month;Day;Time(NMT);TA
-
-  int STNR,YEAR,MONTH,DAY,TIME;
-
-  for(unsigned int i=0;i<header.size();i++) {
-    cerr << header[i] << endl;
-      if (header[i] == "STNR")
-        STNR = i;
-      else if (header[i] == "YEAR")
-        YEAR = i;
-      else if (header[i] == "MONTH")
-        MONTH = i;
-      else if (header[i] == "DAY")
-        DAY = i;
-      else if (header[i] == "TIME(NMT)")
-        TIME = i;
-      else
-        cerr << "parameter" << endl;
+  for (unsigned int i = 0; i < header.size(); i++) {
+    string key = boost::to_upper_copy(header[i]);
+    cerr << key << endl;
+    if (key == "STNR")
+      STNR = i;
+    else if (key == "YEAR")
+      YEAR = i;
+    else if (key == "MONTH")
+      MONTH = i;
+    else if (key == "DAY")
+      DAY = i;
+    else if (key == "TIME(NMT)")
+      TIME = i;
+    else {
+      if (knownKlimaParameters.count(key)) {
+        string petsName = knownKlimaParameters[key];
+        KlimaData kd;
+        klimaData.push_back(kd);
+        klimaData.back().parameter = parameterDefinitions[petsName];
+        klimaData.back().col = i;
+      }
     }
-/*
-    vector<string> token;
+  }
 
-    for (unsigned int i = 0; i < data.size(); i++) {
-      pets::KlimaStation s;
-      boost::split(token, data[i], boost::algorithm::is_any_of(";"));
-      if (token.size() < header.size())
-        continue;
-      s.name = token[NAME].c_str();
-      s.coordinates.setLat(atof(token[LAT].c_str()));
-      s.coordinates.setLon(atof(token[LON].c_str()));
-      s.amsl = atoi(token[AMSL].c_str());
-      s.distance = 0;
-      s.stationid = atoi(token[STNR].c_str());
-      s.wmo = atoi(token[WMO].c_str());
 
-      stationlist.push_back(s);
-    }
+  // TODO: checking all variables and sorting the data from the data vector
+  // into the klimaData....
 
-*/
+
+
+
+
+  /*
+   vector<string> token;
+
+   for (unsigned int i = 0; i < data.size(); i++) {
+   pets::KlimaStation s;
+   boost::split(token, data[i], boost::algorithm::is_any_of(";"));
+   if (token.size() < header.size())
+   continue;
+   s.name = token[NAME].c_str();
+   s.coordinates.setLat(atof(token[LAT].c_str()));
+   s.coordinates.setLon(atof(token[LON].c_str()));
+   s.amsl = atoi(token[AMSL].c_str());
+   s.distance = 0;
+   s.stationid = atoi(token[STNR].c_str());
+   s.wmo = atoi(token[WMO].c_str());
+
+   stationlist.push_back(s);
+   }
+
+   */
   return true;
 }
 
@@ -280,35 +311,41 @@ pets::KlimaStation KlimaStream::getNearestKlimaStation(miCoordinates& pos)
   list<KlimaStation>::iterator itr = stationlist.begin();
   for (; itr != stationlist.end(); itr++) {
     int dist = itr->coordinates.distance(pos);
-    if (dist < currentStation.distance) {
-      currentStation = *itr;
-      currentStation.distance = dist;
-    }
+    if (dist < maxDistance)
+      if (dist < currentStation.distance) {
+        currentStation = *itr;
+        currentStation.distance = dist;
+      }
   }
+
   return currentStation;
 }
 
-bool KlimaStream::readKlimaData(int stationid, std::vector<ParId>& inpars, std::vector<ParId>& outpars,
+bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& outpars,
     miutil::miTime fromTime, miutil::miTime toTime)
 {
 
-  KlimaData kld;
-  map<string, KlimaData> klimaData;
+  // no place - no data - skipping
+  if (!currentStation.stationid)
+    return false;
 
-  vector<string> klimNames;
+
+  // really ? there is no time for data here - skipping
+  if (fromTime >= toTime)
+    return false;
+
+  vector<string> klimaNames;
 
   map<string, KlimaParameter>::iterator pardef;
 
   // check the parameterlist - what to get and what not....
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;
-    //   cerr << __FUNCTION__ << " alias(inpar) = " << alias << endl;
+    cerr << __FUNCTION__ << " alias(inpar) = " << alias << endl;
     if (parameterDefinitions.count(alias)) {
       pardef = parameterDefinitions.find(alias);
-
-      klimNames.push_back(pardef->second.klimaName);
-      klimaData[alias] = kld;
-      klimaData[alias].parameter = pardef->second;
+      klimaNames.push_back(pardef->second.klimaName);
+      cerr << "Found alias: " << klimaNames.back() << endl;
     } else {
       // we dont know what this is in Klima - skipping
       //  outpars.push_back(inpars[i]);
@@ -317,26 +354,27 @@ bool KlimaStream::readKlimaData(int stationid, std::vector<ParId>& inpars, std::
 
   // get the data .....
 
+  // no data known to pets and the klimadb - skip this
+  if (klimaNames.empty())
+    return false;
+
   // create query ...................
-
-  string query = createDataQuery(klimNames, stationid, fromTime, toTime);
-
-  read(DATAREPORT,query);
-
+  string query = createDataQuery(klimaNames, fromTime, toTime);
 
   /// execute search............
+
+  read(DATAREPORT, query);
 
   // from here its the pets world again ....
 
 
-  return true;
+  // TODO: review the code below! This is from wdbstream, but could be
+  // correct. The data are sorted in setDataFromResult()
 
-  map<string, KlimaData>::iterator kdata = klimaData.begin();
-
-  for (; kdata != klimaData.end(); kdata++) {
+  for (unsigned int i = 0; i < klimaData.size(); i++) {
     WeatherParameter wp;
 
-    ParId pid = kdata->second.parameter.parid;
+    ParId pid = klimaData[i].parameter.parid;
     pid.model = "OBS";
     pid.run = 0;
     pid.level = 0;
@@ -344,17 +382,17 @@ bool KlimaStream::readKlimaData(int stationid, std::vector<ParId>& inpars, std::
     //timeLine= dataList[didx].times;
     TimeLineIsRead = true;
 
-    wp.setDims(kdata->second.times.size(), 1);
+    wp.setDims(klimaData[i].times.size(), 1);
     int ipar = parameters.size();
     int tlindex;
     parameters.push_back(wp); // add it to the vector
-    for (unsigned int j = 0; j < kdata->second.times.size(); j++) {
-      parameters[ipar].setData(j, 0, kdata->second.data[j]);
+    for (unsigned int j = 0; j < klimaData[i].times.size(); j++) {
+      parameters[ipar].setData(j, 0, klimaData[i].data[j]);
     }
 
-    if ((tlindex = timeLines.Exist(kdata->second.times)) == -1) {
+    if ((tlindex = timeLines.Exist(klimaData[i].times)) == -1) {
       tlindex = numTimeLines;
-      timeLines.insert(kdata->second.times, tlindex);
+      timeLines.insert(klimaData[i].times, tlindex);
       numTimeLines++;
     }
 
@@ -370,14 +408,12 @@ bool KlimaStream::readKlimaData(int stationid, std::vector<ParId>& inpars, std::
   return true;
 }
 
-string KlimaStream::createDataQuery(vector<string> klimaNames, int stationid, miutil::miTime fromTime,
-    miutil::miTime toTime)
+string KlimaStream::createDataQuery(vector<string> klimaNames, miutil::miTime fromTime, miutil::miTime toTime)
 {
 
   ostringstream query;
 
   query << DATAFORMAT;
-
 
   for (unsigned int i = 0; i < klimaNames.size(); i++)
     query << "&p=" << klimaNames[i];
@@ -385,7 +421,6 @@ string KlimaStream::createDataQuery(vector<string> klimaNames, int stationid, mi
   query << "&s=" << currentStation.stationid;
   query << "&fd=" << fromTime.format("%d.%m.%Y") << "%" << fromTime.hour();
   query << "&td=" << toTime.format("%d.%m.%Y") << "%" << toTime.hour();
-
 
   return query.str();
 }

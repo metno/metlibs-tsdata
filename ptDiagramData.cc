@@ -3981,7 +3981,7 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
   return true;
 }
 
-bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima, int stationid,
+bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
     vector<ParId>& inpars, vector<ParId>& outpars, miTime fromTime, miTime toTime)
 {
 
@@ -3997,7 +3997,7 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima, int stationid
 
   // find station and read in data block
   try {
-    if (!klima->readKlimaData(stationid,inpars,outpars,fromTime,toTime))
+    if (!klima->readKlimaData(inpars,outpars,fromTime,toTime))
       return false;
   } catch(exception& e) {
     cerr << "KLIMA::READDATA FAILED: " << e.what() << endl;

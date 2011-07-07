@@ -59,6 +59,8 @@ struct KlimaParameter {
   ParId parid;
   std::string klimaName;
   pets::math::DynamicFunction * transform;
+
+
   KlimaParameter() :
     transform(NULL)
   {
@@ -68,13 +70,15 @@ struct KlimaParameter {
     if (transform)
       delete transform;
   }
+  KlimaParameter & operator= (const KlimaParameter & rhs);
 };
 
 struct KlimaData {
   KlimaParameter parameter;
   std::vector<float> data;
   std::vector<miutil::miTime> times;
-  pets::math::DynamicFunction * transform;
+  int col; // column in datafile
+
 };
 
 
@@ -90,10 +94,11 @@ private:
   std::string host;
   std::vector<std::string> getFromHttp(std::string url);
   std::map<std::string,KlimaParameter> parameterDefinitions;
-  std::string createDataQuery(std::vector<std::string> klimaNames, int stationid, miutil::miTime fromTime,
+  std::map<std::string,std::string> knownKlimaParameters;
+  std::string createDataQuery(std::vector<std::string> klimaNames, miutil::miTime fromTime,
       miutil::miTime toTime);
 
-  std::map<std::string,KlimaData> data;
+  std::vector<KlimaData> klimaData;
 
 public:
   KlimaStream(std::string h, std::map<std::string, std::string> pars, int maxd = 50) :
@@ -123,7 +128,7 @@ public:
   bool openStreamForWrite(ErrorFlag*);
   bool readData(const int posIndex, const ParId&, const miutil::miTime&, const miutil::miTime&, ErrorFlag*);
 
-  bool readKlimaData(int stationid, std::vector<ParId>& inpars, std::vector<ParId>& outpars,
+  bool readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& outpars,
       miutil::miTime fromTime, miutil::miTime toTime);
   bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);
   bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);

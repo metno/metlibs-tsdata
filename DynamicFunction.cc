@@ -12,6 +12,7 @@ namespace math {
 
 DynamicFunction::DynamicFunction(string nf, double f) : next(NULL) , factor(f)
 {
+  txt=nf;
   if(!nf.empty()) {
 
     int pos     = nf.find_first_of("+-*/",0);

@@ -240,7 +240,7 @@ public:
       std::vector<ParId>& inpars, std::vector<ParId>& outpars, unsigned long& readtime,
       miutil::miString stationname);
 
-  bool fetchDataFromKlimaDB(pets::KlimaStream* klima, int stationid, vector<ParId>& inpars,
+  bool fetchDataFromKlimaDB(pets::KlimaStream* klima, vector<ParId>& inpars,
       vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
 
 

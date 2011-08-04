@@ -131,9 +131,11 @@ public:
   bool readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& outpars,
       miutil::miTime fromTime, miutil::miTime toTime);
   bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);
+  bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline);
   bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);
   bool putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*);
   bool getOnePar(int, WeatherParameter&, ErrorFlag*);
+  bool getOnePar(int, WeatherParameter&);
   bool putOnePar(WeatherParameter&, ErrorFlag*);
   bool getStations(std::vector<miPosition>&);
   bool getStationSeq(int, miPosition&);

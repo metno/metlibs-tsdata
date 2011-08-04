@@ -4005,16 +4005,17 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
   }
 
 
-/*
+
   vector<int> newtimelines;
-  int tlIndex;
+  int tlIndex,index;
+  int nread=0;
   // get all parameters
-  for (i = 0; i < wdb->numParameters(); i++) {
+  for (signed int i = 0; i < klima->numParameters(); i++) {
     WeatherParameter wp;
-    if (wdb->getOnePar(i, wp)) {
+    if (klima->getOnePar(i, wp)) {
 
       // add timeline and progline
-      if (!wdb->getTimeLine(wp.TimeLineIndex(), tline, pline))
+      if (!klima->getTimeLine(wp.TimeLineIndex(), tline, pline))
         break;
 
       if ((tlIndex = timeLine.Exist(tline)) == -1) {
@@ -4032,33 +4033,18 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
     }
   }
 
-  // if no parameters are found, delete the timeline we added previously
-  if (nread == 0) {
-    for (i = 0; i < newtimelines.size(); i++) {
-      deleteTimeLine(newtimelines[i]);
-      progLines.pop_back();
-    }
-    return false;
-  }
+
 
   // set the index of the first and last elements appended
   //first = range.first = index + 1 - nread;
   //last = range.last = index;
+  Range range;
   range.first = index + 1 - nread;
   range.last = index;
 
   fetchRange.push_back(range);
   ++nfetches;
-//
-//  station.setLat(lat);
-//  station.setLon(lon);
-//  miCoordinates c=station.Coordinates();
-//  if(stationname.exists())
-//    station.setName(stationname);
-//  else
-//    station.setName( c.str() );
 
-*/
   return true;
 }
 

@@ -238,7 +238,7 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
 
   // Create index
 
-  int STNR, YEAR, MONTH, DAY, TIME;
+  int STNR=-1, YEAR=-1, MONTH=-1, DAY=-1, TIME=-1;
 
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
@@ -264,34 +264,45 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
     }
   }
 
+  if(STNR==-1 || YEAR==-1|| MONTH==-1 || DAY==-1 ||  TIME==-1)
+    return false;
 
-  // TODO: checking all variables and sorting the data from the data vector
-  // into the klimaData....
+  if(klimaData.empty())
+    return false;
 
-
-
-
-
-  /*
    vector<string> token;
 
    for (unsigned int i = 0; i < data.size(); i++) {
-   pets::KlimaStation s;
-   boost::split(token, data[i], boost::algorithm::is_any_of(";"));
-   if (token.size() < header.size())
-   continue;
-   s.name = token[NAME].c_str();
-   s.coordinates.setLat(atof(token[LAT].c_str()));
-   s.coordinates.setLon(atof(token[LON].c_str()));
-   s.amsl = atoi(token[AMSL].c_str());
-   s.distance = 0;
-   s.stationid = atoi(token[STNR].c_str());
-   s.wmo = atoi(token[WMO].c_str());
+     boost::split(token, data[i], boost::algorithm::is_any_of(";"));
+     if (token.size() < header.size())
+       continue;
 
-   stationlist.push_back(s);
+ //    int stnr =  atoi(token[STNR].c_str());
+     int year =  atoi(token[YEAR].c_str());
+     int month = atoi(token[MONTH].c_str());
+     int day  =  atoi(token[DAY].c_str());
+     int hour =  atoi(token[TIME].c_str());
+     int dayadd=0;
+     // in the climadatabase midnight is at 24 o'clock which is not iso standard - this is the workaround for that
+     if(hour==24)  {
+       hour=0;
+       dayadd=1;
+     }
+
+     miutil::miTime valid(year,month,day,hour,0,0);
+     if(dayadd)
+       valid.addDay(dayadd);
+
+
+     for(unsigned int k=0; k < klimaData.size();k++) {
+       double value = atof(token[ klimaData[k].col ].c_str());
+       if( klimaData[k].parameter.transform)
+         klimaData[k].parameter.transform->calc(value);
+       klimaData[k].data.push_back(value);
+       klimaData[k].times.push_back(valid);
+     }
    }
 
-   */
   return true;
 }
 
@@ -341,7 +352,7 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
   // check the parameterlist - what to get and what not....
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;
-    cerr << __FUNCTION__ << " alias(inpar) = " << alias << endl;
+
     if (parameterDefinitions.count(alias)) {
       pardef = parameterDefinitions.find(alias);
       klimaNames.push_back(pardef->second.klimaName);
@@ -367,9 +378,6 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
 
   // from here its the pets world again ....
 
-
-  // TODO: review the code below! This is from wdbstream, but could be
-  // correct. The data are sorted in setDataFromResult()
 
   for (unsigned int i = 0; i < klimaData.size(); i++) {
     WeatherParameter wp;
@@ -419,8 +427,8 @@ string KlimaStream::createDataQuery(vector<string> klimaNames, miutil::miTime fr
     query << "&p=" << klimaNames[i];
 
   query << "&s=" << currentStation.stationid;
-  query << "&fd=" << fromTime.format("%d.%m.%Y") << "%" << fromTime.hour();
-  query << "&td=" << toTime.format("%d.%m.%Y") << "%" << toTime.hour();
+  query << "&fd=" << fromTime.format("%d.%m.%Y");
+  query << "&td=" << toTime.format("%d.%m.%Y");
 
   return query.str();
 }
@@ -472,6 +480,19 @@ bool KlimaStream::getTimeLine(const int& index, std::vector<miutil::miTime>& tli
   return false;
 }
 
+bool KlimaStream::getTimeLine(const int& index, vector<miutil::miTime>& tline, vector<int>& pline)
+{
+  if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
+    if (index<progLines.size())
+      pline = progLines[index];
+    return true;
+  }
+  return false;
+}
+
+
+
+
 bool KlimaStream::putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline,
     ErrorFlag*)
 {
@@ -490,6 +511,17 @@ bool KlimaStream::getOnePar(int, WeatherParameter&, ErrorFlag*)
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
 }
+
+
+bool KlimaStream::getOnePar(int i, WeatherParameter& wp)
+{
+  if(i>=0 && i<parameters.size()) {
+    wp=parameters[i];
+    return true;
+  }
+  return false;
+}
+
 
 bool KlimaStream::putOnePar(WeatherParameter&, ErrorFlag*)
 {

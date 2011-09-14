@@ -65,6 +65,9 @@ struct KlimaParameter {
     transform(NULL)
   {
   }
+
+  KlimaParameter(const KlimaParameter&);
+
   ~KlimaParameter()
   {
     if (transform)

@@ -167,6 +167,8 @@ public:
     return parList.size();
   }
 
+  int timeLineLengthInHours()  { return timeLine.lengthInHours(); }
+
   const miPosition& getStation() const
   {
     return station;

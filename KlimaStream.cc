@@ -54,6 +54,11 @@ void KlimaStation::clear()
   wmo = 0;
 }
 
+KlimaParameter::KlimaParameter(const KlimaParameter& rhs) : transform(NULL)
+{
+  *this=rhs;
+}
+
 KlimaParameter & KlimaParameter::operator=(const KlimaParameter & rhs)
 {
   if (this != &rhs) {
@@ -237,12 +242,10 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
   klimaData.clear();
 
   // Create index
-
   int STNR=-1, YEAR=-1, MONTH=-1, DAY=-1, TIME=-1;
 
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
-    cerr << key << endl;
     if (key == "STNR")
       STNR = i;
     else if (key == "YEAR")
@@ -295,9 +298,14 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
 
 
      for(unsigned int k=0; k < klimaData.size();k++) {
-       double value = atof(token[ klimaData[k].col ].c_str());
-       if( klimaData[k].parameter.transform)
+       double value=0;
+       if (token[ klimaData[k].col] == "-") continue;
+
+       value = atof(token[ klimaData[k].col ].c_str());
+
+       if( klimaData[k].parameter.transform) {
          klimaData[k].parameter.transform->calc(value);
+       }
        klimaData[k].data.push_back(value);
        klimaData[k].times.push_back(valid);
      }
@@ -348,20 +356,24 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
   vector<string> klimaNames;
 
   map<string, KlimaParameter>::iterator pardef;
+  vector<ParId> newinpars;
 
   // check the parameterlist - what to get and what not....
+
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;
 
     if (parameterDefinitions.count(alias)) {
       pardef = parameterDefinitions.find(alias);
-      klimaNames.push_back(pardef->second.klimaName);
-      cerr << "Found alias: " << klimaNames.back() << endl;
-    } else {
-      // we dont know what this is in Klima - skipping
-      //  outpars.push_back(inpars[i]);
+      if(pardef->second.klimaName == "COMPUTE")
+        outpars.push_back(inpars[i]);
+      else {
+        klimaNames.push_back(pardef->second.klimaName);
+        newinpars.push_back(inpars[i]);
+      }
     }
   }
+  inpars=newinpars;
 
   // get the data .....
 
@@ -389,6 +401,12 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
 
     //timeLine= dataList[didx].times;
     TimeLineIsRead = true;
+
+    // TODO: check if there is an empty timeline and delete it if necessary
+    int numOfTimes= klimaData[i].times.size();
+
+    if(numOfTimes < 1)
+        continue;
 
     wp.setDims(klimaData[i].times.size(), 1);
     int ipar = parameters.size();

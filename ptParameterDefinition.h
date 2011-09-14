@@ -69,7 +69,8 @@ struct ParId {
   bool wdbCompare(const ParId& lhs);
 
   void reset();
-
+  friend bool operator<(const ParId& lhs, const ParId& rhs);
+  friend bool operator>(const ParId& lhs, const ParId& rhs);
   friend bool operator==(const ParId& lhs, const ParId& rhs);
   friend bool operator!=(const ParId& lhs, const ParId& rhs)
   { return !(lhs==rhs);}

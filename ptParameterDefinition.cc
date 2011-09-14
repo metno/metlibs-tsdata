@@ -59,6 +59,36 @@ bool operator==(const ParId& lhs, const ParId& rhs) {
   return true;
 }
 
+bool operator<(const ParId& lhs, const ParId& rhs)
+{
+  if (lhs.submodel < rhs.submodel)
+    return true;
+  if (lhs.level < rhs.level)
+    return true;
+  if (lhs.run < rhs.run)
+    return true;
+  if (lhs.model < rhs.model)
+    return true;
+  if (lhs.alias < rhs.alias)
+    return true;
+  return false;
+}
+
+bool operator>(const ParId& lhs, const ParId& rhs)
+{
+  if (lhs.submodel > rhs.submodel)
+    return true;
+  if (lhs.level > rhs.level)
+    return true;
+  if (lhs.run > rhs.run)
+    return true;
+  if (lhs.model > rhs.model)
+    return true;
+  if (lhs.alias > rhs.alias)
+    return true;
+  return false;
+}
+
 bool ParId::wdbCompare(const ParId& lhs)
 {
 

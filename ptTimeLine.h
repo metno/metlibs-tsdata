@@ -134,6 +134,11 @@ public:
       return false;
     return data[i].flag[j];
   }
+
+  int lengthInHours() {
+    return ( data.size() > 1 ? miutil::miTime::hourDiff(data.back().time, data.front().time ) : 0 );
+  }
+
   int size()
   {
     return data.size();

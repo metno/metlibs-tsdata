@@ -747,9 +747,9 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
         /*
         if (xws == 2) // Disig
           visi = 3.0;
-        else if (xws == 1) // Tåkebanker
+        else if (xws == 1) // Tï¿½kebanker
           visi = 2.0;
-        else if (xws == -1) // Tåke
+        else if (xws == -1) // Tï¿½ke
           visi = 1.0;
         else
          */
@@ -3679,21 +3679,7 @@ bool ptDiagramData::addTimePoint(const miTime& tp, int tlIndex, ErrorFlag *ef)
   return ok;
 }
 
-// bool ptDiagramData::addTimePoints(const miTime& start, const miTime& stop,
-// 				  int hourInterval, int tlIndex, ErrorFlag* ef)
-// {
-//   if (tlIndex < 0 || tlIndex > MAXTIMELINES-1) {
-//     *ef = DD_RANGE_ERROR;
-//     return false;
-//   }
-//   miTime tp = start;
-//   while (tp <= stop) {
-//     timeLine.insert(tp,tlIndex);
-//     tp.addHour(hourInterval);
-//   }
-//   *ef = OK;
-//   return true;
-// }
+
 
 // make a vector from two components
 bool ptDiagramData::makeVector(const ParId& comp1, const ParId& comp2,
@@ -3904,6 +3890,7 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
     unsigned long& readtime, miString stationname)
 {
 
+
   int nread = 0, i;
 
   vector<miTime> tline;
@@ -3985,13 +3972,8 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
     vector<ParId>& inpars, vector<ParId>& outpars, miTime fromTime, miTime toTime)
 {
 
- // int nread = 0,i;
-
   vector<miTime> tline;
   vector<int> pline;
- // int index = 0;
- // Range range;
-
 
   klima->clean();
 

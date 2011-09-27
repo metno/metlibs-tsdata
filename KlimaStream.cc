@@ -228,7 +228,6 @@ bool KlimaStream::setStationsFromResult(vector<string>& data, vector<string>& he
     s.distance = 0;
     s.stationid = atoi(token[STNR].c_str());
     s.wmo = atoi(token[WMO].c_str());
-
     stationlist.push_back(s);
   }
 
@@ -243,7 +242,6 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
 
   // Create index
   int STNR=-1, YEAR=-1, MONTH=-1, DAY=-1, TIME=-1;
-
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
     if (key == "STNR")
@@ -254,18 +252,18 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
       MONTH = i;
     else if (key == "DAY")
       DAY = i;
-    else if (key == "TIME(NMT)")
+    else if (key == "TIME(UTC)") {
       TIME = i;
-    else {
-      if (knownKlimaParameters.count(key)) {
-        string petsName = knownKlimaParameters[key];
-        KlimaData kd;
-        klimaData.push_back(kd);
-        klimaData.back().parameter = parameterDefinitions[petsName];
-        klimaData.back().col = i;
-      }
+    }
+    if (knownKlimaParameters.count(key)) {
+      string petsName = knownKlimaParameters[key];
+      KlimaData kd;
+      klimaData.push_back(kd);
+      klimaData.back().parameter = parameterDefinitions[petsName];
+      klimaData.back().col = i;
     }
   }
+
 
   if(STNR==-1 || YEAR==-1|| MONTH==-1 || DAY==-1 ||  TIME==-1)
     return false;
@@ -359,7 +357,6 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
   vector<ParId> newinpars;
 
   // check the parameterlist - what to get and what not....
-
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;
 
@@ -376,11 +373,10 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
   inpars=newinpars;
 
   // get the data .....
-
   // no data known to pets and the klimadb - skip this
-  if (klimaNames.empty())
+  if (klimaNames.empty()) {
     return false;
-
+  }
   // create query ...................
   string query = createDataQuery(klimaNames, fromTime, toTime);
 

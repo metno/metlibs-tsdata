@@ -419,7 +419,7 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
   wdbNames.clear();
   map<string, DataFromWdb> datafromWdb;
   // check the parameterlist - what to get and what not....
-  for(int i=0;i<inpar.size();i++) {
+  for(unsigned int i=0;i<inpar.size();i++) {
     ParId parid=inpar[i];
 
     list<transformIdx>::iterator trans=transformIndex.begin();
@@ -445,7 +445,7 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
 
     string wdbName =  trans->wdbName;
     string level   =  trans->level;
-
+    string wdbIndex= wdbName+level;
 
     if(!parametersFound.count(wdbName)) {
       // we know the parameter, but we cannot find it in wdb - skipping
@@ -453,9 +453,9 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
       continue;
     }
 
-    datafromWdb[wdbName]=dwdb;
-    datafromWdb[wdbName].transform= trans->transform;
-    datafromWdb[wdbName].parid = parid;
+    datafromWdb[wdbIndex]=dwdb;
+    datafromWdb[wdbIndex].transform= trans->transform;
+    datafromWdb[wdbIndex].parid = parid;
     wdbNames.push_back(wdbName);
 
 
@@ -489,7 +489,7 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
 
         miTime valid(validstr.c_str());
 
-        datafromWdb[wdbName].setData(valid,value);
+        datafromWdb[wdbIndex].setData(valid,value);
       }
     } catch (exception& e) {
       cerr <<  endl << "No Data " << e.what() << endl;

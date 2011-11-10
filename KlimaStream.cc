@@ -241,7 +241,7 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
   klimaData.clear();
 
   // Create index
-  int STNR=-1, YEAR=-1, MONTH=-1, DAY=-1, TIME=-1;
+  int STNR=-1, YEAR=-1, MONTH=-1, DAY=-1, TIME=-1, DD=-1,FF=-1;
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
     if (key == "STNR")
@@ -261,6 +261,10 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
       klimaData.push_back(kd);
       klimaData.back().parameter = parameterDefinitions[petsName];
       klimaData.back().col = i;
+      if(key=="DD")
+        DD=i;
+      else if(key=="FF")
+        FF=i;
     }
   }
 
@@ -297,7 +301,13 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
 
      for(unsigned int k=0; k < klimaData.size();k++) {
        double value=0;
-       if (token[ klimaData[k].col] == "-") continue;
+       int col = klimaData[k].col;
+
+       // drop empty lines
+       if (token[ col ] == "-") continue;
+       // you need FF and DD to present vind
+       if(col==DD && token[FF] == "-" ) continue;
+       if(col==FF && token[DD] == "-" ) continue;
 
        value = atof(token[ klimaData[k].col ].c_str());
 

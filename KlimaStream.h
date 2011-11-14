@@ -114,6 +114,10 @@ public:
   }
   void initialize(std::string h, std::map<std::string, std::string> pars, int maxd = 50);
   bool read(std::string report_, std::string query = "");
+  // see documentation for flaglevel
+  // at http://metklim.met.no/klima/userservices/urlinterface/brukerdok#observasjoner
+  // default=5
+  void setFlagLevel(int newFlagLevel);
   bool isInitialized() const
   {
     return initialized;

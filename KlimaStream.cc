@@ -44,6 +44,15 @@ namespace pets {
 static const string STATIONREPORT = "16";
 static const string DATAFORMAT = "&ddel=dot&ct=text/plain&nod=line";
 static const string DATAREPORT = "17";
+static int          FLAGLEVEL  = 5;
+
+void  KlimaStream::setFlagLevel(int newFlagLevel)
+{
+  if(newFlagLevel < 0 || newFlagLevel > 7)
+    return;
+  FLAGLEVEL=newFlagLevel;
+}
+
 
 void KlimaStation::clear()
 {
@@ -304,17 +313,17 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
        int col = klimaData[k].col;
 
        // drop empty lines
-       if (token[ col ] == "-") continue;
-       // you need FF and DD to present vind
+       if (token[ col ] == "-" | token[ col ] =="x" ) continue;
 
+       // you need FF and DD to present vind
        if(col==DD )
          if(FF >= 0)
-           if(token[FF] == "-" )
+           if(token[FF] == "-" | token[FF] =="x" )
              continue;
 
        if(col == FF )
          if(DD >= 0 )
-           if ( token[DD] == "-" )
+           if ( token[DD] == "-" |  token[DD] == "x" )
                continue;
 
        value = atof(token[ klimaData[k].col ].c_str());
@@ -458,6 +467,7 @@ string KlimaStream::createDataQuery(vector<string> klimaNames, miutil::miTime fr
   for (unsigned int i = 0; i < klimaNames.size(); i++)
     query << "&p=" << klimaNames[i];
 
+  query << "&qa="<<FLAGLEVEL;
   query << "&s=" << currentStation.stationid;
   query << "&fd=" << fromTime.format("%d.%m.%Y");
   query << "&td=" << toTime.format("%d.%m.%Y");

@@ -306,8 +306,16 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
        // drop empty lines
        if (token[ col ] == "-") continue;
        // you need FF and DD to present vind
-       if(col==DD && token[FF] == "-" ) continue;
-       if(col==FF && token[DD] == "-" ) continue;
+
+       if(col==DD )
+         if(FF >= 0)
+           if(token[FF] == "-" )
+             continue;
+
+       if(col == FF )
+         if(DD >= 0 )
+           if ( token[DD] == "-" )
+               continue;
 
        value = atof(token[ klimaData[k].col ].c_str());
 

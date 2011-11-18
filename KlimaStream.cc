@@ -313,17 +313,17 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
        int col = klimaData[k].col;
 
        // drop empty lines
-       if (token[ col ] == "-" | token[ col ] =="x" ) continue;
+       if (token[ col ] == "-" || token[ col ] =="x" ) continue;
 
        // you need FF and DD to present vind
        if(col==DD )
          if(FF >= 0)
-           if(token[FF] == "-" | token[FF] =="x" )
+           if(token[FF] == "-" || token[FF] =="x" )
              continue;
 
        if(col == FF )
          if(DD >= 0 )
-           if ( token[DD] == "-" |  token[DD] == "x" )
+           if ( token[DD] == "-" ||  token[DD] == "x" )
                continue;
 
        value = atof(token[ klimaData[k].col ].c_str());

@@ -2526,7 +2526,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["VVQ"] = parameter_info("VVQ", 9, false, false);
   parInfo["WW"] = parameter_info("WW", 0, false, false);
   parInfo["MSLP"] = parameter_info("MSLP", 1000, true, false);
-  parInfo["HST"] = parameter_info("HST", 0.1, 0, 15, 0, false, true, false); //
+  parInfo["HST"] = parameter_info("HST", 0.1, 0, 100, 0, false, true, false); //
   parInfo["HSX"] = parameter_info("HSX", 0, true, false);
   parInfo["HSTX"] = parameter_info("HSTX", 0, true, false);
   parInfo["HSTE"] = parameter_info("HSTE", 0, true, false);

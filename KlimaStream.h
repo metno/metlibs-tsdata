@@ -32,11 +32,14 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <puDatatypes/miCoordinates.h>
 #include "ptDataStream.h"
 #include "DynamicFunction.h"
 
 namespace pets {
+
+enum KlimaDatatype { klima_observation, klima_monthly_normal };
 
 struct KlimaStation {
   std::string name;
@@ -59,7 +62,7 @@ struct KlimaParameter {
   ParId parid;
   std::string klimaName;
   pets::math::DynamicFunction * transform;
-
+  KlimaDatatype type;
 
   KlimaParameter() :
     transform(NULL)
@@ -93,27 +96,35 @@ private:
   std::list<KlimaStation> stationlist;
   bool setDataFromResult(std::vector<std::string> & data, std::vector<std::string>& header);
   bool setStationsFromResult(std::vector<std::string>& data, std::vector<std::string>& header);
+  bool setNormalFromResult(std::vector<std::string>& data, std::vector<std::string>& header, miutil::miTime from, miutil::miTime to);
   int maxDistance;
   std::string host;
   std::vector<std::string> getFromHttp(std::string url);
   std::map<std::string,KlimaParameter> parameterDefinitions;
   std::map<std::string,std::string> knownKlimaParameters;
   std::string createDataQuery(std::vector<std::string> klimaNames, miutil::miTime fromTime,
-      miutil::miTime toTime);
+      miutil::miTime toTime, pets::KlimaDatatype type);
+
+  std::vector<miutil::miTime>  createMonthlyTimeline( miutil::miTime from, miutil::miTime to);
+  std::map<int, std::vector<miutil::miTime> > createTimelines( miutil::miTime from, miutil::miTime to);
 
   std::vector<KlimaData> klimaData;
-
+  std::vector<std::string> allParameters;
+  std::set<std::string> blacklist;
 public:
-  KlimaStream(std::string h, std::map<std::string, std::string> pars, int maxd = 50) :
+  KlimaStream(std::string h, std::map<std::string, std::string> pars, std::map<std::string, std::string> norms, int maxd = 50) :
     DataStream("KLIMA"), initialized(false)
   {
-    initialize(h, pars, maxd);
+    initialize(h, pars, norms, maxd);
   }
   ~KlimaStream()
   {
   }
-  void initialize(std::string h, std::map<std::string, std::string> pars, int maxd = 50);
-  bool read(std::string report_, std::string query = "");
+  void initialize(std::string h, std::map<std::string, std::string> pars, std::map<std::string, std::string> norms, int maxd = 50);
+
+  void setSingleParameterDefinition(std::string key, std::string token, pets::KlimaDatatype type);
+
+  bool read(std::string report_, std::string query = "", miutil::miTime from = miutil::miTime::nowTime(), miutil::miTime to =miutil::miTime::nowTime() );
   // see documentation for flaglevel
   // at http://metklim.met.no/klima/userservices/urlinterface/brukerdok#observasjoner
   // default=5
@@ -124,6 +135,13 @@ public:
   }
 
   pets::KlimaStation getNearestKlimaStation(miCoordinates& pos);
+
+
+  void setBlacklist(std::set<std::string> bl);
+  std::set<std::string> getBlacklist();
+  std::vector<std::string> getAllParameters();
+  std::string getObservationBlacklistAsString();
+  void setObservationBlacklistFromString(std::string blist);
 
   /// Inherited from DataStream ---------------------------
 

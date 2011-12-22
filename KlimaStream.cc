@@ -26,7 +26,6 @@
  */
 
 //"http://klapp.oslo.dnmi.no/metnopub/production/metno?ct=text/plain&del=semicolon"
-
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -41,18 +40,20 @@ using namespace std;
 
 namespace pets {
 
+static const int EXPECTEDFORECASTLENGTH = 2; // look 2 days into the future - for monthly normals only
+static const string MONTHNORMALREPORT = "28";
 static const string STATIONREPORT = "16";
 static const string DATAFORMAT = "&ddel=dot&ct=text/plain&nod=line";
 static const string DATAREPORT = "17";
-static int          FLAGLEVEL  = 5;
+static const int UNDEFINED_COL= 999;
+static int FLAGLEVEL = 5;
 
-void  KlimaStream::setFlagLevel(int newFlagLevel)
+void KlimaStream::setFlagLevel(int newFlagLevel)
 {
-  if(newFlagLevel < 0 || newFlagLevel > 7)
+  if (newFlagLevel < 0 || newFlagLevel > 7)
     return;
-  FLAGLEVEL=newFlagLevel;
+  FLAGLEVEL = newFlagLevel;
 }
-
 
 void KlimaStation::clear()
 {
@@ -63,9 +64,10 @@ void KlimaStation::clear()
   wmo = 0;
 }
 
-KlimaParameter::KlimaParameter(const KlimaParameter& rhs) : transform(NULL)
+KlimaParameter::KlimaParameter(const KlimaParameter& rhs) :
+    transform(NULL)
 {
-  *this=rhs;
+  *this = rhs;
 }
 
 KlimaParameter & KlimaParameter::operator=(const KlimaParameter & rhs)
@@ -74,13 +76,15 @@ KlimaParameter & KlimaParameter::operator=(const KlimaParameter & rhs)
 
     parid = rhs.parid;
     klimaName = rhs.klimaName;
+    type = rhs.type;
 
     if (transform) {
       delete transform;
       transform = NULL;
     }
     if (rhs.transform) {
-      transform = new pets::math::DynamicFunction(rhs.transform->text(), rhs.transform->getFactor());
+      transform = new pets::math::DynamicFunction(rhs.transform->text(),
+          rhs.transform->getFactor());
     }
   }
   return *this;
@@ -121,44 +125,109 @@ std::string pets::KlimaStation::description()
   return ost.str();
 }
 
-void KlimaStream::initialize(std::string h, std::map<std::string, std::string> pars, int max)
+void KlimaStream::setBlacklist(std::set<std::string> bl)
+{
+  set<string>::iterator itr = bl.begin();
+  blacklist.clear();
+  for (; itr != bl.end(); itr++) {
+    if (knownKlimaParameters.count(*itr))
+      blacklist.insert(knownKlimaParameters[*itr]);
+  }
+}
+
+std::set<std::string> KlimaStream::getBlacklist()
+{
+  set<string>::iterator itr = blacklist.begin();
+  set<string> blacklistAsKlimaNames;
+  for (; itr != blacklist.end(); itr++) {
+    if (parameterDefinitions.count(*itr)) {
+      blacklistAsKlimaNames.insert(parameterDefinitions[*itr].klimaName);
+    }
+  }
+  return blacklistAsKlimaNames;
+}
+
+std::vector<std::string> KlimaStream::getAllParameters()
+{
+  return allParameters;
+}
+
+std::string KlimaStream::getObservationBlacklistAsString()
+{
+  ostringstream ost;
+  set<string>::iterator itr = blacklist.begin();
+  string delimiter = "";
+  for (; itr != blacklist.end(); itr++) {
+    ost << delimiter << *itr;
+    delimiter = ":";
+  }
+  return ost.str();
+
+}
+
+void KlimaStream::setObservationBlacklistFromString(std::string blist)
+{
+  set<string> tokens;
+  boost::split(tokens, blist, boost::algorithm::is_any_of(":"));
+  setBlacklist(tokens);
+}
+
+void KlimaStream::initialize(std::string h,
+    std::map<std::string, std::string> pars,
+    std::map<std::string, std::string> norms, int max)
 {
   host = h;
   maxDistance = max;
   currentStation.clear();
 
-  map<string, string>::iterator itr = pars.begin();
-  for (; itr != pars.end(); itr++) {
+  map<string, string>::iterator par_itr = pars.begin();
+  map<string, string>::iterator norm_itr = norms.begin();
 
-    string key = itr->first;
-    string token = itr->second;
+  for (; par_itr != pars.end(); par_itr++) {
+    setSingleParameterDefinition(par_itr->first, par_itr->second,
+        pets::klima_observation);
+  }
 
-    if (token.empty())
-      continue;
-
-    vector<string> tokens;
-
-    boost::split(tokens, token, boost::algorithm::is_any_of(":"));
-
-    KlimaParameter kpar;
-    kpar.klimaName = tokens[0];
-    kpar.parid.setFromString(key);
-    boost::algorithm::trim(kpar.klimaName);
-    string parameterkey = kpar.parid.alias;
-
-    parameterDefinitions[parameterkey] = kpar;
-    knownKlimaParameters[kpar.klimaName] = parameterkey;
-
-    if (tokens.size() > 1) {
-      parameterDefinitions[parameterkey].transform = new pets::math::DynamicFunction(tokens[1]);
-    }
+  for (; norm_itr != norms.end(); norm_itr++) {
+    setSingleParameterDefinition(norm_itr->first, norm_itr->second,
+        pets::klima_monthly_normal);
   }
 
   initialized = true;
   initialized = read(STATIONREPORT);
 }
 
-bool KlimaStream::read(string report, string query)
+void KlimaStream::setSingleParameterDefinition(string key, string token,
+    pets::KlimaDatatype type)
+{
+  if (token.empty())
+    return;
+
+  vector<string> tokens;
+  boost::split(tokens, token, boost::algorithm::is_any_of(":"));
+
+  KlimaParameter kpar;
+  kpar.klimaName = tokens[0];
+  kpar.parid.setFromString(key);
+  kpar.type = type;
+  boost::algorithm::trim(kpar.klimaName);
+  string parameterkey = kpar.parid.alias;
+
+  parameterDefinitions[parameterkey] = kpar;
+  knownKlimaParameters[kpar.klimaName] = parameterkey;
+
+  if (kpar.klimaName != "COMPUTE")
+    allParameters.push_back(kpar.klimaName);
+
+  if (tokens.size() > 1) {
+    parameterDefinitions[parameterkey].transform =
+        new pets::math::DynamicFunction(tokens[1]);
+  }
+
+}
+
+bool KlimaStream::read(string report, string query, miutil::miTime from,
+    miutil::miTime to)
 {
   if (host.empty())
     return false;
@@ -190,13 +259,17 @@ bool KlimaStream::read(string report, string query)
 
   if (report == STATIONREPORT) {
     return setStationsFromResult(data, header);
-  } else
+  } else if (report == MONTHNORMALREPORT) {
+    return setNormalFromResult(data, header, from, to);
+  } else {
     return setDataFromResult(data, header);
+  }
 
   return false;
 }
 
-bool KlimaStream::setStationsFromResult(vector<string>& data, vector<string>& header)
+bool KlimaStream::setStationsFromResult(vector<string>& data,
+    vector<string>& header)
 {
   int NAME = 0, STNR = 0, AMSL = 0, LAT = 0, LON = 0, WMO = 0;
 
@@ -245,12 +318,138 @@ bool KlimaStream::setStationsFromResult(vector<string>& data, vector<string>& he
   return npos != 0;
 }
 
-bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header)
+vector<miutil::miTime>  KlimaStream::createMonthlyTimeline( miutil::miTime from, miutil::miTime to)
 {
-  klimaData.clear();
+  vector<miutil::miTime> monthlyTimeline;
+  while (from <= to ) {
+    monthlyTimeline.push_back(from);
+    from.addHour(1);
+  }
+  return monthlyTimeline;
+}
+
+map<int, vector<miutil::miTime> > KlimaStream::createTimelines( miutil::miTime from, miutil::miTime to)
+{
+  map<int, vector<miutil::miTime> > timeline;
+
+  miutil::miTime breakpoint=from;
+  int current_month = from.month();
+  int to_month   = to.month();
+
+  cerr << "current_month: " << current_month << "  to_month:  " <<   to_month << endl;
+
+  // all in one month
+  if(current_month == to_month) {
+    timeline[current_month] = createMonthlyTimeline( from, to);
+    return timeline;
+  }
+  // first month from "from" to end of month
+  breakpoint.addDay( breakpoint.date().daysInMonth() - breakpoint.day());
+  timeline[current_month] = createMonthlyTimeline( from, breakpoint);
+
+  breakpoint.addDay(1);
+  current_month = breakpoint.month();
+  // more than two month - circle until you find the last month
+
+  while (current_month != to_month) {
+    from = breakpoint;
+    breakpoint.addDay(breakpoint.date().daysInMonth() - 1);
+    timeline[current_month] = createMonthlyTimeline( from, breakpoint);
+    breakpoint.addDay(1);
+    current_month = breakpoint.month();
+  }
+
+  timeline[current_month] = createMonthlyTimeline( breakpoint, to);
+
+  return timeline;
+}
+
+bool KlimaStream::setNormalFromResult(vector<string>& data,
+    vector<string>& header, miutil::miTime from, miutil::miTime to)
+{
+  to.addDay(EXPECTEDFORECASTLENGTH);
+
+  from.setTime(from.date(), miutil::miClock("00:00:00"));
+  to.setTime(to.date(), miutil::miClock("00:00:00"));
+
+
 
   // Create index
-  int STNR=-1, YEAR=-1, MONTH=-1, DAY=-1, TIME=-1, DD=-1,FF=-1;
+  int STNR = -1, MONTH = -1;
+  for (unsigned int i = 0; i < header.size(); i++) {
+    string key = boost::to_upper_copy(header[i]);
+    if (key == "STNR")
+      STNR = i;
+    else if (key == "MONTH")
+      MONTH = i;
+
+
+    if (knownKlimaParameters.count(key)) {
+      string petsName = knownKlimaParameters[key];
+      KlimaData kd;
+      klimaData.push_back(kd);
+      klimaData.back().parameter = parameterDefinitions[petsName];
+      klimaData.back().col = i;
+    }
+  }
+
+  if (STNR == -1 || MONTH == -1)
+    return false;
+
+  if (klimaData.empty())
+    return false;
+
+  map<int, vector<miutil::miTime> > timelines = createTimelines(from, to);
+
+  vector<string> token;
+
+  for (unsigned int i = 0; i < data.size(); i++) {
+    boost::split(token, data[i], boost::algorithm::is_any_of(";"));
+    if (token.size() < header.size())
+      continue;
+
+    //    int stnr =  atoi(token[STNR].c_str());
+    int month = atoi(token[MONTH].c_str()) - 1;
+    vector<miutil::miTime> currentTimeLine = timelines[month];
+
+    for (unsigned int k = 0; k < klimaData.size(); k++) {
+      double value = 0;
+      int col = klimaData[k].col;
+
+      // this is a value from another query
+      if(col == UNDEFINED_COL )
+        continue;
+
+      // drop empty lines
+      if (token[col] == "-" || token[col] == "x")
+        continue;
+
+      value = atof(token[klimaData[k].col].c_str());
+
+      if (klimaData[k].parameter.transform) {
+        klimaData[k].parameter.transform->calc(value);
+      }
+      for (unsigned int tim = 0; tim < currentTimeLine.size(); tim++) {
+        klimaData[k].data.push_back(value);
+        klimaData[k].times.push_back(currentTimeLine[tim]);
+      }
+    }
+  }
+
+  for (unsigned int k = 0; k < klimaData.size(); k++) {
+     // we need the columns for the next query - so we set them to nothing
+     klimaData[k].col = UNDEFINED_COL;
+   }
+
+  return true;
+}
+
+bool KlimaStream::setDataFromResult(vector<string>& data,
+    vector<string>& header)
+{
+
+  // Create index
+  int STNR = -1, YEAR = -1, MONTH = -1, DAY = -1, TIME = -1, DD = -1, FF = -1;
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
     if (key == "STNR")
@@ -270,71 +469,78 @@ bool KlimaStream::setDataFromResult(vector<string>& data, vector<string>& header
       klimaData.push_back(kd);
       klimaData.back().parameter = parameterDefinitions[petsName];
       klimaData.back().col = i;
-      if(key=="DD")
-        DD=i;
-      else if(key=="FF")
-        FF=i;
+      if (key == "DD")
+        DD = i;
+      else if (key == "FF")
+        FF = i;
     }
   }
 
-
-  if(STNR==-1 || YEAR==-1|| MONTH==-1 || DAY==-1 ||  TIME==-1)
+  if (STNR == -1 || YEAR == -1 || MONTH == -1 || DAY == -1 || TIME == -1)
     return false;
 
-  if(klimaData.empty())
+  if (klimaData.empty())
     return false;
 
-   vector<string> token;
+  vector<string> token;
 
-   for (unsigned int i = 0; i < data.size(); i++) {
-     boost::split(token, data[i], boost::algorithm::is_any_of(";"));
-     if (token.size() < header.size())
-       continue;
+  for (unsigned int i = 0; i < data.size(); i++) {
+    boost::split(token, data[i], boost::algorithm::is_any_of(";"));
+    if (token.size() < header.size())
+      continue;
 
- //    int stnr =  atoi(token[STNR].c_str());
-     int year =  atoi(token[YEAR].c_str());
-     int month = atoi(token[MONTH].c_str());
-     int day  =  atoi(token[DAY].c_str());
-     int hour =  atoi(token[TIME].c_str());
-     int dayadd=0;
-     // in the climadatabase midnight is at 24 o'clock which is not iso standard - this is the workaround for that
-     if(hour==24)  {
-       hour=0;
-       dayadd=1;
-     }
+    //    int stnr =  atoi(token[STNR].c_str());
+    int year = atoi(token[YEAR].c_str());
+    int month = atoi(token[MONTH].c_str());
+    int day = atoi(token[DAY].c_str());
+    int hour = atoi(token[TIME].c_str());
+    int dayadd = 0;
+    // in the climadatabase midnight is at 24 o'clock which is not iso standard - this is the workaround for that
+    if (hour == 24) {
+      hour = 0;
+      dayadd = 1;
+    }
 
-     miutil::miTime valid(year,month,day,hour,0,0);
-     if(dayadd)
-       valid.addDay(dayadd);
+    miutil::miTime valid(year, month, day, hour, 0, 0);
+    if (dayadd)
+      valid.addDay(dayadd);
 
+    for (unsigned int k = 0; k < klimaData.size(); k++) {
+      double value = 0;
+      int col = klimaData[k].col;
 
-     for(unsigned int k=0; k < klimaData.size();k++) {
-       double value=0;
-       int col = klimaData[k].col;
+      // this is a value from another query
+      if(col == UNDEFINED_COL )
+        continue;
 
-       // drop empty lines
-       if (token[ col ] == "-" || token[ col ] =="x" ) continue;
+      // drop empty lines
+      if (token[col] == "-" || token[col] == "x")
+        continue;
 
-       // you need FF and DD to present vind
-       if(col==DD )
-         if(FF >= 0)
-           if(token[FF] == "-" || token[FF] =="x" )
-             continue;
+      // you need FF and DD to present vind
+      if (col == DD)
+        if (FF >= 0)
+          if (token[FF] == "-" || token[FF] == "x")
+            continue;
 
-       if(col == FF )
-         if(DD >= 0 )
-           if ( token[DD] == "-" ||  token[DD] == "x" )
-               continue;
+      if (col == FF)
+        if (DD >= 0)
+          if (token[DD] == "-" || token[DD] == "x")
+            continue;
 
-       value = atof(token[ klimaData[k].col ].c_str());
+      value = atof(token[klimaData[k].col].c_str());
 
-       if( klimaData[k].parameter.transform) {
-         klimaData[k].parameter.transform->calc(value);
-       }
-       klimaData[k].data.push_back(value);
-       klimaData[k].times.push_back(valid);
-     }
-   }
+      if (klimaData[k].parameter.transform) {
+        klimaData[k].parameter.transform->calc(value);
+      }
+      klimaData[k].data.push_back(value);
+      klimaData[k].times.push_back(valid);
+    }
+  }
+  for (unsigned int k = 0; k < klimaData.size(); k++) {
+    // we need the columns for the next query - so we set them to nothing
+    klimaData[k].col = UNDEFINED_COL;
+  }
 
   return true;
 }
@@ -365,20 +571,20 @@ pets::KlimaStation KlimaStream::getNearestKlimaStation(miCoordinates& pos)
   return currentStation;
 }
 
-bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& outpars,
-    miutil::miTime fromTime, miutil::miTime toTime)
+bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
+    std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
 {
 
   // no place - no data - skipping
   if (!currentStation.stationid)
     return false;
 
-
   // really ? there is no time for data here - skipping
   if (fromTime >= toTime)
     return false;
 
   vector<string> klimaNames;
+  vector<string> normalNames;
 
   map<string, KlimaParameter>::iterator pardef;
   vector<ParId> newinpars;
@@ -387,17 +593,25 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;
 
+    if (blacklist.count(alias))
+      continue;
+
     if (parameterDefinitions.count(alias)) {
       pardef = parameterDefinitions.find(alias);
-      if(pardef->second.klimaName == "COMPUTE")
+      if (pardef->second.klimaName == "COMPUTE")
         outpars.push_back(inpars[i]);
       else {
-        klimaNames.push_back(pardef->second.klimaName);
+
+        if (pardef->second.type == pets::klima_monthly_normal) {
+          normalNames.push_back(pardef->second.klimaName);
+        } else {
+          klimaNames.push_back(pardef->second.klimaName);
+        }
         newinpars.push_back(inpars[i]);
       }
     }
   }
-  inpars=newinpars;
+  inpars = newinpars;
 
   // get the data .....
   // no data known to pets and the klimadb - skip this
@@ -405,14 +619,18 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
     return false;
   }
   // create query ...................
-  string query = createDataQuery(klimaNames, fromTime, toTime);
-
+  string klimaquery = createDataQuery(klimaNames, fromTime, toTime,
+      pets::klima_observation);
+  string normalquery = createDataQuery(normalNames, fromTime, toTime,
+      pets::klima_monthly_normal);
   /// execute search............
 
-  read(DATAREPORT, query);
+  klimaData.clear();
+
+  read(DATAREPORT, klimaquery);
+  read(MONTHNORMALREPORT, normalquery,fromTime,toTime);
 
   // from here its the pets world again ....
-
 
   for (unsigned int i = 0; i < klimaData.size(); i++) {
     WeatherParameter wp;
@@ -426,10 +644,10 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
     TimeLineIsRead = true;
 
     // TODO: check if there is an empty timeline and delete it if necessary
-    int numOfTimes= klimaData[i].times.size();
+    int numOfTimes = klimaData[i].times.size();
 
-    if(numOfTimes < 1)
-        continue;
+    if (numOfTimes < 1)
+      continue;
 
     wp.setDims(klimaData[i].times.size(), 1);
     int ipar = parameters.size();
@@ -457,7 +675,8 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& 
   return true;
 }
 
-string KlimaStream::createDataQuery(vector<string> klimaNames, miutil::miTime fromTime, miutil::miTime toTime)
+string KlimaStream::createDataQuery(vector<string> klimaNames,
+    miutil::miTime fromTime, miutil::miTime toTime, pets::KlimaDatatype type)
 {
 
   ostringstream query;
@@ -467,23 +686,36 @@ string KlimaStream::createDataQuery(vector<string> klimaNames, miutil::miTime fr
   for (unsigned int i = 0; i < klimaNames.size(); i++)
     query << "&p=" << klimaNames[i];
 
-  query << "&qa="<<FLAGLEVEL;
+  query << "&qa=" << FLAGLEVEL;
   query << "&s=" << currentStation.stationid;
-  query << "&fd=" << fromTime.format("%d.%m.%Y");
-  query << "&td=" << toTime.format("%d.%m.%Y");
+
+  if (type == pets::klima_observation) {
+    query << "&fd=" << fromTime.format("%d.%m.%Y");
+    query << "&td=" << toTime.format("%d.%m.%Y");
+
+  } else if (type == pets::klima_monthly_normal) {
+    string startmonth = fromTime.format("%m");
+    string currentmonth = toTime.format("%m");
+    toTime.addDay(EXPECTEDFORECASTLENGTH);
+    string endmonth = toTime.format("%m");
+
+    query << "&m=" << currentmonth;
+    if (startmonth != currentmonth)
+      query << "&m=" << startmonth;
+    if (endmonth != currentmonth)
+      query << "&m=" << endmonth;
+  }
 
   return query.str();
 }
 
 // INHERITED FROM DATASTREAM  ---------------------------------------------
 
-
 int KlimaStream::findStation(const miutil::miString&)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return 0;
 } // find station index
-
 
 int KlimaStream::findDataPar(const ParId&)
 {
@@ -508,35 +740,33 @@ bool KlimaStream::openStreamForWrite(ErrorFlag*)
   return false;
 }
 
-bool KlimaStream::readData(const int posIndex, const ParId&, const miutil::miTime&, const miutil::miTime&,
-    ErrorFlag*)
+bool KlimaStream::readData(const int posIndex, const ParId&,
+    const miutil::miTime&, const miutil::miTime&, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
 }
 
-bool KlimaStream::getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline,
-    ErrorFlag*)
+bool KlimaStream::getTimeLine(const int& index,
+    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
 }
 
-bool KlimaStream::getTimeLine(const int& index, vector<miutil::miTime>& tline, vector<int>& pline)
+bool KlimaStream::getTimeLine(const int& index, vector<miutil::miTime>& tline,
+    vector<int>& pline)
 {
-  if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
-    if (index<progLines.size())
+  if (TimeLineIsRead && timeLines.Timeline(index, tline)) {
+    if (index < progLines.size())
       pline = progLines[index];
     return true;
   }
   return false;
 }
 
-
-
-
-bool KlimaStream::putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline,
-    ErrorFlag*)
+bool KlimaStream::putTimeLine(const int& index,
+    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
@@ -554,16 +784,14 @@ bool KlimaStream::getOnePar(int, WeatherParameter&, ErrorFlag*)
   return false;
 }
 
-
 bool KlimaStream::getOnePar(int i, WeatherParameter& wp)
 {
-  if(i>=0 && i<parameters.size()) {
-    wp=parameters[i];
+  if (i >= 0 && i < parameters.size()) {
+    wp = parameters[i];
     return true;
   }
   return false;
 }
-
 
 bool KlimaStream::putOnePar(WeatherParameter&, ErrorFlag*)
 {
@@ -589,7 +817,8 @@ bool KlimaStream::getModelSeq(int, Model&, Run&, int&)
   return false;
 }
 
-bool KlimaStream::getModelSeq(int, Model&, Run&, int&, std::vector<miutil::miString>&)
+bool KlimaStream::getModelSeq(int, Model&, Run&, int&,
+    std::vector<miutil::miString>&)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
@@ -601,8 +830,8 @@ int KlimaStream::putStation(const miPosition& s, ErrorFlag*)
   return 0;
 }
 
-bool KlimaStream::writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write,
-    bool write_submodel)
+bool KlimaStream::writeData(const int posIndex, const int modIndex, ErrorFlag*,
+    bool complete_write, bool write_submodel)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;

@@ -139,6 +139,13 @@ public:
     return ( data.size() > 1 ? miutil::miTime::hourDiff(data.back().time, data.front().time ) : 0 );
   }
 
+  miutil::miTime endTime() {
+    return ( data.size() ?  data.back().time : miutil::miTime::nowTime());
+  }
+  miutil::miTime startTime() {
+    return ( data.size() ?  data.front().time : miutil::miTime::nowTime());
+  }
+
   int size()
   {
     return data.size();

@@ -169,6 +169,9 @@ public:
 
   int timeLineLengthInHours()  { return timeLine.lengthInHours(); }
 
+  miutil::miTime timelineEnd()   { return timeLine.endTime(); }
+  miutil::miTime timelineBegin() { return timeLine.startTime();}
+
   const miPosition& getStation() const
   {
     return station;

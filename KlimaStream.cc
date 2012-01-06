@@ -40,12 +40,12 @@ using namespace std;
 
 namespace pets {
 
-static const int EXPECTEDFORECASTLENGTH = 2; // look 2 days into the future - for monthly normals only
+
 static const string MONTHNORMALREPORT = "28";
 static const string STATIONREPORT = "16";
 static const string DATAFORMAT = "&ddel=dot&ct=text/plain&nod=line";
 static const string DATAREPORT = "17";
-static const int UNDEFINED_COL= 999;
+static const int UNDEFINED_COL= -1;
 static int FLAGLEVEL = 5;
 
 void KlimaStream::setFlagLevel(int newFlagLevel)
@@ -323,7 +323,7 @@ vector<miutil::miTime>  KlimaStream::createMonthlyTimeline( miutil::miTime from,
   vector<miutil::miTime> monthlyTimeline;
   while (from <= to ) {
     monthlyTimeline.push_back(from);
-    from.addHour(1);
+    from.addHour(6);
   }
   return monthlyTimeline;
 }
@@ -336,7 +336,6 @@ map<int, vector<miutil::miTime> > KlimaStream::createTimelines( miutil::miTime f
   int current_month = from.month();
   int to_month   = to.month();
 
-  cerr << "current_month: " << current_month << "  to_month:  " <<   to_month << endl;
 
   // all in one month
   if(current_month == to_month) {
@@ -345,17 +344,19 @@ map<int, vector<miutil::miTime> > KlimaStream::createTimelines( miutil::miTime f
   }
   // first month from "from" to end of month
   breakpoint.addDay( breakpoint.date().daysInMonth() - breakpoint.day());
+  breakpoint.addHour(23);
   timeline[current_month] = createMonthlyTimeline( from, breakpoint);
 
-  breakpoint.addDay(1);
+  breakpoint.addHour(1);
   current_month = breakpoint.month();
   // more than two month - circle until you find the last month
 
   while (current_month != to_month) {
     from = breakpoint;
     breakpoint.addDay(breakpoint.date().daysInMonth() - 1);
+    breakpoint.addHour(23);
     timeline[current_month] = createMonthlyTimeline( from, breakpoint);
-    breakpoint.addDay(1);
+    breakpoint.addHour(1);
     current_month = breakpoint.month();
   }
 
@@ -367,15 +368,14 @@ map<int, vector<miutil::miTime> > KlimaStream::createTimelines( miutil::miTime f
 bool KlimaStream::setNormalFromResult(vector<string>& data,
     vector<string>& header, miutil::miTime from, miutil::miTime to)
 {
-  to.addDay(EXPECTEDFORECASTLENGTH);
 
   from.setTime(from.date(), miutil::miClock("00:00:00"));
-  to.setTime(to.date(), miutil::miClock("00:00:00"));
+//  to.setTime(to.date(), miutil::miClock("00:00:00"));
 
 
 
   // Create index
-  int STNR = -1, MONTH = -1;
+  int STNR = UNDEFINED_COL, MONTH = UNDEFINED_COL;
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
     if (key == "STNR")
@@ -393,15 +393,19 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
     }
   }
 
-  if (STNR == -1 || MONTH == -1)
+  if (STNR == UNDEFINED_COL || MONTH == UNDEFINED_COL)
     return false;
 
   if (klimaData.empty())
     return false;
 
   map<int, vector<miutil::miTime> > timelines = createTimelines(from, to);
+  map<int, vector<miutil::miTime> >::iterator itr=timelines.begin();
+
 
   vector<string> token;
+
+  map<int, map<miutil::miTime,double > > value_buffer;
 
   for (unsigned int i = 0; i < data.size(); i++) {
     boost::split(token, data[i], boost::algorithm::is_any_of(";"));
@@ -409,7 +413,7 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
       continue;
 
     //    int stnr =  atoi(token[STNR].c_str());
-    int month = atoi(token[MONTH].c_str()) - 1;
+    int month = atoi(token[MONTH].c_str());
     vector<miutil::miTime> currentTimeLine = timelines[month];
 
     for (unsigned int k = 0; k < klimaData.size(); k++) {
@@ -429,14 +433,23 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
       if (klimaData[k].parameter.transform) {
         klimaData[k].parameter.transform->calc(value);
       }
+
       for (unsigned int tim = 0; tim < currentTimeLine.size(); tim++) {
-        klimaData[k].data.push_back(value);
-        klimaData[k].times.push_back(currentTimeLine[tim]);
+        value_buffer[k][currentTimeLine[tim]] = value;
       }
     }
   }
 
+  // the return values have to be sorted by time!
   for (unsigned int k = 0; k < klimaData.size(); k++) {
+     if(value_buffer.count(k)) {
+       map<miutil::miTime, double>::iterator itr = value_buffer[k].begin();
+       for(;itr != value_buffer[k].end();itr++) {
+         klimaData[k].data.push_back(itr->second);
+         klimaData[k].times.push_back(itr->first);
+       }
+     }
+
      // we need the columns for the next query - so we set them to nothing
      klimaData[k].col = UNDEFINED_COL;
    }
@@ -449,7 +462,7 @@ bool KlimaStream::setDataFromResult(vector<string>& data,
 {
 
   // Create index
-  int STNR = -1, YEAR = -1, MONTH = -1, DAY = -1, TIME = -1, DD = -1, FF = -1;
+  int STNR = UNDEFINED_COL, YEAR = UNDEFINED_COL, MONTH = UNDEFINED_COL, DAY = UNDEFINED_COL, TIME = UNDEFINED_COL, DD = UNDEFINED_COL, FF = UNDEFINED_COL;
   for (unsigned int i = 0; i < header.size(); i++) {
     string key = boost::to_upper_copy(header[i]);
     if (key == "STNR")
@@ -476,7 +489,7 @@ bool KlimaStream::setDataFromResult(vector<string>& data,
     }
   }
 
-  if (STNR == -1 || YEAR == -1 || MONTH == -1 || DAY == -1 || TIME == -1)
+  if (STNR == UNDEFINED_COL || YEAR == UNDEFINED_COL || MONTH == UNDEFINED_COL || DAY == UNDEFINED_COL || TIME == UNDEFINED_COL)
     return false;
 
   if (klimaData.empty())
@@ -593,8 +606,9 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;
 
-    if (blacklist.count(alias))
+    if (blacklist.count(alias)) {
       continue;
+    }
 
     if (parameterDefinitions.count(alias)) {
       pardef = parameterDefinitions.find(alias);
@@ -613,22 +627,25 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
   }
   inpars = newinpars;
 
-  // get the data .....
-  // no data known to pets and the klimadb - skip this
-  if (klimaNames.empty()) {
-    return false;
-  }
-  // create query ...................
-  string klimaquery = createDataQuery(klimaNames, fromTime, toTime,
-      pets::klima_observation);
-  string normalquery = createDataQuery(normalNames, fromTime, toTime,
-      pets::klima_monthly_normal);
-  /// execute search............
-
   klimaData.clear();
 
-  read(DATAREPORT, klimaquery);
-  read(MONTHNORMALREPORT, normalquery,fromTime,toTime);
+  // get the data .....
+  // no data known to pets and the klimadb - skip this
+  if (klimaNames.empty() && normalNames.empty() ) {
+    return false;
+  }
+
+  if(!klimaNames.empty() ) {
+    string klimaquery = createDataQuery(klimaNames, fromTime, toTime,
+        pets::klima_observation);
+    read(DATAREPORT, klimaquery);
+  }
+
+  if(!normalNames.empty() ) {
+    string normalquery = createDataQuery(normalNames, fromTime, toTime,
+        pets::klima_monthly_normal);
+    read(MONTHNORMALREPORT, normalquery,fromTime,toTime);
+  }
 
   // from here its the pets world again ....
 
@@ -657,7 +674,7 @@ bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
       parameters[ipar].setData(j, 0, klimaData[i].data[j]);
     }
 
-    if ((tlindex = timeLines.Exist(klimaData[i].times)) == -1) {
+    if ((tlindex = timeLines.Exist(klimaData[i].times)) == UNDEFINED_COL) {
       tlindex = numTimeLines;
       timeLines.insert(klimaData[i].times, tlindex);
       numTimeLines++;
@@ -694,10 +711,9 @@ string KlimaStream::createDataQuery(vector<string> klimaNames,
     query << "&td=" << toTime.format("%d.%m.%Y");
 
   } else if (type == pets::klima_monthly_normal) {
-    string startmonth = fromTime.format("%m");
-    string currentmonth = toTime.format("%m");
-    toTime.addDay(EXPECTEDFORECASTLENGTH);
-    string endmonth = toTime.format("%m");
+    int startmonth = fromTime.month()-1;
+    int currentmonth = toTime.month() -1;
+    int endmonth = toTime.month() -1;
 
     query << "&m=" << currentmonth;
     if (startmonth != currentmonth)

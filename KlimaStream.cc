@@ -31,6 +31,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <sstream>
+#include <puTools/miDate.h>
+#include <set>
 
 #include <curl/curl.h>
 
@@ -359,7 +361,6 @@ map<int, vector<miutil::miTime> > KlimaStream::createTimelines( miutil::miTime f
     breakpoint.addHour(1);
     current_month = breakpoint.month();
   }
-
   timeline[current_month] = createMonthlyTimeline( breakpoint, to);
 
   return timeline;
@@ -400,8 +401,6 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
     return false;
 
   map<int, vector<miutil::miTime> > timelines = createTimelines(from, to);
-  map<int, vector<miutil::miTime> >::iterator itr=timelines.begin();
-
 
   vector<string> token;
 
@@ -409,9 +408,9 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
 
   for (unsigned int i = 0; i < data.size(); i++) {
     boost::split(token, data[i], boost::algorithm::is_any_of(";"));
-    if (token.size() < header.size())
+    if (token.size() < header.size()) {
       continue;
-
+    }
     //    int stnr =  atoi(token[STNR].c_str());
     int month = atoi(token[MONTH].c_str());
     vector<miutil::miTime> currentTimeLine = timelines[month];
@@ -711,15 +710,19 @@ string KlimaStream::createDataQuery(vector<string> klimaNames,
     query << "&td=" << toTime.format("%d.%m.%Y");
 
   } else if (type == pets::klima_monthly_normal) {
-    int startmonth = fromTime.month()-1;
-    int currentmonth = toTime.month() -1;
-    int endmonth = toTime.month() -1;
+    miutil::miDate fromDate=fromTime.date();
+    miutil::miDate toDate=toTime.date();
+    set<int> allmonth;
 
-    query << "&m=" << currentmonth;
-    if (startmonth != currentmonth)
-      query << "&m=" << startmonth;
-    if (endmonth != currentmonth)
-      query << "&m=" << endmonth;
+    while(fromDate < toDate) {
+      allmonth.insert(fromDate.month() -1);
+      fromDate.addDay(fromDate.daysInMonth());
+    }
+    allmonth.insert(fromDate.month() -1);
+
+    set<int>::iterator currentmonth = allmonth.begin();
+    for(; currentmonth !=allmonth.end();currentmonth++)
+      query << "&m=" << *currentmonth;
   }
 
   return query.str();

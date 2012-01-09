@@ -105,8 +105,7 @@ private:
   std::string createDataQuery(std::vector<std::string> klimaNames, miutil::miTime fromTime,
       miutil::miTime toTime, pets::KlimaDatatype type);
 
-  std::vector<miutil::miTime>  createMonthlyTimeline( miutil::miTime from, miutil::miTime to);
-  std::map<int, std::vector<miutil::miTime> > createTimelines( miutil::miTime from, miutil::miTime to);
+  std::vector<miutil::miTime>  createTimeline( miutil::miTime from, miutil::miTime to);
 
   std::vector<KlimaData> klimaData;
   std::vector<std::string> allParameters;

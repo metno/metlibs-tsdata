@@ -67,7 +67,7 @@ void KlimaStation::clear()
 }
 
 KlimaParameter::KlimaParameter(const KlimaParameter& rhs) :
-    transform(NULL)
+                transform(NULL)
 {
   *this = rhs;
 }
@@ -320,60 +320,22 @@ bool KlimaStream::setStationsFromResult(vector<string>& data,
   return npos != 0;
 }
 
-vector<miutil::miTime>  KlimaStream::createMonthlyTimeline( miutil::miTime from, miutil::miTime to)
+vector<miutil::miTime>  KlimaStream::createTimeline( miutil::miTime from, miutil::miTime to)
 {
-  vector<miutil::miTime> monthlyTimeline;
+  vector<miutil::miTime> timeline;
   while (from <= to ) {
-    monthlyTimeline.push_back(from);
+    timeline.push_back(from);
     from.addHour(6);
   }
-  return monthlyTimeline;
-}
-
-map<int, vector<miutil::miTime> > KlimaStream::createTimelines( miutil::miTime from, miutil::miTime to)
-{
-  map<int, vector<miutil::miTime> > timeline;
-
-  miutil::miTime breakpoint=from;
-  int current_month = from.month();
-  int to_month   = to.month();
-
-
-  // all in one month
-  if(current_month == to_month) {
-    timeline[current_month] = createMonthlyTimeline( from, to);
-    return timeline;
-  }
-  // first month from "from" to end of month
-  breakpoint.addDay( breakpoint.date().daysInMonth() - breakpoint.day());
-  breakpoint.addHour(23);
-  timeline[current_month] = createMonthlyTimeline( from, breakpoint);
-
-  breakpoint.addHour(1);
-  current_month = breakpoint.month();
-  // more than two month - circle until you find the last month
-
-  while (current_month != to_month) {
-    from = breakpoint;
-    breakpoint.addDay(breakpoint.date().daysInMonth() - 1);
-    breakpoint.addHour(23);
-    timeline[current_month] = createMonthlyTimeline( from, breakpoint);
-    breakpoint.addHour(1);
-    current_month = breakpoint.month();
-  }
-  timeline[current_month] = createMonthlyTimeline( breakpoint, to);
-
   return timeline;
 }
+
 
 bool KlimaStream::setNormalFromResult(vector<string>& data,
     vector<string>& header, miutil::miTime from, miutil::miTime to)
 {
 
   from.setTime(from.date(), miutil::miClock("00:00:00"));
-//  to.setTime(to.date(), miutil::miClock("00:00:00"));
-
-
 
   // Create index
   int STNR = UNDEFINED_COL, MONTH = UNDEFINED_COL;
@@ -400,11 +362,11 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
   if (klimaData.empty())
     return false;
 
-  map<int, vector<miutil::miTime> > timelines = createTimelines(from, to);
+  vector<miutil::miTime> timeline = createTimeline(from, to);
 
   vector<string> token;
 
-  map<int, map<miutil::miTime,double > > value_buffer;
+  map<int, map<int, double> > monthly_values;
 
   for (unsigned int i = 0; i < data.size(); i++) {
     boost::split(token, data[i], boost::algorithm::is_any_of(";"));
@@ -413,7 +375,6 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
     }
     //    int stnr =  atoi(token[STNR].c_str());
     int month = atoi(token[MONTH].c_str());
-    vector<miutil::miTime> currentTimeLine = timelines[month];
 
     for (unsigned int k = 0; k < klimaData.size(); k++) {
       double value = 0;
@@ -433,25 +394,29 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
         klimaData[k].parameter.transform->calc(value);
       }
 
-      for (unsigned int tim = 0; tim < currentTimeLine.size(); tim++) {
-        value_buffer[k][currentTimeLine[tim]] = value;
-      }
+      monthly_values[k][month] = value;
+
     }
   }
 
   // the return values have to be sorted by time!
   for (unsigned int k = 0; k < klimaData.size(); k++) {
-     if(value_buffer.count(k)) {
-       map<miutil::miTime, double>::iterator itr = value_buffer[k].begin();
-       for(;itr != value_buffer[k].end();itr++) {
-         klimaData[k].data.push_back(itr->second);
-         klimaData[k].times.push_back(itr->first);
-       }
-     }
+    if ( !monthly_values.count(k))
+      continue;
 
-     // we need the columns for the next query - so we set them to nothing
-     klimaData[k].col = UNDEFINED_COL;
-   }
+    for(int i=0; i<timeline.size();i++) {
+
+      if(!monthly_values[k].count(timeline[i].month()))
+        continue;
+
+      double normal= monthly_values[k][timeline[i].month()];
+      klimaData[k].data.push_back(normal);
+      klimaData[k].times.push_back(timeline[i]);
+    }
+
+    // we need the columns for the next query - so we set them to nothing
+    klimaData[k].col = UNDEFINED_COL;
+  }
 
   return true;
 }

@@ -3757,8 +3757,9 @@ bool ptDiagramData::makePolarVector(const ParId& comp1, const ParId& comp2,
           dd += M_PI * 2;
         else if (dd > M_PI*2)
           dd -= M_PI * 2;
-        wpresult.setData(i, ff);
-        wpresult.setData(i + nump, dd * 180 / M_PI);
+        dd *= 180 / M_PI;
+        wpresult.setData(i,0, ff );
+        wpresult.setData(i,1, dd );
       }
       wpresult.calcAllProperties();
       addParameter(wpresult);

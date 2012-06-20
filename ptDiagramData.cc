@@ -846,7 +846,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
             j)) {
           f1 = parList[wpx1].Data(j);
           f2 = parList[wpx2].Data(j);
-          tmpSymbol = wsymbols.getSymbol(static_cast<int> (f1));
+          symbolMaker::Symboltype tmpSymbol = wsymbols.getSymboltype(static_cast<int> (f1));
           clgrp = lucy.findCl(tmpSymbol, static_cast<int> (f2));
           parList[wpx].setData(j, 0, clgrp);
         }
@@ -1065,7 +1065,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
   int level;
   double reflevel = 10;
   Uprofile profs;
-  miSymbol tmpSymbol;
+  symbolMaker::Symboltype tmpSymbol;
   vision sight;
   cloudGrp lucy;
   ptStatistics statist;
@@ -2185,8 +2185,8 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       for (j = 0; j < wp.Npoints(); j++) {
         f1 = wp.Data(j);
         f2 = wp2.Data(j);
-        tmpSymbol = wsymbols.getSymbol(static_cast<int> (f1));
-        visi = sight.findVision(tmpSymbol.vis(), static_cast<int> (f2));
+        tmpSymbol = wsymbols.getSymboltype(static_cast<int> (f1));
+        visi = sight.findVision(wsymbols.visibility(tmpSymbol), static_cast<int> (f2));
         wp.setData(j, visi);
       }
       if (newpid.run == R_UNDEF)
@@ -2210,7 +2210,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       for (j = 0; j < wp.Npoints(); j++) {
         f1 = wp.Data(j);
         f2 = wp2.Data(j);
-        tmpSymbol = wsymbols.getSymbol(static_cast<int> (f1));
+        tmpSymbol = wsymbols.getSymboltype(static_cast<int> (f1));
         clgrp = lucy.findCl(tmpSymbol, static_cast<int> (f2));
         wp.setData(j, clgrp);
       }

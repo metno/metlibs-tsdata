@@ -103,12 +103,12 @@ public:
       const miutil::miTime&, ErrorFlag*)=0;
   virtual bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline,
       std::vector<int>& pline, ErrorFlag*)=0;
-  virtual bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline,
-      std::vector<int>& pline, ErrorFlag*)
+  virtual bool putTimeLine(const int& /*index*/, std::vector<miutil::miTime>& /*tline*/,
+      std::vector<int>& /*pline*/, ErrorFlag*)
   {
     return false;
   }
-  virtual bool putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
+  virtual bool putTimeLine(TimeLine& /*tl*/, std::vector<int>& /*pline*/, ErrorFlag*)
   {
     return false;
   }
@@ -126,18 +126,18 @@ public:
       Run&, int&)=0;
   virtual bool getModelSeq(int, Model&, // fetch model info
       Run&, int&, std::vector<miutil::miString>&)=0;
-  virtual int putStation(const miPosition& s, //adds station to posList
+  virtual int putStation(const miPosition& /*s*/, //adds station to posList
       ErrorFlag*)
   {
     return 0;
   }
-  virtual bool writeData(const int posIndex, //write data to file
-      const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel)
+  virtual bool writeData(const int /*posIndex*/, //write data to file
+      const int /*modIndex*/, ErrorFlag*, bool /*complete_write*/, bool /*write_submodel*/)
   {
     return false;
   }
   virtual bool close() = 0;
-  virtual void getTextLines(const ParId p, std::vector<miutil::miString>& tl)
+  virtual void getTextLines(const ParId /*p*/, std::vector<miutil::miString>& tl)
   {
     tl = textLines;
   }

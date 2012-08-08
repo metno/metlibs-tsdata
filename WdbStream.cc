@@ -81,7 +81,7 @@ vector<miTime> WdbStream::DataFromWdb::adaptSingle(vector<miTime> ntim)
 {
   vector<miTime> res;
   map<miTime,float> buf;
-  for(int i=0;i<ntim.size();i++) {
+  for(unsigned int i=0;i<ntim.size();i++) {
     if(rawdata.count(ntim[i])) {
       buf[ntim[i]] = rawdata[ntim[i]];
       res.push_back(ntim[i]);
@@ -95,14 +95,14 @@ vector<miTime> WdbStream::DataFromWdb::adaptSingle(vector<miTime> ntim)
 
 WdbStream::WdbStream(std::string host, map<string, string> parlist, vector<string> vectorFunctionList,
     std::string u) :
-    wdb( QUERY::CONNECT(host,u) ) , user(u), DataStream("WdbStream")
+    		DataStream("WdbStream"), wdb( QUERY::CONNECT(host,u) ) , user(u)
 {
   geoGrid.setGeographic();
   transformIndex.clear();
 
   map<string,string>::iterator itr=parlist.begin();
 
-  int i=-1;
+
   for(;itr!=parlist.end();itr++){
 
     string key   = itr->first;
@@ -169,6 +169,7 @@ bool WdbStream::setCurrentProvider(string currentProviderName)
 
   currentProvider = currentProviderName;
   setReferenceTimes();
+  return true;
 }
 
 WdbStream::BoundaryBox WdbStream::getGeometry()
@@ -203,7 +204,7 @@ WdbStream::BoundaryBox WdbStream::getGeometry()
     vector<string> pos;
     boost::split(pos,geoname,boost::algorithm::is_any_of(","));
     boundaries.setMinMax();
-    for(int i=0;i<pos.size();i++) {
+    for(unsigned int i=0;i<pos.size();i++) {
       vector<string> loc;
       boost::split(loc,pos[i],boost::algorithm::is_any_of(" "));
       if(loc.size() < 2) continue;
@@ -243,7 +244,7 @@ void WdbStream::rotate2geo(float x,float y, std::vector<float>& xdata ,std::vect
 {
   if(xdata.size() != ydata.size()) return;
 
-  for(int i=0;i<xdata.size();i++) {
+  for(unsigned int i=0;i<xdata.size();i++) {
 
     geoGrid.convertVectors(currentGrid,1, &x, &y, &xdata[i], &ydata[i]);
   }
@@ -290,13 +291,14 @@ bool WdbStream::setCurrentReferenceTime(miutil::miTime newReferenceTime)
   currentReferenceTime = newReferenceTime;
   //  setLevels();
   setParameters();
+  return true;
 }
 
 bool WdbStream::setLevels()
 {
   // TODO: setLevels is not good enough implemented in  WDB
   // WDB gives only min and max level, but we need any level at a time and model
-  // to readjust the gui... A bug has been notified to the wdb team to solve this problem
+  // to read just the gui... A bug has been notified to the wdb team to solve this problem
   // until then the level is skipped.
 
   if(!dataProviders.count(currentProvider))       return false;
@@ -345,7 +347,7 @@ void WdbStream::setRotateToGeo(vector<std::string> str)
 {
   rot.clear();
 
-  for(int i=0; i< str.size();i++) {
+  for(unsigned int i=0; i< str.size();i++) {
     vector<string> xy;
     boost::split(xy,str[i], boost::algorithm::is_any_of(":") );
     if(xy.size() < 2 ) {
@@ -414,7 +416,7 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
   readtime=0;
   if(!setCurrentReferenceTime(run)) return false;
 
-  pets::math::DynamicFunction * transform=NULL;
+
   DataFromWdb dwdb;
   wdbNames.clear();
   map<string, DataFromWdb> datafromWdb;
@@ -509,7 +511,7 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
     float x_geoproj = lon * DEG_TO_RAD;
     float y_geoproj = lat * DEG_TO_RAD;
 
-    for ( int k=0; k< rot.size();k++)
+    for ( unsigned int k=0; k< rot.size();k++)
       if(datafromWdb.count(rot[k].x) && datafromWdb.count(rot[k].y )) {
         datafromWdb[rot[k].x].adaptTimelines(datafromWdb[rot[k].y]);
         rotate2geo(x_geoproj,y_geoproj, datafromWdb[rot[k].x].data ,datafromWdb[rot[k].y].data);
@@ -538,7 +540,7 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
     int ipar= parameters.size();
     int tlindex;
     parameters.push_back(wp); // add it to the vector
-    for (int j=0; j< itr->second.times.size(); j++) {
+    for (unsigned int j=0; j< itr->second.times.size(); j++) {
       parameters[ipar].setData(j,0,itr->second.data[j]);
     }
 
@@ -553,7 +555,6 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
     parameters[ipar].calcAllProperties();
 
 
-    transform=NULL;
   }
 
   npar= parameters.size();
@@ -565,7 +566,8 @@ bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& r
 
 bool WdbStream::getOnePar(int i, WeatherParameter& wp)
 {
-  if(i>=0 && i<parameters.size()) {
+
+  if(i>=0 && i<(int)parameters.size()) {
     wp=parameters[i];
     return true;
   }
@@ -575,7 +577,7 @@ bool WdbStream::getOnePar(int i, WeatherParameter& wp)
 bool WdbStream::getTimeLine(const int& index, vector<miTime>& tline, vector<int>& pline)
 {
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
-    if (index<progLines.size())
+    if (index>0 && index<(int)progLines.size())
       pline = progLines[index];
     return true;
   }
@@ -615,7 +617,7 @@ void WdbStream::clean()
 
 
 
-static const string unimplemented(string func)
+void unimplemented(string func)
 {
   cerr << "unimplemented function " << func << " called in WdbStream " << endl;
 }

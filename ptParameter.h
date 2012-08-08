@@ -51,7 +51,7 @@ public:
     strcpy(par->name,p.name);
     strcpy(par->alias,p.alias);
     strcpy(par->unit,p.unit);
-    strcpy(par->robsname,p.robsname);
+  //  strcpy(par->robsname,p.robsname);
     par->scale=p.scale;
     par->size=p.size;
     par->order=p.order;

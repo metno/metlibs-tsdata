@@ -166,7 +166,6 @@ bool ParameterDefinition::readParameters(const miString paramdef)
 
   parsepardefs(paramdef.cStr(),&parlist,&npar);
   for (int i=0; i<npar; i++) {
-    cerr << "adding parameter number: " << i << endl;
     paramList.push_back(Parameter(*parlist[i]));
     free(parlist[i]);
   }

@@ -9,8 +9,6 @@ lib_LTLIBRARIES = libtsData.la
 libtsData_la_SOURCES = \
 	ptAsciiStream.cc \
 	ptDiagramData.cc \
-	ptHDFFile.cc \
-	ptHDFUtils.cc \
 	ptMIROS22File.cc \
 	ptParameterDefinition.cc \
 	ptPrimitiveType.cc \
@@ -23,7 +21,6 @@ libtsData_la_SOURCES = \
 	KlimaStream.cc
 
 libtsData_la_CPPFLAGS = \
-	$(HDF4_CPPFLAGS) \
 	$(LOG4CXX_CPPFLAGS) \
 	$(MILOGGER_CPPFLAGS) \
 	$(PARAMETER_CPPFLAGS) \
@@ -36,25 +33,66 @@ libtsData_la_CPPFLAGS = \
 	$(CURL_CPPFLAGS)
 
 
-libtsData_la_LDFLAGS = $(VERSION_INFO) 
-#	$(HDF4_LDFLAGS) \
-#	$(LOG4CXX_LDFLAGS) \
-#	$(MILOGGER_LDFLAGS) \
-#	$(PARAMETER_LDFLAGS) \
-#	$(PUCTOOLS_LDFLAGS) \
-#	$(PUDATATYPES_LDFLAGS) \
-#	$(PUMET_LDFLAGS) \
-#	$(PUTOOLS_LDFLAGS) \
-#	$(DIFIELD_LDFLAGS) \
-#	$(POSTGRESQL_LDFLAGS) \
-#	${LIBMI_LDFLAGS} \
-#	${MILIB_LDFLAGS} \
-#	${BOOST_LDFLAGS} \
-#	${PROJ_LDFLAGS} \
-#	$(CURL_LDFLAGS)
+libtsData_la_LDFLAGS = $(VERSION_INFO)
+libtsData_la_LIBADD =
+if ENABLE_SHARED_LIBRARY
+libtsData_la_LDFLAGS += \
+	$(LOG4CXX_LDFLAGS) \
+	$(MILOGGER_LDFLAGS) \
+	$(PARAMETER_LDFLAGS) \
+	$(PUCTOOLS_LDFLAGS) \
+	$(PUDATATYPES_LDFLAGS) \
+	$(PUMET_LDFLAGS) \
+	$(PUTOOLS_LDFLAGS) \
+	$(DIFIELD_LDFLAGS) \
+	$(POSTGRESQL_LDFLAGS) \
+	${LIBMI_LDFLAGS} \
+	${MILIB_LDFLAGS} \
+	${BOOST_LDFLAGS} \
+	${PROJ_LDFLAGS} \
+	$(CURL_LDFLAGS)
+
+libtsData_la_LIBADD += \
+	$(LOG4CXX_LIBS) \
+	$(MILOGGER_LIBS) \
+	$(PARAMETER_LIBS) \
+	$(PUCTOOLS_LIBS) \
+	$(PUDATATYPES_LIBS) \
+	$(PUMET_LIBS) \
+	$(PUTOOLS_LIBS) \
+	$(DIFIELD_LIBS) \
+	$(POSTGRESQL_LIBS) \
+	${LIBMI_LIBS} \
+	${MILIB_LIBS} \
+	${BOOST_LIBS} \
+	${PROJ_LIBS} \
+	$(CURL_LIBS)
+endif
+
+if WITH_HDF4
+libtsData_la_SOURCES += \
+	ptHDFFile.cc \
+	ptHDFUtils.cc
+
+libtsData_la_CPPFLAGS += \
+	$(HDF4_CPPFLAGS)
+
+libtsData_la_LDFLAGS += \
+	$(HDF4_LDFLAGS)
+if ENABLE_SHARED_LIBRARY
+libtsData_la_LIBADD += \
+	$(HDF4_LIBS)
+endif
+endif
+
+if ENABLE_GRIBFILE
+libtsData_la_LDFLAGS += \
+	${DIFIELD_CPPFLAGS}
+
+libtsData_la_SOURCES += ptGribStream.cc
+endif
 
 pkg_includedir = ${includedir}/tsData
-
 
 pkg_include_HEADERS = \
 	$(libtsData_la_SOURCES:.cc=.h) \
@@ -65,10 +103,3 @@ pkg_include_HEADERS = \
 	ptTimeLine.h
 
 
-if ENABLE_GRIBFILE
-libtsData_la_LDFLAGS += \
-	${DIFIELD_CPPFLAGS}
-
-libtsData_la_SOURCES += ptGribStream.cc
-pkg_include_HEADERS += ptGribStream.h
-endif

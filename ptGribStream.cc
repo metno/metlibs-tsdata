@@ -34,11 +34,7 @@
 #include "config.h"
 #endif
 
-#include <hdf.h>
-
-//#include "ptHDFFile.h"
 #include "ptGribStream.h"
-#include "ptHDFUtils.h"
 
 #include <puCtools/puMath.h>
 #include <diField/diFieldManager.h>  //added
@@ -69,14 +65,13 @@ bool GribStream::_parseGrib()
 #endif
   vector<miString> list,tokens,stokens;
   miString key,value, str;
-  int n,p;
+  size_t n,p;
 
    sp->parse(Name);
 
   //parsing <STATION_LIST>
   if (!sp->getSection(SectStationList,list))
     return false;
-  n=list.size(); 
   for (n=0; n< list.size(); n++) {
       str = list[n];
       if ((p = str.find ("#")) == 0) {
@@ -90,7 +85,7 @@ bool GribStream::_parseGrib()
            // structures of type: A=B 
            if (key == "file" ) stFileName = value;
         }
-     }   
+     }
   }
 
   list.clear();
@@ -98,7 +93,6 @@ bool GribStream::_parseGrib()
 
   if (!sp->getSection(SectGribParMod,list))
     return false;
-  n=list.size();  
   for (n=0; n< list.size(); n++) {
       str = list[n];
       if ((p = str.find ("#")) == 0) {
@@ -437,24 +431,15 @@ bool GribStream::readData(const int posIndex,
 		       const miTime& stop,
 		       ErrorFlag* ef)
 {
-  uint8* dataBuf;
-  char   modelName[VSNAMELENMAX+1]; 
   int32  nrec;
   int32  nfields;
   vector<miString> nameFields;
   vector<int>   orderFields;
   vector<int>   fieldSize;
-  char  *fields;
-  int32  vpos, vmod;
-  int32  tag, ref, interlace, recsz, i, j, k, l;
-  int    fnsize=0;
+  size_t i, j, k, l;
 
-  int32 *tags, *refs;
-  int npairs;
   miString modname,modName;
   int modrun, modidx= -1;
-  bool foundmodel=false;
-//  const int HDFFAIL = -1;
 
 #ifdef DEBUG
   cout << "GribStream::readData posIndex:   " << posIndex<< endl;
@@ -489,9 +474,9 @@ bool GribStream::readData(const int posIndex,
 
   }
   //Getting lat and long for pos with posIndex.
-  float lat, lon;
-  vector<miString> params; 
-  for (int posnum= 0; posnum< posList.size(); posnum++){
+  float lat =0, lon=0;
+  vector<miString> params;
+  for (size_t posnum= 0; posnum< posList.size(); posnum++){
       if (posnum == posIndex){
        lat = posList[posIndex].geopos[0];
        lon = posList[posIndex].geopos[1];
@@ -503,8 +488,8 @@ bool GribStream::readData(const int posIndex,
   cout << "Requested gribModelName:  " << modName << endl;
 #endif
   params.clear();
-  //Getting list of parameters for gribfile   
-  for (int pl= 0; pl < parList.size(); pl++) {
+  //Getting list of parameters for gribfile
+  for (size_t pl= 0; pl < parList.size(); pl++) {
       params.push_back(parList[pl].name);
   }
 
@@ -578,16 +563,10 @@ bool GribStream::readData(const int posIndex,
 
   // Organize the data in dataBuf. Separate the actual parameterdata
   // from the rest (Time, Prog, Level (and sensor))
-  int inc,totinc=0;
-  uint8 *tmp = dataBuf;
-  float *fdata;
-  int16 number16;
-  int32 number32;
   vector<int> levelList;
   vector<float> uniqLevels;
 
   vector<int> ULCount; // Unique level count
-  bool levelfound;
   WeatherParameter wp; // basis for all weatherparameters found
   ParId pid = ID_UNDEF;
   pid.model = modname;
@@ -847,7 +826,7 @@ bool GribStream::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
 #ifdef DEBUG
   cout << "GribStream::putOnePar2" << endl;
 #endif
-  int i;
+  size_t i;
   Parameter par;
   GribPar hpar;
   GribMod hmod;
@@ -938,7 +917,7 @@ bool GribStream::_readPosList(ErrorFlag* ef)
   miString stLine;
   vector<miString>stationVector;
   posList.clear();
-  int i = 0;
+  size_t i = 0;
   while (getline(file, stLine, '\n')){
     stationVector = stLine.split(",",true);
     if(stationVector.size() == 6) {
@@ -995,7 +974,7 @@ bool GribStream::_readParList(ErrorFlag* ef)
   miString stLine;
   vector<miString> parameterVector, list;
   parList.clear();
-  int i, n, p;
+  size_t n, p;
   sp->parse(Name);
   list.clear();
 #ifdef DEBUG
@@ -1075,7 +1054,7 @@ bool GribStream::_readModList(ErrorFlag* ef)
   miString Line, modName, key,value;
   vector<miString> modelVector, modlist;
   //parList.clear();
-  int i, n, p;
+  size_t n, p;
   GribMod tempMod;
 
   if (!sp->getSection(SectModel,modlist)) {
@@ -1146,8 +1125,8 @@ bool GribStream::_readModList(ErrorFlag* ef)
    tempMod.runid= tempMod.run[3];
 
    modList.push_back(tempMod);
-   
-   for (int i =0; i< modList.size(); i++){
+
+   for (size_t i =0; i< modList.size(); i++){
 #ifdef DEBUG
       cout << "---- Grib model no:" << i << endl;
       cout << "Id:" << modList[i].modelPn << endl;
@@ -1174,7 +1153,7 @@ bool GribStream::_readModList(ErrorFlag* ef)
 void GribStream::getTextLines(const ParId p,
 			   vector<miString>& tl)
 {
-  for (int i=0; i<modList.size(); i++)
+  for (size_t i=0; i<modList.size(); i++)
     if (modList[i].modelid==p.model){
       tl= modList[i].textlines;
       break;

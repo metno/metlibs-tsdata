@@ -10,7 +10,9 @@ namespace pets {
 namespace math {
 
 
-DynamicFunction::DynamicFunction(string nf, double f) : next(NULL) , factor(f)
+DynamicFunction::DynamicFunction(string nf, double f)
+    : factor(f)
+    , next(0)
 {
   txt=nf;
   if(!nf.empty()) {

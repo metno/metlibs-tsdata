@@ -33,7 +33,7 @@ libtsData_la_CPPFLAGS = \
 	$(CURL_CPPFLAGS)
 
 
-libtsData_la_LDFLAGS = $(VERSION_INFO)
+libtsData_la_LDFLAGS = $(tsData_VERSION_INFO)
 libtsData_la_LIBADD =
 if ENABLE_SHARED_LIBRARY
 libtsData_la_LDFLAGS += \

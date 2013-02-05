@@ -306,7 +306,7 @@ bool AsciiStream::readData(const int posIndex,
 	parameters.push_back(wp); // add it to the vector
 	
 	// insert the actual data
-	for (int j=0; j<times.size(); j++) {
+	for (size_t j=0; j<times.size(); j++) {
 	  parameters[ipar].setData(j,0,data[j]);
 	}
 	// check if new timeline already exist, add it
@@ -523,7 +523,7 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       line.prog= 0;
       line.level= level;
       line.submodel= submodel;
-      for (int j=ds; j<vt1.size(); j++){
+      for (size_t j=ds; j<vt1.size(); j++){
 	float f= UNDEF;
 	if (vt1[j] != "-")
 	  f= atof(vt1[j].cStr());
@@ -548,7 +548,7 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
 	ds= 3;
 	use_submodel= true;
       }
-      for (int j=ds; j<vt1.size(); j++){
+      for (size_t j=ds; j<vt1.size(); j++){
 	adata.params.push_back(vt1[j]);
       }
       adata.levels.clear();

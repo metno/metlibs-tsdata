@@ -146,7 +146,7 @@ std::string CACHEQUERY(std::string model, std::string run, std::vector<std::stri
   else {
     query << "ARRAY[";
     bool first=true;
-    for( int i=0 ; i < parameters.size();i++) {
+    for(size_t i=0 ; i < parameters.size();i++) {
 
       if(boost::find_first(parameters[i],RAW())){
         hasRaw=true;

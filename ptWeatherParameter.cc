@@ -56,10 +56,15 @@ using namespace std;
 
 // constructor
 WeatherParameter::WeatherParameter()
-  : polar(false),ndim(0),npoints(0),
-    timeLineIndex(0),type(DUM_PRIMITIVE),
-    dirty(false), temp_dirty(false),
-    locked(false),starti(0), stopi(0)
+  : polar(false)
+  , type(DUM_PRIMITIVE)
+  , ndim(0)
+  , npoints(0)
+  , timeLineIndex(0)
+  , dirty(false)
+  , temp_dirty(false)
+  , locked(false)
+  , starti(0), stopi(0)
 {
 }
 
@@ -185,7 +190,7 @@ ostream& operator<<(ostream& out, const WeatherParameter& wp)
     out << i << ".comp> min: " << wp.cmin[i] << " max: " << wp.cmax[i]
 	<< " delta: " << wp.cdelta[i] << endl;
   out << "Datavalues:" << endl;
-  for (int i=0;i<wp.data.size();i++)
+  for (size_t i=0;i<wp.data.size();i++)
     out << wp.data[i] << '\t';
   return out;
 }
@@ -290,8 +295,7 @@ void WeatherParameter::setData(const int i, const int comp,
 void WeatherParameter::clearTempDirty()
 {
   temp_dirty=false;
-  for (int i=0; i<modified.size(); i++)
-    modified[i]= false;
+  std::fill(modified.begin(), modified.end(), false);
 }
 
 //==========================================================

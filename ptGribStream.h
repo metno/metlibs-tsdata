@@ -1,3 +1,4 @@
+// -*- c++ -*-
 /*
   libtsData - Time Series Data
   
@@ -42,10 +43,6 @@
 #include <vector>
 
 #define MAXLEV 100
-
-using namespace std;
-using namespace miutil;
-using miutil::SetupParser;
 
 class FieldManager;
 class SetupParser;

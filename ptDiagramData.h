@@ -1,9 +1,8 @@
+// -*- c++ -*-
 /*
  libtsData - Time Series Data
 
- $Id$
-
- Copyright (C) 2006 met.no
+ Copyright (C) 2013 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -47,12 +46,12 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 
 #define MERGE_RAW   0
 #define MERGE_ADAPT 1
 
-//typedef vector<miString> StringVector;
+//typedef std::vector<miString> StringVector;
 
 struct time_interval {
   miutil::miTime from;
@@ -63,7 +62,7 @@ struct time_interval {
 struct Range {
   int first, last;
 
-  friend ostream& operator<<(ostream& out, const Range& rhs)
+  friend std::ostream& operator<<(std::ostream& out, const Range& rhs)
   {
     return out << rhs.first << '\t' << rhs.last;
   }
@@ -159,7 +158,7 @@ public:
       return emptypar;
   }
 
-  friend ostream& operator<<(ostream&, /*const*/ptDiagramData&);
+  friend std::ostream& operator<<(std::ostream&, /*const*/ptDiagramData&);
 
   void Erase();
   int size() const
@@ -245,8 +244,8 @@ public:
       std::vector<ParId>& inpars, std::vector<ParId>& outpars, unsigned long& readtime,
       miutil::miString stationname);
 
-  bool fetchDataFromKlimaDB(pets::KlimaStream* klima, vector<ParId>& inpars,
-      vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
+  bool fetchDataFromKlimaDB(pets::KlimaStream* klima, std::vector<ParId>& inpars,
+      std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
 
 
 
@@ -272,7 +271,7 @@ public:
     return timeLine.flag(j, parList[i].TimeLineIndex());
   }
   void useAlternateSymbolmaker(const bool use);
-  set<Model> allModels();
+  std::set<Model> allModels();
 };
 
 #endif

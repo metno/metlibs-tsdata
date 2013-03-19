@@ -35,6 +35,7 @@
 #include <puTools/miString.h>
 
 #include <parameter/parameter.h>
+#include <iostream>
 
 class Parameter {
   parameter* par;

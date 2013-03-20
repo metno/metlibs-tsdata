@@ -37,9 +37,10 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "puTools/miTime.h"
+
 #include <string>
-#include <sstream>
-#include <puTools/miTime.h>
+#include <vector>
 
 // collection of all wdb-queries performed by the pets::WdbStream
 

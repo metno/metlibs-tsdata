@@ -40,6 +40,8 @@
 
 #include "WdbQueries.h"
 
+#include <sstream>
+
 using namespace std;
 
 namespace pets  {

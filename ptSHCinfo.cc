@@ -91,7 +91,7 @@ bool SHCcollection::readList(const miString& filename)
   total.levels.clear();
   list.clear();
 
-  ifstream f(filename.cStr());
+  ifstream f(filename.c_str());
   if (!f) {
     cerr << "ERROR opening file" << endl;
     return false;
@@ -164,11 +164,11 @@ bool SHCcollection::readList(const miString& filename)
 //       cerr << "Totalname " << totalname << endl;
       
     } else if (buf.contains("numlevels=")){
-      numlev= atoi(vs[1].cStr());
+      numlev= atoi(vs[1].c_str());
 //       cerr << "Found " << numlev << " levels" << endl;
       
     } else if (buf.contains("numdirections=")){
-      numdir= atoi(vs[1].cStr());
+      numdir= atoi(vs[1].c_str());
 //       cerr << "Found " << numdir << " directions" << endl;
       
     } else if (buf.contains("directions=")){
@@ -184,7 +184,7 @@ bool SHCcollection::readList(const miString& filename)
 	return false;
       }
       for (int i=0; i<numdir+1; i++)
-	fdir.push_back(atof(vvs[i].cStr()));
+	fdir.push_back(atof(vvs[i].c_str()));
       
     } else if (mode==read_val){
 //       cerr << "READ_VAL:" << numlev << " " << numdir << endl;
@@ -202,7 +202,7 @@ bool SHCcollection::readList(const miString& filename)
 	return false;
       }
       for (int i=0; i<numdir; i++){
-	list[numloc].levels[ilevel].dirs[i].value= atof(vals[i].cStr());
+	list[numloc].levels[ilevel].dirs[i].value= atof(vals[i].c_str());
       }
     }
   }

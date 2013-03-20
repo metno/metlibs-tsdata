@@ -903,7 +903,7 @@ bool GribStream::_readPosList(ErrorFlag* ef)
   cout << "GribStream::_readPosList --starting-----" << endl;
   cout << "          ::_readPosList filename =    " << stFileName<< endl;
 #endif
-  ifstream file(stFileName.cStr());
+  ifstream file(stFileName.c_str());
   if (!file){
     *ef = DF_FILE_OPEN_ERROR;
     return false;
@@ -960,7 +960,7 @@ bool GribStream::_readParList(ErrorFlag* ef)
   cout << "GribStream::_readParList" << endl;
 #endif
  /* miString Name="/data/proj5/diana/NYVIS_DEV/Ariunaa.Bertelsen/DIANA/local/hirlam_11.param"; 
-  ifstream file(Name.cStr());
+  ifstream file(Name.c_str());
   if (!file){
     *ef = DF_FILE_OPEN_ERROR;
     return false;

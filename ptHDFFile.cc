@@ -372,7 +372,7 @@ bool HDFFile::readData(const int posIndex,
 #ifdef DEBUG
 	    cout << "Vdata name:" << modelName << endl;
 #endif
-	    if (strcmp(modelName,modname.cStr())==0) {
+	    if (strcmp(modelName,modname.c_str())==0) {
 #ifdef DEBUG
 	      cout << "It is a match!!" << endl;
 #endif
@@ -667,12 +667,12 @@ bool HDFFile::writeData(const int posIndex,
 
   // make current positions vgroup
   vpos=Vattach(fid,-1,"w");
-  Vsetname(vpos,posList[posIndex].name.cStr());
+  Vsetname(vpos,posList[posIndex].name.c_str());
   Vinsert(posVG,vpos);
 
   // make vdata for current model
   modVD=VSattach(fid,-1,"w");
-  VSsetname(modVD,modname.cStr());
+  VSsetname(modVD,modname.c_str());
   Vinsert(vpos,modVD);
 
   // Vdata field definitions
@@ -724,7 +724,7 @@ bool HDFFile::writeData(const int posIndex,
       // make a list over unique SubModels
       miString sm= parameters[i].Id().submodel;
       if (sm != S_UNDEF)
-	stemp = atoi(sm.cStr());
+	stemp = atoi(sm.c_str());
       else
 	stemp = undefValue;
       for (is=0; (is<uniqSModels.size())&&(stemp!=uniqSModels[is]); is++)
@@ -748,9 +748,9 @@ bool HDFFile::writeData(const int posIndex,
       aliaslist.push_back(alias); // store it
       colidx.push_back(j);        // store corresponding index to parList
       numcomp+=parList[j].order;  // update number of datacomponents
-      VSfdefine(modVD,parList[j].alias.cStr(),DFNT_INT16,parList[j].order);
+      VSfdefine(modVD,parList[j].alias.c_str(),DFNT_INT16,parList[j].order);
       strcat(thisPosFN,",");
-      strcat(thisPosFN,parList[j].alias.cStr());
+      strcat(thisPosFN,parList[j].alias.c_str());
     }
     column.push_back(kk);
   }
@@ -1028,7 +1028,7 @@ bool HDFFile::_openFile(ErrorFlag* ef)
   cout << "HDFFile::_openFile" << endl;
 #endif
 //   cerr << "***** Foer Hopen.."<<endl;
-  if((fid = Hopen(Name.cStr(),DFACC_RDONLY,0))==-1) {
+  if((fid = Hopen(Name.c_str(),DFACC_RDONLY,0))==-1) {
     *ef = DF_FILE_OPEN_ERROR;
     return false;
   }
@@ -1049,7 +1049,7 @@ bool HDFFile::_createFile(ErrorFlag* ef)
 #ifdef DEBUG
   cout << "HDFFile::_createFile" << endl;
 #endif
-  if((fid = Hopen(Name.cStr(),DFACC_CREATE,0))==-1) {
+  if((fid = Hopen(Name.c_str(),DFACC_CREATE,0))==-1) {
     *ef = DF_FILE_OPEN_ERROR;
     return false;
   }
@@ -1241,13 +1241,13 @@ bool HDFFile::_writeParList(ErrorFlag* ef)
 
   for (i=0; i<npar; i++) {
     memcpy(tmp,&(parList[i].num),     inc=sizeof(uint16)); tmp+=inc;
-    strcpy(ctmp,parList[i].name.cStr());
+    strcpy(ctmp,parList[i].name.c_str());
     for (j=strlen(ctmp);j<=PARNSZ;j++) ctmp[j]='\0';
     memcpy(tmp,  ctmp,     inc=(PARNSZ+1)*sizeof(char)); tmp+=inc;
-    strcpy(ctmp,parList[i].alias.cStr());
+    strcpy(ctmp,parList[i].alias.c_str());
     for (j=strlen(ctmp);j<=ALIASZ;j++) ctmp[j]='\0';
     memcpy(tmp,  ctmp,    inc=(ALIASZ+1)*sizeof(char)); tmp+=inc;
-    strcpy(ctmp,parList[i].unit.cStr());
+    strcpy(ctmp,parList[i].unit.c_str());
     for (j=strlen(ctmp);j<=UNITSZ;j++) ctmp[j]='\0';
     memcpy(tmp,  ctmp,     inc=(UNITSZ+1)*sizeof(char)); tmp+=inc;
     memcpy(tmp,&(parList[i].scale),   inc=sizeof(int8));   tmp+=inc;
@@ -1447,7 +1447,7 @@ bool HDFFile::_writePosList(ErrorFlag* ef)
 
   for (i=0; i<npos; i++) {
     memcpy(tmp,&(posList[i].ref),      inc=sizeof(int32)); tmp+=inc;
-    strcpy(ctmp,posList[i].name.cStr());
+    strcpy(ctmp,posList[i].name.c_str());
     for (j=strlen(ctmp);j<posnsz;j++) ctmp[j]='\0';
     memcpy(tmp, ctmp, inc=posnsz*sizeof(char)); tmp+=inc;
     memcpy(tmp, posList[i].geopos,inc=2*sizeof(float32)); tmp+=inc;
@@ -1673,7 +1673,7 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
 
   for (i=0; i<nmod; i++) {
     memcpy(tmp,&(modList[i].modelPn),inc=sizeof(uint16)); tmp+=inc;
-    strcpy(ctmp,modList[i].name.cStr());
+    strcpy(ctmp,modList[i].name.c_str());
     for (j=strlen(ctmp);j<modnsz;j++) ctmp[j]='\0';
     memcpy(tmp, ctmp, inc=modnsz); tmp+=inc;
     memcpy(tmp,&(modList[i].run[0]), inc=sizeof(uint32)); tmp+=inc;

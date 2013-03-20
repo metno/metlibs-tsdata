@@ -137,11 +137,11 @@ void ParId::setFromString(miutil::miString buffer)
   if ( n < 1 ) return;
   if ( parts[0] != "x"    ) alias   = parts[0];
   if ( n < 2 ) return;
-  if ( parts[1].isNumber()) level   = atoi(parts[1].cStr());
+  if ( parts[1].isNumber()) level   = atoi(parts[1].c_str());
   if ( n < 3 ) return;
   if ( parts[2] != "x"    ) model    = parts[2];
   if ( n < 4 ) return;
-  if ( parts[3].isNumber()) run      = atoi(parts[3].cStr());
+  if ( parts[3].isNumber()) run      = atoi(parts[3].c_str());
   if ( n < 5 ) return;
   if ( parts[4] != "x"    ) submodel = parts[4];
 }
@@ -150,7 +150,7 @@ void ParId::setFromString(miutil::miString buffer)
 bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
 {
   for (int i=0; i<paramList.size(); i++)
-    if (strcmp(paramList[i].alias().cStr(),id.cStr())==0){
+    if (strcmp(paramList[i].alias().c_str(),id.c_str())==0){
       p =  paramList[i];
       return true;
     }
@@ -164,7 +164,7 @@ bool ParameterDefinition::readParameters(const miString paramdef)
   parameter **parlist;
   int npar;
 
-  parsepardefs(paramdef.cStr(),&parlist,&npar);
+  parsepardefs(paramdef.c_str(),&parlist,&npar);
   for (int i=0; i<npar; i++) {
     paramList.push_back(Parameter(*parlist[i]));
     free(parlist[i]);

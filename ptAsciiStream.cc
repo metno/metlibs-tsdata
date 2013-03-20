@@ -432,7 +432,7 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
 #ifdef DEBUG
   cout << "AsciiStream::_openFile" << endl;
 #endif
-  ifstream file(Name.cStr());
+  ifstream file(Name.c_str());
   if (!file){
     *ef = DF_FILE_OPEN_ERROR;
     return false;
@@ -486,8 +486,8 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       miString name= vt2[0];
       miCoordinates c;
       if (vt2.size()>2){
-	float loni= atof(vt2[1].cStr());
-	float lati= atof(vt2[2].cStr());
+	float loni= atof(vt2[1].c_str());
+	float lati= atof(vt2[2].c_str());
 	c= miCoordinates(loni,lati);
       }
       miPosition pos(c,0,0,name);
@@ -511,11 +511,11 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
 	     << buf << endl;
 	return false;
       }
-      int level= atoi(vt1[2].cStr());
+      int level= atoi(vt1[2].c_str());
       int submodel= 0;
       int ds= 3;
       if (use_submodel) {
-	submodel= atoi(vt1[3].cStr());
+	submodel= atoi(vt1[3].c_str());
 	ds= 4;
       }
       AsciiLine line;
@@ -526,7 +526,7 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       for (size_t j=ds; j<vt1.size(); j++){
 	float f= UNDEF;
 	if (vt1[j] != "-")
-	  f= atof(vt1[j].cStr());
+	  f= atof(vt1[j].c_str());
 	line.data.push_back(f);
       }
       adata.pardata.push_back(line);

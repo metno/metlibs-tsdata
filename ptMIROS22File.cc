@@ -63,7 +63,7 @@ bool MIROS22File::read(const miString& location,
   bool allpars=false;
   res= cant_open;
   
-  ifstream f(filename.cStr());
+  ifstream f(filename.c_str());
   if (!f) return false;
 
   res= bad_file;
@@ -84,7 +84,7 @@ bool MIROS22File::read(const miString& location,
     res= bad_file;
     return false;
   }
-  miDate d(atoi(vs[2].cStr()),atoi(vs[1].cStr()),atoi(vs[0].cStr()));
+  miDate d(atoi(vs[2].c_str()),atoi(vs[1].c_str()),atoi(vs[0].c_str()));
   if (d.undef() || d!=date) return false;
 
 //   cerr << "File:" << filename << " is ok, and has location:"
@@ -109,7 +109,7 @@ bool MIROS22File::read(const miString& location,
 	  res= bad_file;
 	  return false;
 	}
-	miClock c(atoi(vs[0].cStr()),atoi(vs[1].cStr()),0);
+	miClock c(atoi(vs[0].c_str()),atoi(vs[1].c_str()),0);
 	if (c.undef()){
 	  res= bad_file;
 	  return false;
@@ -139,7 +139,7 @@ bool MIROS22File::read(const miString& location,
 	vector<float> values;
 	for (int k=0; k<numl; k++){
 	  getline(f,buf);
-	  values.push_back(atof(buf.cStr()));
+	  values.push_back(atof(buf.c_str()));
 	}
 	// extract parameter values
 	for (int k=0; k<np; k++){
@@ -200,7 +200,7 @@ bool MIROS22Definition::scan()
 {
   if (!filename.exists()) return false;
   
-  ifstream f(filename.cStr());
+  ifstream f(filename.c_str());
   if (!f) return false;
 
   enum bstatus {
@@ -254,7 +254,7 @@ bool MIROS22Definition::scan()
       pars.push_back(par);
       pars[n].block= vs2[0];
       pars[n].sensor= vs2[1][0];
-      pars[n].parnum= atoi(vs2[2].cStr());
+      pars[n].parnum= atoi(vs2[2].c_str());
       pars[n].parid= p;
 //       cerr << "Found parameter:" << pars[n].parid << " --> "
 // 	   << pars[n].block << "," << pars[n].sensor << ","
@@ -298,12 +298,12 @@ bool MIROS22Definition::scan()
 	       << buf << endl;
 	  continue;
 	}
-	float lat= atof(vs2[0].cStr());
-	float lon= atof(vs2[1].cStr());
+	float lat= atof(vs2[0].c_str());
+	float lon= atof(vs2[1].c_str());
 	locs[n-1].loc.setPos(miCoordinates(lon,lat),
 			     0,0,locs[n-1].loc.Name());
-// 	locs[n-1].loc.pos.latitude= atof(vs2[0].cStr());
-// 	locs[n-1].loc.pos.longitude= atof(vs2[1].cStr());
+// 	locs[n-1].loc.pos.latitude= atof(vs2[0].c_str());
+// 	locs[n-1].loc.pos.longitude= atof(vs2[1].c_str());
 
 // 	cerr << "Location:" << locs[n-1].loc.name << " has position:"
 // 	     << locs[n-1].loc.pos << endl;

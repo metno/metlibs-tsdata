@@ -53,7 +53,7 @@ class SetupParser;
    list of strings with references to original linenumbers and filesources
 */
 struct SetupSection {
-  std::vector<miutil::miString> strlist;
+  std::vector<std::string> strlist;
   std::vector<int> linenum;
   std::vector<int> filenum;
 };
@@ -61,11 +61,11 @@ struct SetupSection {
 
 class GribStream : public DataStream {
 public:
-  GribStream(const miString&);
+  GribStream(const std::string&);
   ~GribStream();
 
-  int  findStation(const miString& posName); // return index in posList
-  int  findModel(const miString& modelName,
+  int  findStation(const std::string& posName); // return index in posList
+  int  findModel(const std::string& modelName,
 		 const int& modelRun);       // return index in modList
   int  findDataPar(const ParId&);            // return index in parList
   void clean();
@@ -90,7 +90,7 @@ public:
 		   Run& run, int& id);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id,
-		   std::vector<miString>& vtl);
+		   std::vector<std::string>& vtl);
   int  putStation(const miPosition& s, //adds station to posList
 		  ErrorFlag*);
   bool writeData(const int posIndex,      //write data to file
@@ -99,16 +99,16 @@ public:
 		 bool complete_write,
 		 bool write_submodel);
   bool close(); // close file
-  void getTextLines(const ParId p, std::vector<miString>& tl);
+  void getTextLines(const ParId p, std::vector<std::string>& tl);
 private:
 
   FieldManager  *fieldm; // FieldManager handles gribfiles
   SetupParser  *sp; // SetupParser handles all related .grib and other setup files
-  miString stFileName;   // Stationlist file name
-  miString parmodFileName;  // SMHI's setupfile i Diana for grib parameters and models  
+  std::string stFileName;   // Stationlist file name
+  std::string parmodFileName;  // SMHI's setupfile i Diana for grib parameters and models  
   std::vector<miTime> validTime; // times from gribfiles
   std::vector<int> forecastHour; // forecast hours from gribfiles
-  std::map<miString,std::vector<float> > data; //map with a key as  from 
+  std::map<std::string,std::vector<float> > data; //map with a key as  from 
 
   /// Setuptext hashed by Section name
   //static map<miString, SetupSection> sectionm;
@@ -120,9 +120,9 @@ private:
 
   struct GribPar {
     int num;
-    miString name;     // name that matches name in dianas GRIB_PARAMETERS
-    miString alias;    // name used in tseries     
-    miString unit;
+    std::string name;     // name that matches name in dianas GRIB_PARAMETERS
+    std::string alias;    // name used in tseries     
+    std::string unit;
     int      scale;
     int      size;     // size in bytes
     int      order;    // scalar, vector
@@ -131,19 +131,19 @@ private:
   };
   struct GribPos {
     int    ref;       // Reference number in Grib file
-    miString name;      // Modelname
+    std::string name;      // Modelname
     float  geopos[2]; // Longitude/latitude (before: int16)
     float  topo;      // Topography
     float  topo2;      // Topography
   };
   struct GribMod {
     int   modelPn; // production number
-    miString name;    // model name
-    miString alias;  //name that matches model name in dianas setupfile
+    std::string name;    // model name
+    std::string alias;  //name that matches model name in dianas setupfile
     int   run[6];  // year,month,day,hour,minute,second
     Model    modelid; // model id
     Run      runid;   // run id
-    std::vector<miString> textlines;
+    std::vector<std::string> textlines;
   };
 
   std::vector<GribPar> parList;
@@ -154,7 +154,7 @@ private:
   bool _readParList(ErrorFlag*);
   bool _readPosList(ErrorFlag*);
   bool _readModList(ErrorFlag*);
-  void _setData(int,const miString&, const ParId&);
+  void _setData(int,const std::string&, const ParId&);
 
 //  bool _createFile(ErrorFlag*);
 //  bool _writeParLis/t(ErrorFlag*);

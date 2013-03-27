@@ -695,7 +695,7 @@ string KlimaStream::createDataQuery(vector<string> klimaNames,
 
 // INHERITED FROM DATASTREAM  ---------------------------------------------
 
-int KlimaStream::findStation(const miutil::miString&)
+int KlimaStream::findStation(const std::string&)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return 0;
@@ -802,7 +802,7 @@ bool KlimaStream::getModelSeq(int, Model&, Run&, int&)
 }
 
 bool KlimaStream::getModelSeq(int, Model&, Run&, int&,
-    std::vector<miutil::miString>&)
+    std::vector<std::string>&)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
@@ -827,7 +827,7 @@ bool KlimaStream::close()
   return false;
 }
 
-void KlimaStream::getTextLines(const ParId p, std::vector<miutil::miString>& tl)
+void KlimaStream::getTextLines(const ParId p, std::vector<std::string>& tl)
 {
   tl = textLines;
 }

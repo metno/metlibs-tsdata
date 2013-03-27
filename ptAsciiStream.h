@@ -48,7 +48,7 @@ private:
     std::vector<float> data;
   };
   struct AsciiMod{
-    miutil::miString name;
+    std::string name;
     miutil::miTime run;
   };
   struct AsciiData{
@@ -57,7 +57,7 @@ private:
     std::set<int> levels;          // unique levels
     std::set<int> submodels;       // unique submodels
     std::set<miutil::miTime> times;        // unique times
-    std::vector<miutil::miString> params;  // all param-names
+    std::vector<std::string> params;  // all param-names
     std::vector<AsciiLine> pardata;// one time/data line
   };
 
@@ -79,11 +79,11 @@ private:
   
 
 public:
-  AsciiStream(const miutil::miString&);
+  AsciiStream(const std::string&);
   ~AsciiStream();
 
-    int  findStation(const miutil::miString& posName); // return index in posList
-  int  findModel(const miutil::miString& modelName,
+  int  findStation(const std::string& posName); // return index in posList
+  int  findModel(const std::string& modelName,
 		 const int& modelRun);       // return index in modList
   int  findDataPar(const ParId&);            // return index in parList
   void clean();
@@ -108,7 +108,7 @@ public:
 		   Run& run, int& id);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id,
-		   std::vector<miutil::miString>& vtl)
+		   std::vector<std::string>& vtl)
   {return getModelSeq(idx,mod,run,id);}
   int  putStation(const miPosition& s, //adds station to posList
 		  ErrorFlag*);

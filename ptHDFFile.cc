@@ -57,7 +57,7 @@ void out_of_store()
 using namespace miutil;
 using namespace std;
 
-HDFFile::HDFFile(const miString& fname)
+HDFFile::HDFFile(const std::string& fname)
   : DataStream(fname), hasposVG(false)
 {
 #ifdef DEBUG
@@ -90,15 +90,15 @@ bool HDFFile::close()
 }
 
 // return index of station 'statName' in posList, -1 if not found
-int HDFFile::findStation(const miString& statName)
+int HDFFile::findStation(const std::string& statName)
 {
 #ifdef DEBUG
   cout << "HDFFile::findStation:" << statName << endl;
 #endif
   int rn=-1, i;
-  miString sname= statName.upcase();
+  std::string sname= miutil::to_upper(statName);
   for (i=0; i<npos; ++i) {
-    if (posList[i].name.upcase() == sname) {
+    if (miutil::to_upper(posList[i].name) == sname) {
       rn = i;
       break;
     }
@@ -179,7 +179,7 @@ bool HDFFile::getModelSeq(int idx, Model& mod,
 
 bool HDFFile::getModelSeq(int idx, Model& mod,
 			  Run& run, int& id,
-			  vector<miString>& vtl)
+			  vector<std::string>& vtl)
 {
 #ifdef DEBUG
   cout << "HDFFile::getModelSeq" << endl;
@@ -201,7 +201,7 @@ bool HDFFile::getModelSeq(int idx, Model& mod,
 
 // return index of model 'modelName' and run modelRun
 // in modList, -1 if not found
-int HDFFile::findModel(const miString& modelName,
+int HDFFile::findModel(const std::string& modelName,
 		       const int& modelRun)
 {
 #ifdef DEBUG
@@ -311,7 +311,7 @@ bool HDFFile::readData(const int posIndex,
   char   modelName[VSNAMELENMAX+1];
   int32  nrec;
   int32  nfields;
-  vector<miString> nameFields;
+  vector<std::string> nameFields;
   vector<int>   orderFields;
   vector<int>   fieldSize;
   char  *fields;
@@ -321,7 +321,7 @@ bool HDFFile::readData(const int posIndex,
 
   int32 *tags, *refs;
   int npairs;
-  miString modname;
+  std::string modname;
   int modrun, modidx= -1;
   bool foundmodel=false;
   const int HDFFAIL = -1;
@@ -420,7 +420,7 @@ bool HDFFile::readData(const int posIndex,
   orderFields.reserve(nfields);
   parameters.reserve(nfields);
   for (j=0;j<nfields;j++) {
-    nameFields.push_back(miString(VFfieldname(vmod,j)));
+    nameFields.push_back(std::string(VFfieldname(vmod,j)));
     orderFields.push_back(VFfieldorder(vmod,j));
     fnsize += strlen(VFfieldname(vmod,j))+1;
     if (orderFields[j]>0)
@@ -636,7 +636,7 @@ bool HDFFile::writeData(const int posIndex,
   uint8 *buf, *tmp;
   int32  vpos;
   int32  modVD;
-  miString modname;
+  std::string modname;
   char *thisPosFN;
   int i,j,k,is,kk,inc;
   int16 i16dum;
@@ -706,7 +706,7 @@ bool HDFFile::writeData(const int posIndex,
   vector<int> uniqSModels;// unique SubModels
   Alias alias;
 
-  miString atemp;
+  std::string atemp;
   int ltemp;
   int stemp;
   int numcomp=0; // total number of parameter components
@@ -722,7 +722,7 @@ bool HDFFile::writeData(const int posIndex,
 
     if (write_submodel){
       // make a list over unique SubModels
-      miString sm= parameters[i].Id().submodel;
+      std::string sm= parameters[i].Id().submodel;
       if (sm != S_UNDEF)
 	stemp = atoi(sm.c_str());
       else
@@ -799,7 +799,7 @@ bool HDFFile::writeData(const int posIndex,
 
   for (is=0; is<uniqSModels.size(); is++){
     cursubmodel= (uniqSModels[is] != undefValue
-		  ? miString(uniqSModels[is]) : S_UNDEF);
+		  ? miutil::from_number(uniqSModels[is]) : S_UNDEF);
 
     for (il=0; il<uniqLevels.size(); il++){
       curlev = uniqLevels[il];
@@ -1543,14 +1543,14 @@ bool HDFFile::_readModList(ErrorFlag* ef)
       if (txtSz > 0){
 	memcpy(  temptext,         tmp,inc= txtSz); tmp+=inc;
 	temptext[txtSz] = '\0';
-	miString tmp;
+	std::string tmp;
 	for (int j=0; j<txtSz; j++){
 	  if (temptext[j]!='\0')
 	    tmp+= temptext[j];
 	  else if (tmp.length() > 0){
-	    tmp.replace("@","Ø");
-	    tmp.replace("$","Å");
-	    tmp.replace("#","Æ");
+	    miutil::replace(tmp, "@","Ø");
+	    miutil::replace(tmp, "$","Å");
+	    miutil::replace(tmp, "#","Æ");
 	    tempMod.textlines.push_back(tmp);
 	    tmp= "";
 	  }
@@ -1591,7 +1591,7 @@ bool HDFFile::_readModList(ErrorFlag* ef)
 
 
 void HDFFile::getTextLines(const ParId p,
-			   vector<miString>& tl)
+			   vector<std::string>& tl)
 {
   for (int i=0; i<modList.size(); i++)
     if (modList[i].modelid==p.model){
@@ -1705,7 +1705,7 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
 
 
 
-void HDFFile::_setData(int index, const miString& shortName,
+void HDFFile::_setData(int index, const std::string& shortName,
 		       const ParId& pid)
 {
 #ifdef DEBUG

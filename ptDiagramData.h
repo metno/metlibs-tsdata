@@ -39,7 +39,6 @@
 #include "KlimaStream.h"
 
 #include <puDatatypes/miPosition.h>
-#include <puTools/miString.h>
 #include <puMet/symbolMaker.h>
 #include <puMet/WindCalc.h>
 
@@ -82,7 +81,7 @@ struct datasetparam {
 };
 
 struct parameter_info {
-  miutil::miString alias;
+  std::string alias;
   float step;
   float min;
   float max;
@@ -94,11 +93,11 @@ struct parameter_info {
     step(1), min(-10000000), max(100000000), def(0), wrap(false), interpok(true), spreadok(false)
   {
   }
-  parameter_info(miutil::miString a, float st, float mi, float ma, float de, bool wr, bool in, bool sp) :
+  parameter_info(const std::string& a, float st, float mi, float ma, float de, bool wr, bool in, bool sp) :
     alias(a), step(st), min(mi), max(ma), def(de), wrap(wr), interpok(in), spreadok(sp)
   {
   }
-  parameter_info(miutil::miString a, float de, bool in, bool sp) :
+  parameter_info(const std::string& a, float de, bool in, bool sp) :
     alias(a), step(1), min(-10000000), max(10000000), def(de), wrap(false), interpok(in), spreadok(sp)
   {
   }
@@ -113,7 +112,7 @@ private:
   int nfetches;
   std::vector<Range> fetchRange;
   std::vector<WeatherParameter> parList;
-  std::map<miutil::miString, std::vector<miutil::miString> > textLines;
+  std::map<std::string, std::vector<std::string> > textLines;
 
   WeatherParameter emptypar;
   symbolMaker wsymbols;
@@ -121,7 +120,7 @@ private:
   SHCinfo shcinfo;
   WindCalc windCalc;
 
-  std::map<miutil::miString, parameter_info> parInfo;
+  std::map<std::string, parameter_info> parInfo;
 
   void cleanDataStructure_();
   void makeWeatherSymbols_(ParId);
@@ -179,8 +178,8 @@ public:
   {
     station = stat;
   }
-  std::vector<miutil::miString> getAllTextLines();
-  std::vector<miutil::miString> getTextLines(const miutil::miString modelname);
+  std::vector<std::string> getAllTextLines();
+  std::vector<std::string> getTextLines(const std::string& modelname);
 
   void setSHCinfo(const SHCinfo& shc);
   void setWindCalc(const WindCalc& wc);
@@ -240,9 +239,9 @@ public:
   bool fetchDataFromFile(DataStream*, const miPosition&, const ParId&, const Model&, const miutil::miTime&,
       const miutil::miTime&, int* first, int* last, std::vector<ParId>& outPars, bool append, ErrorFlag*);
 
-  bool fetchDataFromWDB(pets::WdbStream*, float lat, float lon, miutil::miString model, miutil::miTime run,
+  bool fetchDataFromWDB(pets::WdbStream*, float lat, float lon, const std::string& model, miutil::miTime run,
       std::vector<ParId>& inpars, std::vector<ParId>& outpars, unsigned long& readtime,
-      miutil::miString stationname);
+      const std::string& stationname);
 
   bool fetchDataFromKlimaDB(pets::KlimaStream* klima, std::vector<ParId>& inpars,
       std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
@@ -250,7 +249,7 @@ public:
 
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);
-  bool writeAllToFile(DataStream*, const miutil::miString&, ErrorFlag*);
+  bool writeAllToFile(DataStream*, const std::string&, ErrorFlag*);
   bool writeWeatherparametersToFile(DataStream*, const miPosition&, const std::vector<int>& wpindexes,
       bool append, ErrorFlag*, bool complete_write = true, bool write_submodel = false);
   Range getRange(int i)

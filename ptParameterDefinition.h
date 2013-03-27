@@ -33,22 +33,21 @@
 #ifndef _parameterdefinition_h
 #define _parameterdefinition_h
 
+#include "ptParameter.h"
+#include <iosfwd>
 #include <vector>
 
-#include <puTools/miString.h>
-#include "ptParameter.h"
-
-typedef miutil::miString Alias;
+typedef std::string Alias;
 typedef int Level;
-typedef miutil::miString Model;
+typedef std::string Model;
 typedef int Run;
-typedef miutil::miString SubModel;
+typedef std::string SubModel;
 
-const Alias    A_UNDEF= "x";
-const Level    L_UNDEF=  INT_MIN;
-const Model    M_UNDEF= "x";
-const Run      R_UNDEF=  INT_MIN;
-const SubModel S_UNDEF= "x";
+extern const Alias    A_UNDEF;
+extern const Level    L_UNDEF;
+extern const Model    M_UNDEF;
+extern const Run      R_UNDEF;
+extern const SubModel S_UNDEF;
 
 struct ParId {
   Alias alias;
@@ -76,15 +75,10 @@ struct ParId {
   { return !(lhs==rhs);}
 
 
-  friend std::ostream& operator<<(std::ostream& out, const ParId& pi) {
-    return out << " alias: " << pi.alias << " level: " << pi.level
-	       << " model: " << pi.model << " run: " << pi.run
-	       << " submodel: " << pi.submodel;
-  }
+  friend std::ostream& operator<<(std::ostream& out, const ParId& pi);
 
-  miutil::miString toString();
-  void setFromString(miutil::miString);
-
+  std::string toString();
+  void setFromString(const std::string&);
 };
 
 const ParId ID_UNDEF;
@@ -99,10 +93,10 @@ private:
 
 public:
   ParameterDefinition(){}
-  static bool readParameters(const miutil::miString);
+  static bool readParameters(const std::string&);
   bool getParameter(const Alias& id, Parameter& p) const;
-  miutil::miString ParId2Str(ParId);
-  ParId Str2ParId(miutil::miString);
+  std::string ParId2Str(ParId);
+  ParId Str2ParId(const std::string&);
 };
 
 #endif

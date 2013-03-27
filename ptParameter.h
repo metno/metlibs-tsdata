@@ -31,11 +31,8 @@
 #ifndef _ptParameter_h
 #define _ptParameter_h
 
-#include <string.h>
-#include <puTools/miString.h>
-
 #include <parameter/parameter.h>
-#include <iostream>
+#include <string>
 
 class Parameter {
   parameter* par;
@@ -45,87 +42,24 @@ public:
     par=0;
   }
 
-  Parameter(const parameter& p) {
-    par=new parameter;
+  Parameter(const parameter& p);
+  Parameter(const Parameter& p);
 
-    par->num=p.num;
-    strcpy(par->name,p.name);
-    strcpy(par->alias,p.alias);
-    strcpy(par->unit,p.unit);
-  //  strcpy(par->robsname,p.robsname);
-    par->scale=p.scale;
-    par->size=p.size;
-    par->order=p.order;
-    par->datatype=p.datatype;
-    par->plottype=p.plottype;
-  }
+  ~Parameter();
 
-  Parameter(const Parameter& p) {
-    par=new parameter;
+  Parameter& operator=(const Parameter& p);
+  Parameter& operator=(const parameter& p);
 
-    par->num=p.par->num;
-    strcpy(par->name,p.par->name);
-    strcpy(par->alias,p.par->alias);
-    strcpy(par->unit,p.par->unit);
-    strcpy(par->robsname,p.par->robsname);
-    par->scale=p.par->scale;
-    par->size=p.par->size;
-    par->order=p.par->order;
-    par->datatype=p.par->datatype;
-    par->plottype=p.par->plottype;
-  }
-
-  Parameter& operator=(const Parameter& p) {
-    if (this!=&p) {
-      delete par;
-      par=new parameter;
-
-      par->num=p.par->num;
-      strcpy(par->name,p.par->name);
-      strcpy(par->alias,p.par->alias);
-      strcpy(par->unit,p.par->unit);
-      strcpy(par->robsname,p.par->robsname);
-      par->scale=p.par->scale;
-      par->size=p.par->size;
-      par->order=p.par->order;
-      par->datatype=p.par->datatype;
-      par->plottype=p.par->plottype;
-    }
-    return *this;
-  }
-
-  Parameter& operator=(const parameter& p) {
-    delete par;
-    par=new parameter;
-
-    par->num=p.num;
-    strcpy(par->name,p.name);
-    strcpy(par->alias,p.alias);
-    strcpy(par->unit,p.unit);
-    strcpy(par->robsname,p.robsname);
-    par->scale=p.scale;
-    par->size=p.size;
-    par->order=p.order;
-    par->datatype=p.datatype;
-    par->plottype=p.plottype;
-
-    return *this;
-  }
-
-  ~Parameter() {
-    delete par;
-  }
-
-  miutil::miString alias() const {
+  std::string alias() const {
     return par->alias;
   }
-  miutil::miString name() const {
+  std::string name() const {
     return par->name;
   }
-  miutil::miString unit() const {
+  std::string unit() const {
     return par->unit;
   }
-  miutil::miString robsname() const {
+  std::string robsname() const {
     return par->robsname;
   }
   int num() const {
@@ -147,9 +81,7 @@ public:
     return par->plottype;
   }
 
-  void printName() const {
-    std::cout << par->name << std::endl;
-  }
+  void printName() const;
 };
 
 #endif

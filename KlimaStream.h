@@ -29,7 +29,6 @@
 #define KLIMASTREAM_H
 
 #include <string>
-#include <iostream>
 #include <vector>
 #include <map>
 #include <set>
@@ -144,7 +143,7 @@ public:
 
   /// Inherited from DataStream ---------------------------
 
-  int findStation(const miutil::miString&); // find station index
+  int findStation(const std::string&); // find station index
   int findDataPar(const ParId&);
   void clean();
   void cleanParData();
@@ -164,12 +163,12 @@ public:
   bool getStations(std::vector<miPosition>&);
   bool getStationSeq(int, miPosition&);
   bool getModelSeq(int, Model&, Run&, int&);
-  bool getModelSeq(int, Model&, Run&, int&, std::vector<miutil::miString>&);
+  bool getModelSeq(int, Model&, Run&, int&, std::vector<std::string>&);
   int putStation(const miPosition& s, ErrorFlag*);
   bool
   writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel);
   bool close();
-  void getTextLines(const ParId p, std::vector<miutil::miString>& tl);
+  void getTextLines(const ParId p, std::vector<std::string>& tl);
 
 };
 }

@@ -42,16 +42,16 @@ using namespace std;
 
 // --------------- MIROS22File -------------------------------
 
-const miString MIROSstart= "!!!!";
-const miString MIROSid= "022";
-const miString MIROSend= "$$$$$$$";
+const std::string MIROSstart= "!!!!";
+const std::string MIROSid= "022";
+const std::string MIROSend= "$$$$$$$";
 
-MIROS22File::MIROS22File(const miString& fn)
+MIROS22File::MIROS22File(const std::string& fn)
   : filename(fn)
 {
 }
 
-bool MIROS22File::read(const miString& location,
+bool MIROS22File::read(const std::string& location,
 		       const miDate& date,
 		       vector<MIROS22parset>& ps,
 		       status& res)
@@ -67,19 +67,19 @@ bool MIROS22File::read(const miString& location,
   if (!f) return false;
 
   res= bad_file;
-  miString buf;
+  std::string buf;
   getline(f, buf);
-  if (!buf.contains(MIROSstart)) return false;
+  if (not miutil::contains(buf, MIROSstart)) return false;
   getline(f, buf);
-  if (!buf.contains(MIROSid)) return false;
+  if (not miutil::contains(buf, MIROSid)) return false;
 
   res= wrong_place;
   getline(f, buf);
-  if (!buf.contains(location)) return false;
+  if (not miutil::contains(buf, location)) return false;
   
   res= wrong_time;
   getline(f, buf);
-  vector<miString> vs= buf.split("-");
+  vector<std::string> vs= miutil::split(buf, "-");
   if (vs.size()!=3){
     res= bad_file;
     return false;
@@ -102,9 +102,9 @@ bool MIROS22File::read(const miString& location,
 
     foundclock= false;
     while (getline(f, buf)){
-      if (buf.contains(":")){
+      if (miutil::contains(buf, ":")){
 // 	cerr << "Found time-string:" << buf << endl;
-	vs= buf.split(":");
+          vs= miutil::split(buf, ":");
 	if (vs.size()!=2){
 	  res= bad_file;
 	  return false;
@@ -124,13 +124,13 @@ bool MIROS22File::read(const miString& location,
     if (foundclock){
 //       cerr << "Found correct clock:" << ps[i].t << endl;
       bool readok= getline(f, buf);
-      while (readok && !buf.contains(MIROSend)){
+      while (readok && not miutil::contains(buf, MIROSend)){
 // 	cerr << "--Block header:" << buf << endl;
 	if (buf.length()<8){
 	  res= bad_file;
 	  return false;
 	}
-	miString block= buf.substr(1,2);
+	std::string block= buf.substr(1,2);
 	char sensor= buf[3];
 	int numl= atoi(buf.substr(5,3).c_str());
 // 	cerr << "Block:" << block << " Sensor:" << sensor
@@ -186,19 +186,19 @@ bool MIROS22File::read(const miString& location,
 
 // --------------- MIROS22Definition -------------------------------
 
-MIROS22Definition::MIROS22Definition(const miString& fn)
+MIROS22Definition::MIROS22Definition(const std::string& fn)
 {
   set(fn);
 }
 
-void MIROS22Definition::set(const miString& fn)
+void MIROS22Definition::set(const std::string& fn)
 {
   filename= fn;
 }
 
 bool MIROS22Definition::scan()
 {
-  if (!filename.exists()) return false;
+  if (filename.empty()) return false;
   
   ifstream f(filename.c_str());
   if (!f) return false;
@@ -209,27 +209,27 @@ bool MIROS22Definition::scan()
     location_block
   };
   bstatus s= no_block;
-  miString buf;
+  std::string buf;
 
   pars.clear();
   locs.clear();
   MIROS22parameter par;
   MIROS22location loc;
-  vector<miString> vs1, vs2;
+  vector<std::string> vs1, vs2;
 
   while (getline(f, buf)){
-    buf.trim();
-    if (!buf.exists()) continue;
+      miutil::trim(buf);
+    if (buf.empty()) continue;
     if (buf[0]=='#') continue;
 
-    if (buf.contains("PARAMETERS")){
+    if (miutil::contains(buf, "PARAMETERS")){
 //       cerr << "----- Found parameter block" << endl;
       s= parameter_block;
-    } else if (buf.contains("LOCATIONS")){
+    } else if (miutil::contains(buf, "LOCATIONS")){
 //       cerr << "----- Found locations block" << endl;
       s= location_block;
     } else if (s == parameter_block) {
-      vs1= buf.split("=");
+      vs1= miutil::split(buf, "=");
       if (vs1.size()!=2){
 	cerr << "MIROS22Definition Warning: Bad parameter definition:"
 	     << buf << endl;
@@ -238,7 +238,7 @@ bool MIROS22Definition::scan()
       // parse ParId
       ParId p= pard.Str2ParId(vs1[0]);
       // parse MIROS def
-      vs2= vs1[1].split(",");
+      vs2= miutil::split(vs1[1], ",");
       if (vs2.size()<3){
 	cerr << "MIROS22Definition Warning: Bad MIROS definition:"
 	     << buf << endl;
@@ -262,14 +262,14 @@ bool MIROS22Definition::scan()
       
     } else if (s == location_block) {
       int n= locs.size();
-      if (buf.contains("Location=")){
-	vs1= buf.split("=");
+      if (miutil::contains(buf, "Location=")){
+	vs1= miutil::split(buf, "=");
 	if (vs1.size()<2){
 	  cerr << "MIROS22Definition Warning: Bad Location definition:"
 	       << buf << endl;
 	  continue;
 	}
-	vs2= vs1[1].split(";");
+	vs2= miutil::split(vs1[1], ";");
 	if (vs2.size()<2){
 	  cerr << "MIROS22Definition Warning: Bad Location definition:"
 	       << buf << endl;
@@ -280,19 +280,19 @@ bool MIROS22Definition::scan()
 	locs[n].name= vs2[1];
 // 	cerr << "Found location:" << locs[n].name << " --> "
 // 	     << locs[n].loc.name << endl;
-      } else if (buf.contains("Position=")){
+      } else if (miutil::contains(buf, "Position=")){
 	if (n==0){
 	  cerr << "MIROS22Definition Warning: Define Location before Position:"
 	       << buf << endl;
 	  continue;
 	}
-	vs1= buf.split("=");
+	vs1= miutil::split(buf, "=");
 	if (vs1.size()<2){
 	  cerr << "MIROS22Definition Warning: Bad Position definition:"
 	       << buf << endl;
 	  continue;
 	}
-	vs2= vs1[1].split(",");
+	vs2= miutil::split(vs1[1], ",");
 	if (vs2.size()<2){
 	  cerr << "MIROS22Definition Warning: Bad Position definition:"
 	       << buf << endl;
@@ -307,13 +307,13 @@ bool MIROS22Definition::scan()
 
 // 	cerr << "Location:" << locs[n-1].loc.name << " has position:"
 // 	     << locs[n-1].loc.pos << endl;
-      } else if (buf.contains("Filepath=")){
+      } else if (miutil::contains(buf, "Filepath=")){
 	if (n==0){
 	  cerr << "MIROS22Definition Warning: Define Location before Filepath:"
 	       << buf << endl;
 	  continue;
 	}
-	vs1= buf.split("=");
+	vs1= miutil::split(buf, "=");
 	if (vs1.size()<2){
 	  cerr << "MIROS22Definition Warning: Bad Filepath definition:"
 	       << buf << endl;
@@ -332,7 +332,7 @@ bool MIROS22Definition::scan()
 
 // --------------- MIROS22Server -------------------------------
 
-MIROS22Server::MIROS22Server(const miString& deffile)
+MIROS22Server::MIROS22Server(const std::string& deffile)
   : DataStream(deffile)
 {
   mirosdef.set(deffile);
@@ -348,21 +348,21 @@ bool MIROS22Server::close()
   return true;
 }
 
-int  MIROS22Server::findStation(const miString& posName) // return index in posList
+int  MIROS22Server::findStation(const std::string& posName) // return index in posList
 {
-  miString sname= posName.upcase();
+  std::string sname= miutil::to_upper(posName);
   for (int i=0; i<npos; i++){
-    if (mirosdef.locs[i].loc.Name().upcase() == sname)
+    if (miutil::to_upper(mirosdef.locs[i].loc.Name()) == sname)
       return i;
   }
   return -1;
 }
 
-int  MIROS22Server::findModel(const miString& modelName,
+int  MIROS22Server::findModel(const std::string& modelName,
 			      const int& modelRun)// return index in modList
 {
   for (int i=0; i<nmod; i++){
-    if (modList[i].downcase() == modelName.downcase())
+    if (miutil::to_lower(modList[i]) == miutil::to_lower(modelName))
       return i;
   }
   
@@ -438,7 +438,7 @@ bool MIROS22Server::readData(const int posIndex,
   *ef = DF_MODEL_NOT_FOUND;
 
   // find name of requested model
-  miString modname;
+  std::string modname;
   int modrun, modidx= -1;
   modname = modid.model;
   modrun  = modid.run;
@@ -471,7 +471,7 @@ bool MIROS22Server::readData(const int posIndex,
   MIROS22value v;
   MIROS22parset ps;
   vector<MIROS22parset> totvps;
-  miString filepath= mirosdef.locs[posIndex].filepath;
+  std::string filepath= mirosdef.locs[posIndex].filepath;
 
   int n= mirosdef.pars.size();
   int k=0;
@@ -485,18 +485,18 @@ bool MIROS22Server::readData(const int posIndex,
       vps[0].val[i].par= mirosdef.pars[i];
     }
     // read data
-    miString year= miString(t.year());
-    miString month= miString(t.month());
+    std::string year= miutil::from_number(t.year());
+    std::string month= miutil::from_number(t.month());
     if (month.length()==1) month= "0"+month;
-    miString day= miString(t.day());
+    std::string day= miutil::from_number(t.day());
     if (day.length()==1) day= "0"+day;
-    miString hour= miString(t.hour());
+    std::string hour= miutil::from_number(t.hour());
     if (hour.length()==1) hour= "0"+hour;
-    miString minute= miString(t.min());
+    std::string minute= miutil::from_number(t.min());
     if (minute.length()==1) minute= "0"+minute;
     
-    miString filename= filepath 
-      + year + month + day + hour + minute + miString(".d22");
+    std::string filename= filepath 
+      + year + month + day + hour + minute + std::string(".d22");
 
     MIROS22File file(filename);
     MIROS22File::status stat;
@@ -618,7 +618,7 @@ bool MIROS22Server::putOnePar(WeatherParameter&,ErrorFlag*)
 
 // fetch name and position of station idx
 bool MIROS22Server::getStationSeq(int idx,
-				  miString& name,
+				  std::string& name,
 				  float& lat,
 				  float& lng)
 {
@@ -653,7 +653,7 @@ bool MIROS22Server::getModelSeq(int idx, Model& mod,       // fetch model info
 
 bool MIROS22Server::getModelSeq(int idx, Model& mod,       // fetch model info
 				Run& run, int& id,
-				vector<miString>& vs)
+				vector<std::string>& vs)
 {
   if (idx >= 0 && idx < nmod) {
     mod= modList[idx];

@@ -38,9 +38,8 @@
 #include <puMet/cloudGrp.h>
 #include <puMet/iceAccretion.h>
 
-#include <math.h>
+#include <cmath>
 
-using namespace miutil;
 using namespace std;
 
 ptDiagramData::ptDiagramData() :
@@ -135,7 +134,7 @@ ostream& operator<<(ostream& out, /*const*/ptDiagramData& dd)
   }
   if (dd.textLines.size()) {
     out << "Printing of textlines:\n";
-    map<miString, vector<miString> >::iterator itr;
+    map<std::string, vector<std::string> >::iterator itr;
     for (itr = dd.textLines.begin(); itr != dd.textLines.end(); itr++)
       for (j = 0; j < itr->second.size(); j++)
         out << "model " << itr->first << " line " << j << ": "
@@ -2063,7 +2062,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     id1.alias = "FX";
     int m=0, i, j;
     for (i = 1; i < 6; i++) {
-      id1.submodel = miString(i);
+      id1.submodel = miutil::from_number(i);
 
       wpok = copyParameter(id1, wp, &error);
       if (wpok) {
@@ -2084,9 +2083,9 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
     // FX 5,25,50,75,95 decils
   } else if (inpid.alias == "FXQT-6h") {
-    miString name = "fx10-6h_Q";
+    std::string name = "fx10-6h_Q";
     int m=0, i, j;
-    const miString q[5] = { "5", "25", "50", "75", "95" };
+    const std::string q[5] = { "5", "25", "50", "75", "95" };
     for (i = 0; i < 5; i++) {
       id1.alias = name + q[i];
 
@@ -2109,9 +2108,9 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
     // RR 5,25,50,75,95 decils
   } else if (inpid.alias == "RRQT") {
-    miString name = "rr24_Q";
+    std::string name = "rr24_Q";
     int m=0, i, j;
-    const miString q[5] = { "5", "25", "50", "75", "95" };
+    const std::string q[5] = { "5", "25", "50", "75", "95" };
     for (i = 0; i < 5; i++) {
       id1.alias = name + q[i];
 
@@ -2134,9 +2133,9 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
     // t2m 5,25,50,75,95 decils
   } else if (inpid.alias == "t2mQT") {
-    miString name = "t2m_Q";
+    std::string name = "t2m_Q";
     int m=0, i, j;
-    const miString q[5] = { "5", "25", "50", "75", "95" };
+    const std::string q[5] = { "5", "25", "50", "75", "95" };
     for (i = 0; i < 5; i++) {
       id1.alias = name + q[i];
 
@@ -2412,15 +2411,15 @@ void ptDiagramData::cleanUpTimeline()
 }
 
 // add data by extrapolation
-void ptDiagramData::addData(const int& id1, const miTime& until,
-    const int step, vector<miTime>& timeline)
+void ptDiagramData::addData(const int& id1, const miutil::miTime& until,
+    const int step, vector<miutil::miTime>& timeline)
 {
   WeatherParameter cwp;
 
   int x1;
   int i, j, k;
-  miTime curr;
-  vector<miTime> newtimes;
+  miutil::miTime curr;
+  vector<miutil::miTime> newtimes;
 
   x1 = timeline.size() - 1;
   if (timeline[x1] < until) {
@@ -2450,10 +2449,10 @@ void ptDiagramData::addData(const int& id1, const miTime& until,
 
 // merge two datasets
 void ptDiagramData::mergeData(const int& id1, const int& id2,
-    const miTime& until, vector<miTime>& timeline, const int method)
+    const miutil::miTime& until, vector<miutil::miTime>& timeline, const int method)
 {
   WeatherParameter cwp;
-  vector<miTime> tl1, tl2;
+  vector<miutil::miTime> tl1, tl2;
   int tlid2 = parList[id2].TimeLineIndex();
   int merge_met = method;
 
@@ -2599,7 +2598,7 @@ bool ptDiagramData::parameterInfo(const ParId& pid, float& def, bool& interpok,
 {
   if (pid.alias == A_UNDEF)
     return false;
-  miString alias = pid.alias;
+  std::string alias = pid.alias;
 
   if (parInfo.count(alias) > 0) {
     parameter_info pai = parInfo[alias];
@@ -2619,7 +2618,7 @@ bool ptDiagramData::parameterInfo(const ParId& pid, parameter_info& pai)
 {
   if (pid.alias == A_UNDEF)
     return false;
-  miString alias = pid.alias;
+  std::string alias = pid.alias;
 
   if (parInfo.count(alias) > 0) {
     pai = parInfo[alias];
@@ -2637,7 +2636,7 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
   WeatherParameter wp;
   int index = -1;
   int i, j;
-  miString alias = pid.alias;
+  std::string alias = pid.alias;
   Parameter pp;
   parameter_info pai;
 
@@ -2743,10 +2742,10 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
 
 // replace wp's data for matching timepoints
 void ptDiagramData::replaceData(const int oldidx, const int newidx,
-    const vector<miTime> inptline, vector<bool>& locked)
+    const vector<miutil::miTime> inptline, vector<bool>& locked)
 {
  unsigned  int j, k, l;
-  vector<miTime> curtline;
+  vector<miutil::miTime> curtline;
   parameter_info pai;
 
   if (newidx != -1 && oldidx != -1 && parList[oldidx].Ndim()
@@ -2786,8 +2785,8 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
   ErrorFlag error;
   WeatherParameter inpwp, curwp;
   unsigned int i, j;
-  miTime ct;
-  vector<miTime> inptline, curtline;
+  miutil::miTime ct;
+  vector<miutil::miTime> inptline, curtline;
   vector<bool> locked;
   int tlindex; // index to new timeline
   int tempindex, subjindex, mainindex, xtraindex; // indices to wp's
@@ -2825,7 +2824,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
   }
   // sort and check timeline for ambiguities
   sort(inptline.begin(), inptline.end());
-  vector<miTime>::iterator p;
+  vector<miutil::miTime>::iterator p;
   for (i = 1; i < inptline.size(); i++) {
     if (inptline[i] == inptline[i - 1]) {
       p = inptline.begin() + i;
@@ -2937,13 +2936,13 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
 
 // make datasets with given timepoints; add data from models
 void ptDiagramData::makeDatasets(const datasetparam& dsp,
-    vector<miTime>& inptline)
+    vector<miutil::miTime>& inptline)
 {
   ErrorFlag error;
   WeatherParameter inpwp, curwp;
   unsigned int i, j;
-  miTime ct;
-  vector<miTime> curtline;
+  miutil::miTime ct;
+  vector<miutil::miTime> curtline;
   vector<bool> locked;
   int tlindex; // index to new timeline
   int tempindex, subjindex, mainindex, xtraindex, xtra2index; // indices to wp's
@@ -2956,7 +2955,7 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
 
   // sort and check timeline for ambiguities
   sort(inptline.begin(), inptline.end());
-  vector<miTime>::iterator p;
+  vector<miutil::miTime>::iterator p;
   for (i = 1; i < inptline.size(); i++) {
     if (inptline[i] == inptline[i - 1]) {
       p = inptline.begin() + i;
@@ -3184,12 +3183,12 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
   const unsigned int numparams = 7;
   ErrorFlag error;
   TimeLine times;
-  vector<miTime> termin, tline;
+  vector<miutil::miTime> termin, tline;
   vector<ParId> id(numparams);
   vector<int> num(numparams, 0);
   vector<miSymbol> symbols;
 
-  map<miTime, float> modelIn;
+  map<miutil::miTime, float> modelIn;
   vector<paramet> modelVec;
   paramet modelUse;
 
@@ -3275,12 +3274,12 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
   const unsigned int numparams = 5;
   ErrorFlag error;
   TimeLine times;
-  vector<miTime> termin, tline;
+  vector<miutil::miTime> termin, tline;
   vector<ParId> id(numparams);
   vector<int> num(numparams, 0);
   vector<miSymbol> symbols;
 
-  map<miTime, float> modelIn;
+  map<miutil::miTime, float> modelIn;
   vector<paramet> modelVec;
   paramet modelUse;
 
@@ -3399,12 +3398,12 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 // a timeline is still added
 bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     const miPosition& stat, const ParId& modelid, const Model& renamemodelid,
-    const miTime& start, const miTime& stop, const vector<ParId>& inPars,
+    const miutil::miTime& start, const miutil::miTime& stop, const vector<ParId>& inPars,
     int* first, int* last, vector<ParId>& outPars, bool append, ErrorFlag* ef)
 {
   int nread = 0, i;
   WeatherParameter wp;
-  vector<miTime> tline;
+  vector<miutil::miTime> tline;
   vector<int> pline;
   int index = 0;
   Range range;
@@ -3434,7 +3433,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     return false;
 
   // fetch textlines
-  vector<miString> tl;
+  vector<std::string> tl;
   pfile->getTextLines(modelid, tl);
   textLines[modelid.model] = tl;
 
@@ -3528,7 +3527,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
 // fetch all parameters for first model for this station
 bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     const miPosition& stat, const ParId& modelid, const Model& renamemodelid,
-    const miTime& start, const miTime& stop, int* first, int* last,
+    const miutil::miTime& start, const miutil::miTime& stop, int* first, int* last,
     vector<ParId>& outPars, bool append, ErrorFlag* ef)
 {
   vector<ParId> emptyvec;
@@ -3536,7 +3535,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
       emptyvec, first, last, outPars, append, ef);
 }
 
-bool ptDiagramData::writeAllToFile(DataStream* pf, const miString& modelName,
+bool ptDiagramData::writeAllToFile(DataStream* pf, const std::string& modelName,
     ErrorFlag* ef)
 {
   return false;
@@ -3607,13 +3606,13 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
 }
 
 // returns all timePoints belonging to timeline idx
-void ptDiagramData::getTimeLine(const int idx, vector<miTime>& timePoints)
+void ptDiagramData::getTimeLine(const int idx, vector<miutil::miTime>& timePoints)
 {
   timeLine.Timeline(idx, timePoints);
 }
 
 // returns all timePoints in the timeLine
-void ptDiagramData::getTimeLine(vector<miTime>& timePoints)
+void ptDiagramData::getTimeLine(vector<miutil::miTime>& timePoints)
 {
   timePoints.clear();
 
@@ -3623,8 +3622,8 @@ void ptDiagramData::getTimeLine(vector<miTime>& timePoints)
 
 // returns the indexes and the timepoints of the timeLine lying between
 // start and stop.
-void ptDiagramData::getTimeLine(const miTime& start, const miTime& stop,
-    vector<int>& indexes, vector<miTime>& timePoints, int skip)
+void ptDiagramData::getTimeLine(const miutil::miTime& start, const miutil::miTime& stop,
+    vector<int>& indexes, vector<miutil::miTime>& timePoints, int skip)
 {
   // clear the input vectors if they're not empty
   indexes.clear();
@@ -3646,7 +3645,7 @@ void ptDiagramData::getTimeLine(const miTime& start, const miTime& stop,
 }
 
 // addTimeLine returns index of the new timeLine
-int ptDiagramData::addTimeLine(vector<miTime>& tl)
+int ptDiagramData::addTimeLine(vector<miutil::miTime>& tl)
 {
   return timeLine.addTimeline(tl);
 }
@@ -3669,7 +3668,7 @@ bool ptDiagramData::getProgLine(int i, vector<int>& prog, ErrorFlag* ef)
   return true;
 }
 
-bool ptDiagramData::addTimePoint(const miTime& tp, int tlIndex, ErrorFlag *ef)
+bool ptDiagramData::addTimePoint(const miutil::miTime& tp, int tlIndex, ErrorFlag *ef)
 {
   *ef = OK;
   bool ok = timeLine.insert(tp, tlIndex);
@@ -3868,32 +3867,32 @@ set<Model> ptDiagramData::allModels()
   return models;
 }
 
-vector<miString> ptDiagramData::getAllTextLines()
+vector<std::string> ptDiagramData::getAllTextLines()
 {
-  vector<miString> str;
-  map<miString, vector<miString> >::iterator itr;
+  vector<std::string> str;
+  map<std::string, vector<std::string> >::iterator itr;
   for (itr = textLines.begin(); itr != textLines.end(); itr++)
     str.insert(str.end(), itr->second.begin(), itr->second.end());
   return str;
 }
 
-vector<miString> ptDiagramData::getTextLines(const miString modelname)
+vector<std::string> ptDiagramData::getTextLines(const std::string& modelname)
 {
-  vector<miString> str = textLines[modelname];
+  vector<std::string> str = textLines[modelname];
   return str;
 }
 
 
 
 bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
-    miString model, miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
-    unsigned long& readtime, miString stationname)
+    const std::string& model, miutil::miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
+    unsigned long& readtime, const std::string& stationname)
 {
 
 
   int nread = 0, i;
 
-  vector<miTime> tline;
+  vector<miutil::miTime> tline;
   vector<int> pline;
   int index = 0;
   Range range;
@@ -3960,7 +3959,7 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
   station.setLat(lat);
   station.setLon(lon);
   miCoordinates c=station.Coordinates();
-  if(stationname.exists())
+  if(not stationname.empty())
     station.setName(stationname);
   else
     station.setName( c.str() );
@@ -3969,10 +3968,10 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
 }
 
 bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
-    vector<ParId>& inpars, vector<ParId>& outpars, miTime fromTime, miTime toTime)
+    vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
 {
 
-  vector<miTime> tline;
+  vector<miutil::miTime> tline;
   vector<int> pline;
 
   klima->clean();

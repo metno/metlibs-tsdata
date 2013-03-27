@@ -38,14 +38,13 @@
 #include "ptTimeLine.h"
 
 #include <puDatatypes/miPosition.h>
-#include <puTools/miString.h>
 #include <puTools/miTime.h>
 
 #include <vector>
 
 class DataStream {
 public:
-  DataStream(const miutil::miString& fname) :
+  DataStream(const std::string& fname) :
     numTimeLines(0), IsOpen(false), InfoIsRead(false), IsCleaned(true),
         DataIsRead(false), TimeLineIsRead(false), npar(0), npos(0), nmod(0)
   {
@@ -56,7 +55,7 @@ public:
   {
   }
 
-  const miutil::miString& name()
+  const std::string& name()
   {
     return Name;
   }
@@ -89,7 +88,7 @@ public:
     return nmod;
   }
 
-  virtual int findStation(const miutil::miString&)=0; // find station index
+  virtual int findStation(const std::string&)=0; // find station index
   virtual int findDataPar(const ParId&)=0;
   virtual void clean()=0;
   virtual void cleanParData()
@@ -125,7 +124,7 @@ public:
   virtual bool getModelSeq(int, Model&, // fetch model info
       Run&, int&)=0;
   virtual bool getModelSeq(int, Model&, // fetch model info
-      Run&, int&, std::vector<miutil::miString>&)=0;
+      Run&, int&, std::vector<std::string>&)=0;
   virtual int putStation(const miPosition& /*s*/, //adds station to posList
       ErrorFlag*)
   {
@@ -137,7 +136,7 @@ public:
     return false;
   }
   virtual bool close() = 0;
-  virtual void getTextLines(const ParId /*p*/, std::vector<miutil::miString>& tl)
+  virtual void getTextLines(const ParId /*p*/, std::vector<std::string>& tl)
   {
     tl = textLines;
   }
@@ -148,10 +147,10 @@ protected:
   TimeLine timeLines; // Full timeline
   int numTimeLines;
   std::vector<WeatherParameter> parameters;
-  std::vector<miutil::miString> textLines;
+  std::vector<std::string> textLines;
 
   ParameterDefinition pdef; // parameter and model id mappings
-  miutil::miString Name;
+  std::string Name;
   bool IsOpen;
   bool InfoIsRead;
   bool IsCleaned;

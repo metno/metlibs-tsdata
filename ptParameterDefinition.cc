@@ -36,14 +36,28 @@
 
 #include "ptParameterDefinition.h"
 
+#include <puTools/miString.h>
+
 #include <fstream>
 #include <algorithm>
 
 using namespace std;
 using namespace miutil;
 
+extern const Alias    A_UNDEF= "x";
+extern const Level    L_UNDEF=  INT_MIN;
+extern const Model    M_UNDEF= "x";
+extern const Run      R_UNDEF=  INT_MIN;
+extern const SubModel S_UNDEF= "x";
 
 vector<Parameter> ParameterDefinition::paramList;
+
+std::ostream& operator<<(std::ostream& out, const ParId& pi)
+{
+    return out << " alias: " << pi.alias << " level: " << pi.level
+	       << " model: " << pi.model << " run: " << pi.run
+	       << " submodel: " << pi.submodel;
+}
 
 bool operator==(const ParId& lhs, const ParId& rhs) {
   if (lhs.submodel != S_UNDEF && lhs.submodel != rhs.submodel)
@@ -110,13 +124,13 @@ bool ParId::wdbCompare(const ParId& lhs)
 
 }
 
-miutil::miString ParId::toString()
+std::string ParId::toString()
 {
-  miString palias    =  ( alias    != A_UNDEF ? alias           : "x");
-  miString plevel    =  ( level    != L_UNDEF ? miString(level) : "x");
-  miString pmodel    =  ( model    != M_UNDEF ? model           : "x");
-  miString prun      =  ( run      != R_UNDEF ? miString(run)   : "x");
-  miString psubmodel =  ( submodel != S_UNDEF ? submodel        : "x");
+  const std::string palias    =  ( alias    != A_UNDEF ? alias           : "x");
+  const std::string plevel    =  ( level    != L_UNDEF ? miString(level) : "x");
+  const std::string pmodel    =  ( model    != M_UNDEF ? model           : "x");
+  const std::string prun      =  ( run      != R_UNDEF ? miString(run)   : "x");
+  const std::string psubmodel =  ( submodel != S_UNDEF ? submodel        : "x");
   return palias + "," + plevel + "," + pmodel + "," + prun + "," + psubmodel;
 }
 
@@ -129,19 +143,19 @@ void  ParId::reset()
   submodel = S_UNDEF;
 
 }
-void ParId::setFromString(miutil::miString buffer)
+void ParId::setFromString(const std::string& buffer)
 {
   reset();
-  vector<miString> parts= buffer.split(',',true);
+  std::vector<std::string> parts = miutil::split(buffer, ",", true);
   int n= parts.size();
   if ( n < 1 ) return;
   if ( parts[0] != "x"    ) alias   = parts[0];
   if ( n < 2 ) return;
-  if ( parts[1].isNumber()) level   = atoi(parts[1].c_str());
+  if (miutil::is_number(parts[1])) level   = miutil::to_int(parts[1]);
   if ( n < 3 ) return;
   if ( parts[2] != "x"    ) model    = parts[2];
   if ( n < 4 ) return;
-  if ( parts[3].isNumber()) run      = atoi(parts[3].c_str());
+  if (miutil::is_number(parts[3])) run      = miutil::to_int(parts[3]);
   if ( n < 5 ) return;
   if ( parts[4] != "x"    ) submodel = parts[4];
 }
@@ -157,7 +171,7 @@ bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
   return false;
 }
 
-bool ParameterDefinition::readParameters(const miString paramdef)
+bool ParameterDefinition::readParameters(const std::string& paramdef)
 {
   // Experimental reading of parameter file
   paramList.clear();
@@ -173,16 +187,14 @@ bool ParameterDefinition::readParameters(const miString paramdef)
   return true;
 }
 
-miString ParameterDefinition::ParId2Str(ParId p)
+std::string ParameterDefinition::ParId2Str(ParId p)
 {
   return p.toString();
 }
 
-
-ParId ParameterDefinition::Str2ParId(miString buffer)
+ParId ParameterDefinition::Str2ParId(const std::string& buffer)
 {
   ParId parid;
   parid.setFromString(buffer);
   return parid;
 }
-

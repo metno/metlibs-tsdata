@@ -44,7 +44,7 @@
 using namespace miutil;
 using namespace std;
 
-AsciiStream::AsciiStream(const miutil::miString& fname)
+AsciiStream::AsciiStream(const std::string& fname)
   : DataStream(fname)
 { 
 #ifdef DEBUG
@@ -70,15 +70,15 @@ bool AsciiStream::close()
 }
 
 // return index of station 'statName' in posList, -1 if not found
-int AsciiStream::findStation(const miString& statName)
+int AsciiStream::findStation(const std::string& statName)
 {
 #ifdef DEBUG
   cout << "AsciiStream::findStation:" << statName << endl;
 #endif
   int rn=-1, i;
-  miString sname= statName.upcase();
+  std::string sname = miutil::to_upper(statName);
   for (i=0; i<npos; ++i) {
-    if (posList[i].Name().upcase() == sname) {
+    if (miutil::to_upper(posList[i].Name()) == sname) {
       rn = i;
       break;
     }
@@ -133,7 +133,7 @@ bool AsciiStream::getModelSeq(int idx, Model& mod,
 
 // return index of model 'modelName' and run modelRun 
 // in modList, -1 if not found
-int AsciiStream::findModel(const miString& modelName,
+int AsciiStream::findModel(const std::string& modelName,
 			   const int& modelRun)
 {
   int rn=-1, i;
@@ -214,7 +214,7 @@ bool AsciiStream::readData(const int posIndex,
 			   const miTime& stop,
 			   ErrorFlag* ef)
 {
-  miString modname;
+  std::string modname;
   int modrun, modidx= -1;
 
 #ifdef DEBUG
@@ -325,7 +325,7 @@ bool AsciiStream::readData(const int posIndex,
 	// (pid is now fully defined)
 	pid.alias = dataList[didx].params[ip];
 	pid.level = int(*leveli);
-	pid.submodel= miString(*submi);
+	pid.submodel= miutil::from_number(*submi);
 	parameters[ipar].setId(pid);
 #ifdef DEBUG
 	cout << "the complete wp:"<<  parameters[ipar]<<endl;
@@ -442,8 +442,8 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
   posList.clear();
   modList.clear();
 
-  miString buf;
-  vector<miString> vt1, vt2;
+  std::string buf;
+  vector<std::string> vt1, vt2;
   bool header_found= false;
   bool data_saved= true;
   bool use_submodel= false;
@@ -454,19 +454,19 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
     if ((p=buf.find("#"))!=string::npos)
       buf.erase(p);
 
-    buf.remove('\n');
-    buf.trim();
+    miutil::remove(buf, '\n');
+    miutil::trim(buf);
 
     if (buf.length() == 0) continue;
 
-    if (buf.upcase().contains("MODEL=")){
+    if (miutil::contains(miutil::to_upper(buf), "MODEL=")){
       if (!data_saved) dataList.push_back(adata);
       data_saved= true;
       adata.params.clear();
 
       AsciiMod  amod;
-      vt1= buf.split("=");
-      vt2= vt1[1].split(",");
+      vt1= miutil::split(buf, "=");
+      vt2= miutil::split(vt1[1], ",");
       amod.name= vt2[0];
       if (vt2.size()>1) {
 	if (miTime::isValid(vt2[1])) amod.run.setTime(vt2[1]);
@@ -476,18 +476,18 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       adata.model= amod;
       
       header_found= false;
-    } else if (buf.upcase().contains("POSITION=")){
+    } else if (miutil::contains(miutil::to_upper(buf), "POSITION=")){
       if (!data_saved) dataList.push_back(adata);
       data_saved= true;
       adata.params.clear();
 
-      vt1= buf.split("=");
-      vt2= vt1[1].split(",");
-      miString name= vt2[0];
+      vt1= miutil::split(buf, "=");
+      vt2= miutil::split(vt1[1], ",");
+      std::string name= vt2[0];
       miCoordinates c;
       if (vt2.size()>2){
-	float loni= atof(vt2[1].c_str());
-	float lati= atof(vt2[2].c_str());
+        float loni= miutil::to_double(vt2[1]);
+	float lati= miutil::to_double(vt2[2]);
 	c= miCoordinates(loni,lati);
       }
       miPosition pos(c,0,0,name);
@@ -496,14 +496,14 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       header_found= false;
 
     } else if (header_found){
-      vt1= buf.split(" ");
+      vt1= miutil::split(buf, " ");
       if (vt1.size() != 2+1+(use_submodel ? 1 : 0)+adata.params.size()){
 	cerr << "AsciiStream error: number of entries in dataline does not match header:"
 	     << buf << endl;
 	return false;
       }
       miTime t;
-      miString times= vt1[0]+" "+vt1[1];
+      std::string times= vt1[0]+" "+vt1[1];
       if (miTime::isValid(times)) 
 	t.setTime(times);
       else {
@@ -511,11 +511,11 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
 	     << buf << endl;
 	return false;
       }
-      int level= atoi(vt1[2].c_str());
+      int level= miutil::to_int(vt1[2]);
       int submodel= 0;
       int ds= 3;
       if (use_submodel) {
-	submodel= atoi(vt1[3].c_str());
+        submodel= miutil::to_int(vt1[3]);
 	ds= 4;
       }
       AsciiLine line;
@@ -536,15 +536,15 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       adata.times.insert(t);
       
     } else {
-      vt1= buf.split(" ");
+      vt1= miutil::split(buf, " ");
       if (vt1.size() < 2 || 
-	  (vt1[0].upcase()!="TIME" || vt1[1].upcase()!="LEVEL")){
+	  (miutil::to_upper(vt1[0])!="TIME" || miutil::to_upper(vt1[1])!="LEVEL")){
 	cerr << "AsciiStream error: table-header should start with"
 	     << " \"TIME LEVEL\" " << endl;
 	return false;
       }
       int ds= 2;
-      if (vt1.size()>2 && vt1[2].upcase()=="SUBMODEL"){
+      if (vt1.size()>2 && miutil::to_upper(vt1[2])=="SUBMODEL"){
 	ds= 3;
 	use_submodel= true;
       }
@@ -571,4 +571,3 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
   *ef = OK;
   return true;
 }
-

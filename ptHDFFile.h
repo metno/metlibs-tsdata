@@ -39,11 +39,11 @@
 
 class HDFFile : public DataStream {
 public:
-  HDFFile(const miutil::miString&);
+  HDFFile(const std::string&);
   ~HDFFile();
 
-  int  findStation(const miutil::miString& posName); // return index in posList
-  int  findModel(const miutil::miString& modelName,
+  int  findStation(const std::string& posName); // return index in posList
+  int  findModel(const std::string& modelName,
 		 const int& modelRun);       // return index in modList
   int  findDataPar(const ParId&);            // return index in parList
   void clean();
@@ -68,7 +68,7 @@ public:
 		   Run& run, int& id);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id,
-		   std::vector<miutil::miString>& vtl);
+		   std::vector<std::string>& vtl);
   int  putStation(const miPosition& s, //adds station to posList
 		  ErrorFlag*);
   bool writeData(const int posIndex,      //write data to file
@@ -77,7 +77,7 @@ public:
 		 bool complete_write,
 		 bool write_submodel);
   bool close(); // close file
-  void getTextLines(const ParId p, std::vector<miutil::miString>& tl);
+  void getTextLines(const ParId p, std::vector<std::string>& tl);
 private:
   int32 fid;            // HDF file handler
   int32 posVG;          // the main position vgroup
@@ -85,9 +85,9 @@ private:
 
   struct HDFPar {
     uint16 num;
-    miutil::miString name;
-    miutil::miString alias;
-    miutil::miString unit;
+    std::string name;
+    std::string alias;
+    std::string unit;
     int8   scale;
     int32  size;     // size in bytes
     int32  order;    // scalar, vector
@@ -96,17 +96,17 @@ private:
   };
   struct HDFPos {
     int32    ref;       // Reference number in HDF file
-    miutil::miString name;      // Modelname
+    std::string name;      // Modelname
     float32  geopos[2]; // Longitude/latitude (before: int16)
     float32  topo;      // Topography
   };
   struct HDFMod {
     uint16   modelPn; // production number
-    miutil::miString name;    // model name
+    std::string name;    // model name
     uint32   run[6];  // year,month,day,hour,minute,second
     Model    modelid; // model id
     Run      runid;   // run id
-    std::vector<miutil::miString> textlines;
+    std::vector<std::string> textlines;
   };
 
   std::vector<HDFPar> parList;
@@ -117,7 +117,7 @@ private:
   bool _readParList(ErrorFlag*);
   bool _readPosList(ErrorFlag*);
   bool _readModList(ErrorFlag*);
-  void _setData(int,const miutil::miString&, const ParId&);
+  void _setData(int,const std::string&, const ParId&);
 
   bool _createFile(ErrorFlag*);
   bool _writeParList(ErrorFlag*);

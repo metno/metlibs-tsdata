@@ -10,6 +10,7 @@ libtsData_la_SOURCES = \
 	ptAsciiStream.cc \
 	ptDiagramData.cc \
 	ptMIROS22File.cc \
+	ptParameter.cc \
 	ptParameterDefinition.cc \
 	ptPrimitiveType.cc \
 	ptSHCinfo.cc \
@@ -99,7 +100,6 @@ pkg_include_HEADERS = \
 	HDFdefs.h      \
 	ptDataStream.h \
 	ptError.h	   \
-	ptParameter.h  \
 	ptTimeLine.h
 
 

@@ -93,14 +93,14 @@ vector<miTime> WdbStream::DataFromWdb::adaptSingle(vector<miTime> ntim)
 
 
 
-WdbStream::WdbStream(std::string host, map<string, string> parlist, vector<string> vectorFunctionList,
-    std::string u) :
+WdbStream::WdbStream(const std::string& host, const map<string, string>& parlist, const std::vector<std::string>& vectorFunctionList,
+    const std::string& u) :
     		DataStream("WdbStream"), wdb( QUERY::CONNECT(host,u) ) , user(u)
 {
   geoGrid.setGeographic();
   transformIndex.clear();
 
-  map<string,string>::iterator itr=parlist.begin();
+  std::map<std::string, std::string>::const_iterator itr=parlist.begin();
 
 
   for(;itr!=parlist.end();itr++){
@@ -343,7 +343,7 @@ bool  WdbStream::setParameters()
 
 }
 
-void WdbStream::setRotateToGeo(vector<std::string> str)
+void WdbStream::setRotateToGeo(const vector<std::string>& str)
 {
   rot.clear();
 
@@ -410,7 +410,7 @@ bool WdbStream::openStream(ErrorFlag* error)
 }
 
 
-bool WdbStream::readWdbData(float lat, float lon,miString model, const miTime& run,vector<ParId>& inpar,vector<ParId>& outpar,
+bool WdbStream::readWdbData(float lat, float lon, const std::string& model, const miTime& run,vector<ParId>& inpar,vector<ParId>& outpar,
     unsigned long& readtime)
 {
   readtime=0;
@@ -627,7 +627,7 @@ void unimplemented(string func)
 
 
 
-int WdbStream::findStation(const miString& s)
+int WdbStream::findStation(const std::string& s)
 {
   unimplemented("findStation");
   return 0;
@@ -713,7 +713,7 @@ bool WdbStream::getModelSeq(int i, Model& m, Run& r, int& ii)
 }
 
 
-bool WdbStream::getModelSeq(int i, Model& m, Run& r, int& ii, vector<miString>& n)
+bool WdbStream::getModelSeq(int i, Model& m, Run& r, int& ii, vector<std::string>& n)
 {
   unimplemented("getModelSeq 2");
   return true;
@@ -738,13 +738,10 @@ bool WdbStream::close()
   return true;
 }
 
-void WdbStream::getTextLines(const ParId p, vector<miString>& tl)
+void WdbStream::getTextLines(const ParId p, vector<std::string>& tl)
 {
   unimplemented("getTextLines");
   tl = textLines;
 }
-
-
-
 
 }

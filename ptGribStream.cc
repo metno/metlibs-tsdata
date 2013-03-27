@@ -47,10 +47,10 @@
 #include <list>
 //#define DEBUG
 
-const miString SectParameters=  "TSERIES_PARAMETERS";
-const miString SectModel=  "TSERIES_MODEL";
-const miString SectStationList= "STATION_LIST";
-const miString SectGribParMod= 	"PARAMETERS_MODELS";
+const std::string SectParameters=  "TSERIES_PARAMETERS";
+const std::string SectModel=  "TSERIES_MODEL";
+const std::string SectStationList= "STATION_LIST";
+const std::string SectGribParMod= 	"PARAMETERS_MODELS";
 
 //map<miString,SetupSection> GribStream::sectionm;
 //map<miString,miString>     GribStream::substitutions;
@@ -63,8 +63,8 @@ bool GribStream::_parseGrib()
 #ifdef DEBUG
   cerr << "GribStream::_parseGrib:-----starting ---setup filename : " << Name << endl;
 #endif
-  vector<miString> list,tokens,stokens;
-  miString key,value, str;
+  vector<std::string> list,tokens,stokens;
+  std::string key,value, str;
   size_t n,p;
 
    sp->parse(Name);
@@ -78,7 +78,7 @@ bool GribStream::_parseGrib()
         continue;
       }
       else {
-        vector<miString> vs= list[n].split(2,'=',true);
+        vector<std::string> vs= list[n].split(2,'=',true);
         if (vs.size()==2) {
            key=vs[0].downcase(); // always converting keyword to lowercase !
            value=vs[1];
@@ -99,7 +99,7 @@ bool GribStream::_parseGrib()
         continue;
       }
       else {
-        vector<miString> vs= list[n].split(2,'=',true);
+        vector<std::string> vs= list[n].split(2,'=',true);
         if (vs.size()==2) {
          key=vs[0].downcase(); // always converting keyword to lowercase !
          value=vs[1];
@@ -123,7 +123,7 @@ bool GribStream::_parseGrib()
 
 }
 
-GribStream::GribStream(const miString& fname)
+GribStream::GribStream(const std::string& fname)
   : DataStream(fname), hasposVG(false)
 { 
 #ifdef DEBUG
@@ -144,12 +144,12 @@ GribStream::GribStream(const miString& fname)
   _parseGrib();
 
   //Parse field sections
-  vector<miString> fieldSubSect = fieldm->subsections();
+  vector<std::string> fieldSubSect = fieldm->subsections();
   fieldSubSect.push_back(fieldm->section());
   int nsect = fieldSubSect.size();
-  vector<miString> errors;
+  vector<std::string> errors;
   for( int i=0; i<nsect; i++){
-    vector<miString> lines;
+    vector<std::string> lines;
 #ifdef DEBUG
         cout<<"*****************Section "<<fieldSubSect[i]<<" in FieldManager."<<endl;
 #endif
@@ -186,13 +186,13 @@ bool GribStream::close()
 }
 
 // return index of station 'statName' in posList, -1 if not found
-int GribStream::findStation(const miString& statName)
+int GribStream::findStation(const std::string& statName)
 {
 #ifdef DEBUG
   cout << "GribStream::findStation:" << statName << endl;
 #endif
   int rn=-1, i;
-  miString sname= statName.upcase();
+  std::string sname= statName.upcase();
   for (i=0; i<npos; ++i) {
     if (posList[i].name.upcase() == sname) {
       rn = i;
@@ -284,7 +284,7 @@ bool GribStream::getModelSeq(int idx, Model& mod,
 
 bool GribStream::getModelSeq(int idx, Model& mod,
 			  Run& run, int& id,
-			  vector<miString>& vtl)
+			  vector<std::string>& vtl)
 {
    nmod=1;  //Måste redas ut vad är för något
 #ifdef DEBUG
@@ -307,7 +307,7 @@ bool GribStream::getModelSeq(int idx, Model& mod,
 
 // return index of model 'modelName' and run modelRun 
 // in modList, -1 if not found
-int GribStream::findModel(const miString& modelName,
+int GribStream::findModel(const std::string& modelName,
 		       const int& modelRun)
 {
 #ifdef DEBUG
@@ -433,12 +433,12 @@ bool GribStream::readData(const int posIndex,
 {
   int32  nrec;
   int32  nfields;
-  vector<miString> nameFields;
+  vector<std::string> nameFields;
   vector<int>   orderFields;
   vector<int>   fieldSize;
   size_t i, j, k, l;
 
-  miString modname,modName;
+  std::string modname,modName;
   int modrun, modidx= -1;
 
 #ifdef DEBUG
@@ -475,7 +475,7 @@ bool GribStream::readData(const int posIndex,
   }
   //Getting lat and long for pos with posIndex.
   float lat =0, lon=0;
-  vector<miString> params;
+  vector<std::string> params;
   for (size_t posnum= 0; posnum< posList.size(); posnum++){
       if (posnum == posIndex){
        lat = posList[posIndex].geopos[0];
@@ -914,8 +914,8 @@ bool GribStream::_readPosList(ErrorFlag* ef)
   //------------------------------------------------------
 
   GribPos tempPos;
-  miString stLine;
-  vector<miString>stationVector;
+  std::string stLine;
+  vector<std::string>stationVector;
   posList.clear();
   size_t i = 0;
   while (getline(file, stLine, '\n')){
@@ -971,8 +971,8 @@ bool GribStream::_readParList(ErrorFlag* ef)
   //------------------------------------------------------
 
   GribPar tempPar;
-  miString stLine;
-  vector<miString> parameterVector, list;
+  std::string stLine;
+  vector<std::string> parameterVector, list;
   parList.clear();
   size_t n, p;
   sp->parse(Name);
@@ -1051,8 +1051,8 @@ bool GribStream::_readModList(ErrorFlag* ef)
 #ifdef DEBUG
   cout << "GribStream::_readModList --starting---" << endl;
 #endif
-  miString Line, modName, key,value;
-  vector<miString> modelVector, modlist;
+  std::string Line, modName, key,value;
+  vector<std::string> modelVector, modlist;
   //parList.clear();
   size_t n, p;
   GribMod tempMod;
@@ -1151,7 +1151,7 @@ bool GribStream::_readModList(ErrorFlag* ef)
 
 
 void GribStream::getTextLines(const ParId p,
-			   vector<miString>& tl)
+			   vector<std::string>& tl)
 {
   for (size_t i=0; i<modList.size(); i++)
     if (modList[i].modelid==p.model){
@@ -1164,7 +1164,7 @@ void GribStream::getTextLines(const ParId p,
 
 
 
-void GribStream::_setData(int index, const miString& shortName, 
+void GribStream::_setData(int index, const std::string& shortName, 
 		       const ParId& pid)
 {
 #ifdef DEBUG

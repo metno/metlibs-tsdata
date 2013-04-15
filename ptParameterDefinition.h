@@ -81,7 +81,7 @@ struct ParId {
   void setFromString(const std::string&);
 };
 
-const ParId ID_UNDEF;
+extern const ParId ID_UNDEF;
 
 
 // ParameterDefinition is a class defining a mapping between the ParId enum

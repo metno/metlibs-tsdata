@@ -198,3 +198,5 @@ ParId ParameterDefinition::Str2ParId(const std::string& buffer)
   parid.setFromString(buffer);
   return parid;
 }
+
+const ParId ID_UNDEF;

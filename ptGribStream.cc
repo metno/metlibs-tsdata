@@ -52,8 +52,8 @@ const std::string SectModel=  "TSERIES_MODEL";
 const std::string SectStationList= "STATION_LIST";
 const std::string SectGribParMod= 	"PARAMETERS_MODELS";
 
-//map<miString,SetupSection> GribStream::sectionm;
-//map<miString,miString>     GribStream::substitutions;
+//map<std::string,SetupSection> GribStream::sectionm;
+//map<std::string,std::string>     GribStream::substitutions;
 
 using namespace std;
 using miutil::SetupParser;
@@ -78,9 +78,9 @@ bool GribStream::_parseGrib()
         continue;
       }
       else {
-        vector<std::string> vs= list[n].split(2,'=',true);
+        vector<std::string> vs= miutil::split(list[n], 2, "=", true);
         if (vs.size()==2) {
-           key=vs[0].downcase(); // always converting keyword to lowercase !
+           key=miutil::to_lower(vs[0]); // always converting keyword to lowercase !
            value=vs[1];
            // structures of type: A=B 
            if (key == "file" ) stFileName = value;
@@ -99,9 +99,9 @@ bool GribStream::_parseGrib()
         continue;
       }
       else {
-        vector<std::string> vs= list[n].split(2,'=',true);
+        vector<std::string> vs= miutil::split(list[n], 2, "=", true);
         if (vs.size()==2) {
-         key=vs[0].downcase(); // always converting keyword to lowercase !
+         key=miutil::to_lower(vs[0]); // always converting keyword to lowercase !
          value=vs[1];
          // structures of type: A=B 
          if (key == "file")
@@ -157,7 +157,7 @@ GribStream::GribStream(const std::string& fname)
 #ifdef DEBUG
         cout<<"*****************section "<<fieldSubSect[i]<<" in setupfile."<<endl;
 #endif
-        if (!fieldm->parseSetup(lines,fieldSubSect[i],errors,false))
+        if (!fieldm->parseSetup(lines,fieldSubSect[i],errors /* ,false*/))
            cerr << "*****************FieldManager-> parseSetup misslyckas" << endl;
     }
   }
@@ -192,9 +192,9 @@ int GribStream::findStation(const std::string& statName)
   cout << "GribStream::findStation:" << statName << endl;
 #endif
   int rn=-1, i;
-  std::string sname= statName.upcase();
+  std::string sname= miutil::to_upper(statName);
   for (i=0; i<npos; ++i) {
-    if (posList[i].name.upcase() == sname) {
+    if (miutil::to_upper(posList[i].name) == sname) {
       rn = i;
       break;
     }
@@ -329,12 +329,12 @@ int GribStream::findModel(const std::string& modelName,
   return rn;
 }
 
-bool GribStream::getFullModeltime(int id, miTime& t)
+bool GribStream::getFullModeltime(int id, miutil::miTime& t)
 {
   if ( id<0 || id>=modList.size() ) return false;
 
-  t =  miTime(modList[id].run[0],modList[id].run[1],modList[id].run[2],
-	      modList[id].run[3],modList[id].run[4],modList[id].run[5]);
+  t = miutil::miTime(modList[id].run[0],modList[id].run[1],modList[id].run[2],
+                     modList[id].run[3],modList[id].run[4],modList[id].run[5]);
 
   return true;
 }
@@ -427,8 +427,8 @@ bool GribStream::openStreamForWrite(ErrorFlag* ef)
 //---------------------------------------------------------------
 bool GribStream::readData(const int posIndex, 
 		       const ParId& modid,
-		       const miTime& start,
-		       const miTime& stop,
+		       const miutil::miTime& start,
+		       const miutil::miTime& stop,
 		       ErrorFlag* ef)
 {
   int32  nrec;
@@ -506,7 +506,7 @@ bool GribStream::readData(const int posIndex,
 #ifdef DEBUG
   cout << "Who map data_iterator starting " <<  endl;
 
-  std::map<miString,std::vector<float> >::iterator p;
+  std::map<std::string,std::vector<float> >::iterator p;
   for (p=data.begin(); p!=data.end(); ++p){
     cout << "Who (key=first): " << p->first<< endl;
     for (int j= 0; j < p->second.size(); j++) {
@@ -666,7 +666,7 @@ bool GribStream::readData(const int posIndex,
       int ipar = parameters.size();
       int curlevel;
       vector<int> parTimes[MAXLEV]; // MAXLEV from HDFdefs.h
-      vector<miTime> times; // timeline for each level
+      vector<miutil::miTime> times; // timeline for each level
       vector<int> ptimes;   // progline for each level
       int tlindex; // new timeline index
 
@@ -755,7 +755,7 @@ bool GribStream::writeData(const int posIndex,
 
 
 bool GribStream::getTimeLine(const int& index,
-			  vector<miTime>& tline,
+			  vector<miutil::miTime>& tline,
 			  vector<int>& pline,
 			  ErrorFlag* ef)
 {
@@ -775,7 +775,7 @@ bool GribStream::getTimeLine(const int& index,
 }
 
 bool GribStream::putTimeLine(const int& index,
-			  vector<miTime>& tline,
+			  vector<miutil::miTime>& tline,
 			  vector<int>& pline,
 			  ErrorFlag* ef)
 {
@@ -919,14 +919,14 @@ bool GribStream::_readPosList(ErrorFlag* ef)
   posList.clear();
   size_t i = 0;
   while (getline(file, stLine, '\n')){
-    stationVector = stLine.split(",",true);
+    stationVector = miutil::split(stLine, ",",true);
     if(stationVector.size() == 6) {
-  	tempPos.ref = stationVector[0].toInt(-1);
+  	tempPos.ref = miutil::to_int(stationVector[0], -1);
   	tempPos.name = stationVector[1];
-  	tempPos.geopos[0] = stationVector[2].toFloat();
-  	tempPos.geopos[1] = stationVector[3].toFloat();
-  	tempPos.topo = stationVector[4].toFloat();
-  	tempPos.topo2 = stationVector[5].toFloat();
+  	tempPos.geopos[0] = miutil::to_double(stationVector[2]);
+  	tempPos.geopos[1] = miutil::to_double(stationVector[3]);
+  	tempPos.topo = miutil::to_double(stationVector[4]);
+  	tempPos.topo2 = miutil::to_double(stationVector[5]);
         posList.push_back(tempPos);
     }
  }
@@ -959,7 +959,7 @@ bool GribStream::_readParList(ErrorFlag* ef)
 #ifdef DEBUG
   cout << "GribStream::_readParList" << endl;
 #endif
- /* miString Name="/data/proj5/diana/NYVIS_DEV/Ariunaa.Bertelsen/DIANA/local/hirlam_11.param"; 
+ /* std::string Name="/data/proj5/diana/NYVIS_DEV/Ariunaa.Bertelsen/DIANA/local/hirlam_11.param"; 
   ifstream file(Name.c_str());
   if (!file){
     *ef = DF_FILE_OPEN_ERROR;
@@ -998,17 +998,17 @@ bool GribStream::_readParList(ErrorFlag* ef)
         continue;
       }
       else {
-        parameterVector = stLine.split(",",true);
+        parameterVector = miutil::split(stLine, ",",true);
         if(parameterVector.size() == 9) {
-           tempPar.num = parameterVector[0].toInt(-1);
+           tempPar.num = miutil::to_int(parameterVector[0], -1);
            tempPar.name = parameterVector[1];
            tempPar.alias = parameterVector[2];
            tempPar.unit = parameterVector[3];
-           tempPar.scale = parameterVector[4].toInt(-1);
-           tempPar.size = parameterVector[5].toInt(-1);
-           tempPar.order = parameterVector[6].toInt(-1);
-           tempPar.dataType = parameterVector[7].toInt(-1);
-           tempPar.plotType = parameterVector[8].toInt(-1);
+           tempPar.scale = miutil::to_int(parameterVector[4], -1);
+           tempPar.size = miutil::to_int(parameterVector[5], -1);
+           tempPar.order = miutil::to_int(parameterVector[6], -1);
+           tempPar.dataType = miutil::to_int(parameterVector[7], -1);
+           tempPar.plotType = miutil::to_int(parameterVector[8], -1);
            parList.push_back(tempPar);
        }
         
@@ -1072,12 +1072,12 @@ bool GribStream::_readModList(ErrorFlag* ef)
         continue;
       }
       else {
-        modelVector = Line.split(2,'=',true);
+        modelVector = miutil::split(Line, 2, "=", true);
         if(modelVector.size()==2)  {
-           key=modelVector[0].downcase(); // always converting keyword to lowercase !
+           key=miutil::to_lower(modelVector[0]); // always converting keyword to lowercase !
            value=modelVector[1];
            // structures of type: A=B 
-           if (key == "id" ) tempMod.modelPn = value.toInt();
+           if (key == "id" ) tempMod.modelPn = miutil::to_int(value);
            else if (key=="name")  tempMod.name=value;   
            else if (key=="alias") modName=tempMod.alias=value;   
            else  
@@ -1089,7 +1089,7 @@ bool GribStream::_readModList(ErrorFlag* ef)
   }
 
 //.................................
-//    miString modName ="E11";
+//    std::string modName ="E11";
 //    vector<miTime> validTime;
 //    vector<int> forecastHour;
     if (!fieldm->invTseries(modName, validTime, forecastHour)) {

@@ -44,7 +44,7 @@
 #include <puCtools/puMath.h>
 
 #include <algorithm>
-
+#include <iostream>
 
 #ifdef DEBUG
 void out_of_store()

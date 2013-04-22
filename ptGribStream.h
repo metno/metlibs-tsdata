@@ -35,6 +35,7 @@
 #include "ptDataStream.h"
 #include <puCtools/porttypes.h>
 #include <puTools/miSetupParser.h>
+#include <puTools/miTime.h>
 
 #include <parameter/parameter.h>
 
@@ -45,7 +46,6 @@
 #define MAXLEV 100
 
 class FieldManager;
-class SetupParser;
 
 /**
    \brief one section in setupfile
@@ -72,13 +72,13 @@ public:
   bool openStream(ErrorFlag*);
   bool openStreamForWrite(ErrorFlag*);
   bool readData(const int posIndex, const ParId&,
-		const miTime&, const miTime&,
+		const miutil::miTime&, const miutil::miTime&,
 		ErrorFlag*);
   bool getTimeLine(const int& index,
-		   std::vector<miTime>& tline, std::vector<int>& pline,
+		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
   bool putTimeLine(const int& index,
-		   std::vector<miTime>& tline, std::vector<int>& pline,
+		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
   bool putTimeLine(TimeLine& tl, std::vector<int>& pline,
 		   ErrorFlag*);
@@ -103,17 +103,17 @@ public:
 private:
 
   FieldManager  *fieldm; // FieldManager handles gribfiles
-  SetupParser  *sp; // SetupParser handles all related .grib and other setup files
+  miutil::SetupParser *sp; // SetupParser handles all related .grib and other setup files
   std::string stFileName;   // Stationlist file name
   std::string parmodFileName;  // SMHI's setupfile i Diana for grib parameters and models  
-  std::vector<miTime> validTime; // times from gribfiles
+  std::vector<miutil::miTime> validTime; // times from gribfiles
   std::vector<int> forecastHour; // forecast hours from gribfiles
   std::map<std::string,std::vector<float> > data; //map with a key as  from 
 
   /// Setuptext hashed by Section name
-  //static map<miString, SetupSection> sectionm;
-  //static map<miString, miString> substitutions;
-  //static map<miString, miString> user_variables;
+  //static map<std::string, SetupSection> sectionm;
+  //static map<std::string, std::string> substitutions;
+  //static map<std::string, std::string> user_variables;
 
 //  int32 posVG;          // the main position vgroup
   bool hasposVG;
@@ -162,11 +162,11 @@ private:
 //  bool _writePosList(ErrorFlag*);
 //  bool _writeModLis/t(ErrorFlag*);
   bool _parseGrib();
-//  bool _parseFile(const miString filename );
-//  bool _checkSubstitutions(miString& t);
-//  bool _getSection(const miString& sectname, vector<miString>& setuplines);
+//  bool _parseFile(const std::string filename );
+//  bool _checkSubstitutions(std::string& t);
+//  bool _getSection(const std::string& sectname, vector<std::string>& setuplines);
 public:
-  bool getFullModeltime(int id, miTime& t);
+  bool getFullModeltime(int id, miutil::miTime& t);
 };
 
 #endif

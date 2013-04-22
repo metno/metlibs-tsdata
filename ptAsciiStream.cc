@@ -32,14 +32,14 @@
 #endif
 
 #include "ptAsciiStream.h"
+#include "puCtools/puMath.h"
 
+#include <cmath>
+#include <iostream>
 #include <fstream>
 
 #include <string.h>
-#include <math.h>
 #include <float.h>
-
-#include <puCtools/puMath.h>
 
 using namespace miutil;
 using namespace std;

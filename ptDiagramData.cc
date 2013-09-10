@@ -43,12 +43,12 @@
 using namespace std;
 
 ptDiagramData::ptDiagramData() :
-    nfetches(0), new_symbolmaker(false)
+            nfetches(0), new_symbolmaker(false)
 {
 }
 
 ptDiagramData::ptDiagramData(symbolMaker& wsym) :
-          nfetches(0), wsymbols(wsym), new_symbolmaker(false)
+                  nfetches(0), wsymbols(wsym), new_symbolmaker(false)
 {
   makedefaultParInfo();
 }
@@ -1412,7 +1412,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
           //cerr << "Found COSN + CORA + STSN + STRA" << endl;
           for (j = 0; j < wp.Npoints(); j++) {
             float rr = wp.Data(j, 0) + wp2.Data(j, 0) + wp3.Data(j, 0)
-                        + wp4.Data(j, 0);
+                                + wp4.Data(j, 0);
             wp.setData(j, 0, rr);
           }
 
@@ -1431,7 +1431,21 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
             wp.setData(j, 0, rr);
           }
         } else {
-          fixed = false; // failed
+
+          id1.alias = "RRAC"; // make RR from accumulated precipitation
+          if (copyParameter(id1, wp, &error) ) {
+            int last= wp.Npoints();
+            if (last>0) {
+              for (j = last; j > 0 ; j--) {
+                float rr = wp.Data(j, 0) - wp.Data(j-1, 0);
+                wp.setData(j,0,rr);
+              }
+              fixed=true;
+            } else
+              fixed=false;
+          } else{
+            fixed = false; // failed
+          }
         }
       }
       if (fixed) {
@@ -1467,6 +1481,11 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
         }
       }
     }
+
+
+
+
+
 
     // SHL
   } else if (inpid.alias == "SHL") {
@@ -2642,7 +2661,7 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
 
   if (parDef.getParameter(pid.alias, pp)) {
     parameterInfo(pid, pai);
-    wp.setPolar(pp.datatype() == polar);
+    wp.setPolar(pp.datatype() == POLAR);
     wp.setTimeLineIndex(tlindex);
     //wp.setType(pp.);
     // set wp's dimensions
@@ -2744,7 +2763,7 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
 void ptDiagramData::replaceData(const int oldidx, const int newidx,
     const vector<miutil::miTime> inptline, vector<bool>& locked)
 {
- unsigned  int j, k, l;
+  unsigned  int j, k, l;
   vector<miutil::miTime> curtline;
   parameter_info pai;
 
@@ -3247,7 +3266,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
       int cn = symbols[i].customNumber();
       if (cn == 999) {
         cerr << i << " Symbolmaker Error:" << symbols[i].customName()
-                    << " number:" << symbols[i].customNumber() << endl;
+                            << " number:" << symbols[i].customNumber() << endl;
         cn = 0;
       }
       termin.push_back(symbols[i].getTime());
@@ -3986,7 +4005,6 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
   }
 
 
-
   vector<int> newtimelines;
   int tlIndex,index;
   int nread=0;
@@ -4031,6 +4049,76 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
 
 
 
+bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString stationname,
+    std::vector<ParId>& inpars, std::vector<ParId>& outpars)
+{
 
+  cerr << "new fimex search for " << stationname << " : " << lat << " : " <<  lon << endl;
+
+  int nread = 0, i;
+
+  vector<miutil::miTime> tline;
+  vector<int> pline;
+  int index = 0;
+  Range range;
+
+  cleanDataStructure_();
+
+
+  // find station and read in data block
+  try {
+    if (!fimex->readData(stationname,lat,lon,inpars,outpars))
+      return false;
+  } catch(exception& e) {
+    cerr << "FIMEX::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+  vector<int> newtimelines;
+
+  // get all parameters
+
+  int tlIndex;
+  // get all parameters
+  for (i = 0; i < fimex->numParameters(); i++) {
+    WeatherParameter wp;
+    if (fimex->getOnePar(i, wp)) {
+      // add timeline and progline
+      if (!fimex->getTimeLine(wp.TimeLineIndex(), tline, pline))
+        break;
+
+      if ((tlIndex = timeLine.Exist(tline)) == -1) {
+        tlIndex = addTimeLine(tline);
+        if (tlIndex == -1) {
+          cerr << "Too many timelines! giving up this parameter" << endl;
+          continue;
+        }
+        progLines.push_back(pline);
+      }
+      wp.setTimeLineIndex(tlIndex);
+      index = addParameter(wp);
+      ++nread;
+    }
+  }
+  // set the index of the first and last elements appended
+  //*first = range.first = index + 1 - nread;
+  //*last = range.last = index;
+  range.first = index + 1 - nread;
+  range.last = index;
+
+  fetchRange.push_back(range);
+  ++nfetches;
+
+  station.setLat(lat);
+  station.setLon(lon);
+  miCoordinates c=station.Coordinates();
+  if(!stationname.empty())
+    station.setName(stationname);
+  else
+    station.setName( c.str() );
+
+  return true;
+
+}
 
 

@@ -40,6 +40,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 using namespace miutil;
@@ -146,18 +147,30 @@ void  ParId::reset()
 void ParId::setFromString(const std::string& buffer)
 {
   reset();
+
   std::vector<std::string> parts = miutil::split(buffer, ",", true);
   int n= parts.size();
+
   if ( n < 1 ) return;
-  if ( parts[0] != "x"    ) alias   = parts[0];
+  if ( parts[0] != "x"    ){
+    alias   = parts[0];
+  }
   if ( n < 2 ) return;
-  if (miutil::is_number(parts[1])) level   = miutil::to_int(parts[1]);
+  if (miutil::is_number(parts[1])){
+    level   = miutil::to_int(parts[1]);
+  }
   if ( n < 3 ) return;
-  if ( parts[2] != "x"    ) model    = parts[2];
+  if ( parts[2] != "x"    ){
+    model    = parts[2];
+  }
   if ( n < 4 ) return;
-  if (miutil::is_number(parts[3])) run      = miutil::to_int(parts[3]);
+  if (miutil::is_number(parts[3])) {
+    run      = miutil::to_int(parts[3]);
+  }
   if ( n < 5 ) return;
-  if ( parts[4] != "x"    ) submodel = parts[4];
+  if ( parts[4] != "x"    ){
+    submodel = parts[4];
+  }
 }
 
 

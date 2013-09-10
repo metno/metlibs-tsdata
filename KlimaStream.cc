@@ -527,14 +527,13 @@ pets::KlimaStation KlimaStream::getNearestKlimaStation(miCoordinates& pos)
   currentStation.clear();
   currentStation.distance = maxDistance;
 
-  if (!initialized)
+  if (!initialized) {
     return currentStation;
-
+  }
   if (stationlist.empty()) {
     read(STATIONREPORT);
     return currentStation;
   }
-
   list<KlimaStation>::iterator itr = stationlist.begin();
   for (; itr != stationlist.end(); itr++) {
     int dist = itr->coordinates.distance(pos);
@@ -551,7 +550,7 @@ pets::KlimaStation KlimaStream::getNearestKlimaStation(miCoordinates& pos)
 bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
     std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
 {
-
+cerr << "Klimastation =  " << currentStation.stationid << endl;
   // no place - no data - skipping
   if (!currentStation.stationid)
     return false;

@@ -19,7 +19,9 @@ libtsData_la_SOURCES = \
 	WdbQueries.cc         \
 	WdbCacheQuery.cc      \
 	DynamicFunction.cc    \
-	KlimaStream.cc
+	KlimaStream.cc        \
+	FimexStream.cc        \
+	FimexTools.cc
 
 libtsData_la_CPPFLAGS = \
 	$(LOG4CXX_CPPFLAGS) \
@@ -100,6 +102,7 @@ pkg_include_HEADERS = \
 	HDFdefs.h      \
 	ptDataStream.h \
 	ptError.h	   \
+	PetsExceptions.h \
 	ptTimeLine.h
 
 

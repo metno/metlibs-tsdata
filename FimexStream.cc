@@ -170,7 +170,6 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
       vector<ParId> extrapar;
       cache[0].getExtrapars(inpar,extrapar);
 
-      cerr << "from " << inpar.size() << " checking " << extrapar.size() << " parameters" << endl;
 
       // try to interpolate the missing parameters
       addToCache(0,poslist.getNumPos(),extrapar,false);

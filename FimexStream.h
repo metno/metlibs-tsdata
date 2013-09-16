@@ -79,8 +79,12 @@ private:
 
   boost::shared_ptr<MetNoFimex::CDMReader>       reader;   // the datafile access
   boost::shared_ptr<MetNoFimex::CDMInterpolator> interpol; // flexible interpolator - new coordinates
+  static FimexPoslist commonposlist;
+  static int          commonposlistVersion;
 
   FimexPoslist poslist;
+  int          poslistVersion;
+
   std::vector<pets::FimexParameter> fimexpar;
 
   int activePosition;
@@ -102,9 +106,12 @@ public:
   FimexStream(const std::string& fname,
         const std::string& modname,
         const std::string& ftype,
-        const std::vector<pets::FimexParameter>& fimexparameters,
-        const pets::FimexPoslist& fimexpositions);
+        const std::vector<pets::FimexParameter>& fimexparameters);
   ~FimexStream();
+
+
+  static void setCommonPoslist(const FimexPoslist& newCommonPoslist);
+  static void setCommonPoslistFromStringlist(std::vector<std::string> newposlist);
 
   /// Implemented from DataStream interface -------------------------------
 
@@ -113,7 +120,7 @@ public:
   bool closeStream();   // unimplemented
 
   // set the raw position list
-  void setPositions(pets::FimexPoslist& fimexpositions) {poslist = fimexpositions;}
+  void setPositions();
 
   // use the position list to interpolate the data
   bool createPoslistInterpolator();

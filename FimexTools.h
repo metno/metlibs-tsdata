@@ -63,6 +63,7 @@ public:
   std::vector<double>  getLon() const { return lon;}
   int getPos(std::string posname, float lat, float lon);
   int getNumPos() const { return lat.size(); }
+  int size() const { return lat.size();}
 
 
 };

@@ -4067,8 +4067,9 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
 
   // find station and read in data block
   try {
-    if (!fimex->readData(stationname,lat,lon,inpars,outpars))
+    if (!fimex->readData(stationname,lat,lon,inpars,outpars)) {
       return false;
+    }
   } catch(exception& e) {
     cerr << "FIMEX::READDATA FAILED: " << e.what() << endl;
     return false;

@@ -87,6 +87,11 @@ void FimexPoslist::addEntry(std::string posname,float latitude, float longitude)
 
 
 
+
+
+
+
+
 void FimexPoslist::clear()
 {
   lat.clear();

@@ -53,15 +53,48 @@ using namespace miutil;
 
 namespace pets
 {
+FimexPoslist FimexStream::commonposlist;
+int          FimexStream::commonposlistVersion=0;
+
+
+
+void FimexStream::setCommonPoslist(const FimexPoslist& cposlist)
+{
+  commonposlist = cposlist;
+  commonposlistVersion++;
+}
+
+void FimexStream::setCommonPoslistFromStringlist(std::vector<std::string> newposlist)
+{
+  cerr << "Creating new fimexposlist" << endl;
+  FimexPoslist newFimexposlist;
+
+  for(unsigned int i=0;i<newposlist.size();i++)
+    newFimexposlist.addEntry(newposlist[i]);
+
+  setCommonPoslist(newFimexposlist);
+
+}
+
+
+
+void FimexStream::setPositions()
+{
+ poslist = commonposlist;
+ poslistVersion = commonposlistVersion;
+}
+
+
+
 FimexStream::FimexStream(const std::string& fname,
     const std::string& modname,
     const std::string& ftype,
-    const std::vector<pets::FimexParameter>& fimexparameters,
-    const pets::FimexPoslist& fimexpositions)
-:  filename(fname) , modelname(modname), filetype(ftype), poslist(fimexpositions), fimexpar(fimexparameters) , progtime(0)
+    const std::vector<pets::FimexParameter>& fimexparameters)
+:  filename(fname) , modelname(modname), filetype(ftype), fimexpar(fimexparameters) , progtime(0)
 {
   timeLineIsRead=false;
-
+  poslist = commonposlist;
+  poslistVersion = commonposlistVersion;
 
 }
 
@@ -163,6 +196,21 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
     activePosition = poslist.getPos(placename,lat,lon);
 
+    // position not found
+    if(activePosition < 0 ) {
+
+      // aha the common poslist has changed - try to reload the cache
+      if(poslistVersion != commonposlistVersion) {
+        cerr << "Poslist has changed - filling cache" << endl;
+        poslist = commonposlist;
+        poslistVersion = commonposlistVersion;
+        createPoslistInterpolator();
+        cache.clear();
+        activePosition = poslist.getPos(placename,lat,lon);
+      }
+    }
+
+
     if(cache.empty() ) {
       addToCache(0,poslist.getNumPos(),inpar,true);
     } else {
@@ -177,15 +225,11 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
     }
 
 
-    // totally new position  - interpolate that one
 
     if(activePosition < 0 ) {
       cerr << placename << " not found " << endl;
+      return false;
 
-      poslist.addEntry(placename,lat,lon);
-      createPoslistInterpolator();
-      int pos=poslist.getNumPos()-1;
-      addToCache(pos,1,inpar,true);
     }
 
     cache[activePosition].getOutpars(inpar,outpar);
@@ -195,9 +239,9 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
     return false;
   }
 
-
   return true;
 }
+
 
 
 void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)

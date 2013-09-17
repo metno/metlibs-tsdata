@@ -100,7 +100,7 @@ private:
 
   bool readFromFimexSlice(FimexParameter par);
   void clean();
-  void addToCache(int posstart, int poslen, std::vector<ParId>& inpar, bool createPoslist);
+  void addToCache(std::vector<ParId>& inpar, bool createPoslist);
 
 public:
   FimexStream(const std::string& fname,

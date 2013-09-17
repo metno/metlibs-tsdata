@@ -66,7 +66,6 @@ void FimexStream::setCommonPoslist(const FimexPoslist& cposlist)
 
 void FimexStream::setCommonPoslistFromStringlist(std::vector<std::string> newposlist)
 {
-  cerr << "Creating new fimexposlist" << endl;
   FimexPoslist newFimexposlist;
 
   for(unsigned int i=0;i<newposlist.size();i++)
@@ -201,7 +200,6 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
       // aha the common poslist has changed - try to reload the cache
       if(poslistVersion != commonposlistVersion) {
-        cerr << "Poslist has changed - filling cache" << endl;
         poslist = commonposlist;
         poslistVersion = commonposlistVersion;
         createPoslistInterpolator();
@@ -212,7 +210,7 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
     if(cache.empty() ) {
-      addToCache(0,poslist.getNumPos(),inpar,true);
+      addToCache(inpar,true);
     } else {
       // check if there are parameters that were not interpolated earlier
       vector<ParId> extrapar;
@@ -220,7 +218,7 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
       // try to interpolate the missing parameters
-      addToCache(0,poslist.getNumPos(),extrapar,false);
+      addToCache(extrapar,false);
 
     }
 
@@ -244,19 +242,19 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
 
-void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
+void FimexStream::addToCache(vector<ParId>& inpar, bool createPoslist)
 {
-
+  int poslen=poslist.getNumPos();
   FimexPetsCache tmp;
-  if(createPoslist)
-    for(unsigned int i=0;i<poslen;i++)
-      cache.push_back(tmp);
-  // check the parameterlist - what to get and what not....
+
+  if(createPoslist) {
+    cache.clear();
+    cache.reserve(poslen);
+  }
+    // check the parameterlist - what to get and what not....
 
   vector<FimexParameter> activeParameters;
 
-  cerr << "Filling cache" << endl;
-  boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   for(unsigned int i=0;i<inpar.size();i++) {
 
     for( unsigned int j=0;j<fimexpar.size();j++) {
@@ -268,13 +266,10 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
         }
 
         break;
-
-
       }
     }
   }
-  boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
-  cerr << "Cache filled in: "  << (last-start).total_milliseconds() << " ms   " << endl;
+
 }
 
 

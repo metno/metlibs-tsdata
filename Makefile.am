@@ -95,6 +95,16 @@ libtsData_la_LDFLAGS += \
 libtsData_la_SOURCES += ptGribStream.cc
 endif
 
+if WITH_FIMEX
+libtsData_la_CPPFLAGS += \
+	-DFIMEX \
+	${FIMEX_CPPFLAGS}
+libtsData_la_LDFLAGS += \
+	${FIMEX_LDFLAGS}
+libtsData_la_LIBADD += \
+	${FIMEX_LIBS}
+endif
+
 pkg_includedir = ${includedir}/tsData
 
 pkg_include_HEADERS = \

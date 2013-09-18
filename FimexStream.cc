@@ -132,7 +132,6 @@ bool FimexStream::createPoslistInterpolator()
 
 void FimexStream::createTimeLine()
 {
-  cerr << "createTimeline " << endl;
   basetimeline.clear();
 
   try {
@@ -144,7 +143,6 @@ void FimexStream::createTimeLine()
 
     for(size_t u = 0; u < timeData->size(); ++u) {
       basetimeline.push_back( miutil::miTime(uTimes[u]) );
-      cerr << "adding time [ " << u << " ] :" << miutil::miTime(uTimes[u]) << endl;
     }
 
   } catch (exception& e) {

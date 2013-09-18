@@ -75,6 +75,9 @@ private:
   std::string filename;
   std::string modelname;
   std::string filetype;
+
+  std::vector<pets::FimexParameter> fimexpar;
+
   int progtime; // 0,6,12,etc for pets name
 
   boost::shared_ptr<MetNoFimex::CDMReader>       reader;   // the datafile access
@@ -85,7 +88,7 @@ private:
   FimexPoslist poslist;
   int          poslistVersion;
 
-  std::vector<pets::FimexParameter> fimexpar;
+
 
   int activePosition;
 
@@ -100,7 +103,7 @@ private:
 
   bool readFromFimexSlice(FimexParameter par);
   void clean();
-  void addToCache(std::vector<ParId>& inpar, bool createPoslist);
+  void addToCache(int posstart, int poslen, std::vector<ParId>& inpar, bool createPoslist);
 
 public:
   FimexStream(const std::string& fname,

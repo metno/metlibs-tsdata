@@ -132,6 +132,7 @@ bool FimexStream::createPoslistInterpolator()
 
 void FimexStream::createTimeLine()
 {
+  cerr << "createTimeline " << endl;
   basetimeline.clear();
 
   try {
@@ -141,9 +142,10 @@ void FimexStream::createTimeLine()
     MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit("time","seconds since 1970-01-01 00:00:00 +00:00");
     boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
 
-    for(size_t u = 0; u < timeData->size(); ++u)
+    for(size_t u = 0; u < timeData->size(); ++u) {
       basetimeline.push_back( miutil::miTime(uTimes[u]) );
-
+      cerr << "adding time [ " << u << " ] :" << miutil::miTime(uTimes[u]) << endl;
+    }
 
   } catch (exception& e) {
     cerr << "Exception catched in createTimeline" << e.what() << endl;
@@ -200,6 +202,7 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
       // aha the common poslist has changed - try to reload the cache
       if(poslistVersion != commonposlistVersion) {
+        cerr << "Poslist has changed - filling cache" << endl;
         poslist = commonposlist;
         poslistVersion = commonposlistVersion;
         createPoslistInterpolator();
@@ -210,7 +213,7 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
     if(cache.empty() ) {
-      addToCache(inpar,true);
+      addToCache(0,poslist.getNumPos(),inpar,true);
     } else {
       // check if there are parameters that were not interpolated earlier
       vector<ParId> extrapar;
@@ -218,7 +221,7 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
       // try to interpolate the missing parameters
-      addToCache(extrapar,false);
+      addToCache(0,poslist.getNumPos(),extrapar,false);
 
     }
 
@@ -242,19 +245,19 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
 
-void FimexStream::addToCache(vector<ParId>& inpar, bool createPoslist)
+void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
 {
-  int poslen=poslist.getNumPos();
-  FimexPetsCache tmp;
 
-  if(createPoslist) {
-    cache.clear();
-    cache.reserve(poslen);
-  }
-    // check the parameterlist - what to get and what not....
+  FimexPetsCache tmp;
+  if(createPoslist)
+    for(unsigned int i=0;i<poslen;i++)
+      cache.push_back(tmp);
+  // check the parameterlist - what to get and what not....
 
   vector<FimexParameter> activeParameters;
 
+  cerr << "Filling cache" << endl;
+  boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   for(unsigned int i=0;i<inpar.size();i++) {
 
     for( unsigned int j=0;j<fimexpar.size();j++) {
@@ -266,10 +269,13 @@ void FimexStream::addToCache(vector<ParId>& inpar, bool createPoslist)
         }
 
         break;
+
+
       }
     }
   }
-
+  boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
+  cerr << "Cache filled in: "  << (last-start).total_milliseconds() << " ms   " << endl;
 }
 
 

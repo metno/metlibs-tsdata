@@ -45,11 +45,11 @@
 using namespace std;
 using namespace miutil;
 
-extern const Alias    A_UNDEF= "x";
-extern const Level    L_UNDEF=  INT_MIN;
-extern const Model    M_UNDEF= "x";
-extern const Run      R_UNDEF=  INT_MIN;
-extern const SubModel S_UNDEF= "x";
+const Alias    A_UNDEF= "x";
+const Level    L_UNDEF=  INT_MIN;
+const Model    M_UNDEF= "x";
+const Run      R_UNDEF=  INT_MIN;
+const SubModel S_UNDEF= "x";
 
 vector<Parameter> ParameterDefinition::paramList;
 

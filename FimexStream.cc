@@ -55,6 +55,87 @@ namespace pets
 {
 FimexPoslist FimexStream::commonposlist;
 int          FimexStream::commonposlistVersion=0;
+int          FimexStream::progress=100;
+std::string  FimexStream::progressMessage="";
+std::set<std::string> FimexStream::parameterFilter;
+std::vector<pets::FimexParameter> FimexStream::fimexpar;
+std::vector<std::string> FimexStream::allParameters;
+
+int  FimexStream::getProgress()
+{
+  return progress;
+}
+
+std::string FimexStream::getProgressMessage()
+{
+  return progressMessage;
+}
+
+std::set<std::string> FimexStream::getParameterFilter()
+{
+  return parameterFilter;
+}
+
+bool FimexStream::isFiltered(std::string petsname)
+{
+  return bool(parameterFilter.count(petsname));
+}
+
+
+
+void FimexStream::setParameterFilter(std::set<std::string> pfilter)
+{
+  parameterFilter=pfilter;
+}
+
+
+void FimexStream::setFimexParameters(std::vector<pets::FimexParameter> par)
+{
+  fimexpar=par;
+  vector<string> apar;
+  for(int i=0;i<fimexpar.size();i++)
+    apar.push_back(fimexpar[i].parid.alias);
+  allParameters=apar;
+}
+
+void FimexStream::addToAllParameters(std::vector<std::string> newpar)
+{
+  allParameters.insert(allParameters.end(),newpar.begin(),newpar.end());
+}
+
+std::vector<std::string> FimexStream::getAllParameters()
+{
+  return allParameters;
+}
+
+
+
+std::string FimexStream::getParameterFilterAsString()
+{
+  ostringstream ost;
+  set<string>::iterator itr = parameterFilter.begin();
+  string delimiter = "";
+  for (; itr != parameterFilter.end(); itr++) {
+    ost << delimiter << *itr;
+    delimiter = ":";
+  }
+  return ost.str();
+
+}
+
+void FimexStream::setParameterFilterFromString(std::string blist)
+{
+  set<string> tokens;
+  boost::split(tokens, blist, boost::algorithm::is_any_of(":"));
+  parameterFilter = tokens;
+}
+
+
+
+
+
+
+
 
 
 
@@ -87,9 +168,8 @@ void FimexStream::setPositions()
 
 FimexStream::FimexStream(const std::string& fname,
     const std::string& modname,
-    const std::string& ftype,
-    const std::vector<pets::FimexParameter>& fimexparameters)
-:  filename(fname) , modelname(modname), filetype(ftype), fimexpar(fimexparameters) , progtime(0)
+    const std::string& ftype)
+:  filename(fname) , modelname(modname), filetype(ftype), progtime(0), is_open(false)
 {
   timeLineIsRead=false;
   poslist = commonposlist;
@@ -134,9 +214,14 @@ void FimexStream::createTimeLine()
 {
   basetimeline.clear();
 
+
   try {
     if(!interpol)
       createPoslistInterpolator();
+
+
+    if(!is_open)
+        return;
 
     MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit("time","seconds since 1970-01-01 00:00:00 +00:00");
     boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
@@ -158,6 +243,8 @@ void FimexStream::openStream()
 {
   try {
     reader = MetNoFimex::CDMFileReaderFactory::create(filetype,filename);
+    cerr << "Stream " << filename << " opened " << endl;
+    is_open=true;
   } catch (exception& e) {
     throw FimexstreamException("Could not open fimexstream");
   }
@@ -177,9 +264,21 @@ boost::posix_time::ptime FimexStream::getReferencetime()
 
 bool FimexStream::readData(std::string placename,float lat, float lon, vector<ParId>& inpar,vector<ParId>& outpar)
 {
+
+  vector<ParId> tmp = inpar;
+  inpar.clear();
+  for(int i=0;i<tmp.size();i++) {
+    if(!parameterFilter.count(tmp[i].alias)) {
+      inpar.push_back(tmp[i]);
+    }
+  }
+
   try {
 
     clean();
+
+    if(!is_open)
+      return false;
 
     if(!interpol) {
       createPoslistInterpolator();
@@ -252,14 +351,28 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
       cache.push_back(tmp);
   // check the parameterlist - what to get and what not....
 
-  vector<FimexParameter> activeParameters;
+  int maxprogress=0;
+  for(unsigned int i=0;i<inpar.size();i++) {
+      for( unsigned int j=0;j<fimexpar.size();j++) {
+        if ( fimexpar[j].parid == inpar[i] )
+          maxprogress++;
+      }
+  }
 
+
+  vector<FimexParameter> activeParameters;
+  int localProgress=0;
   cerr << "Filling cache" << endl;
   boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   for(unsigned int i=0;i<inpar.size();i++) {
 
     for( unsigned int j=0;j<fimexpar.size();j++) {
       if ( fimexpar[j].parid == inpar[i] ) {
+        localProgress++;
+        progress = localProgress / maxprogress * 100;
+        ostringstream ost;
+        ost << "Reading: " << fimexpar[j].parametername;
+        progressMessage = ost.str();
         try {
           readFromFimexSlice(fimexpar[j]);
         } catch ( exception& e) {
@@ -274,12 +387,17 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   }
   boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
   cerr << "Cache filled in: "  << (last-start).total_milliseconds() << " ms   " << endl;
+  progress=100;
 }
 
 
 
 bool FimexStream::readFromFimexSlice(FimexParameter par)
 {
+  if(!is_open)
+    return false;
+
+
   cerr << "Interpolating Parameter: " << par.parametername;
   boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   MetNoFimex::SliceBuilder slice(interpol->getCDM(),par.parametername);
@@ -341,6 +459,10 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 bool FimexStream::getOnePar(int i, WeatherParameter& wp)
 {
   if(i>=0 && i<(int)cache[activePosition].parameters.size()) {
+    string wpname =  cache[activePosition].parameters[i].Id().alias;
+    if(isFiltered(wpname))
+        return false;
+
     wp=cache[activePosition].parameters[i];
     return true;
   }

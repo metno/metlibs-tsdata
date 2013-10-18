@@ -76,14 +76,17 @@ private:
   std::string modelname;
   std::string filetype;
 
-  std::vector<pets::FimexParameter> fimexpar;
-
+  static std::vector<pets::FimexParameter> fimexpar;
+  static std::vector<std::string> allParameters; // pets parameternames to create filter
   int progtime; // 0,6,12,etc for pets name
 
   boost::shared_ptr<MetNoFimex::CDMReader>       reader;   // the datafile access
   boost::shared_ptr<MetNoFimex::CDMInterpolator> interpol; // flexible interpolator - new coordinates
   static FimexPoslist commonposlist;
   static int          commonposlistVersion;
+  static int          progress;
+  static std::string  progressMessage;
+  static std::set<std::string> parameterFilter;
 
   FimexPoslist poslist;
   int          poslistVersion;
@@ -104,23 +107,40 @@ private:
   bool readFromFimexSlice(FimexParameter par);
   void clean();
   void addToCache(int posstart, int poslen, std::vector<ParId>& inpar, bool createPoslist);
+  bool is_open;
 
 public:
   FimexStream(const std::string& fname,
         const std::string& modname,
-        const std::string& ftype,
-        const std::vector<pets::FimexParameter>& fimexparameters);
+        const std::string& ftype);
   ~FimexStream();
 
 
   static void setCommonPoslist(const FimexPoslist& newCommonPoslist);
   static void setCommonPoslistFromStringlist(std::vector<std::string> newposlist);
 
+  static int  getProgress();
+  static std::string getProgressMessage();
+
+  static std::string getParameterFilterAsString();
+  static void setParameterFilterFromString(std::string blist);
+  static void addToAllParameters(std::vector<std::string>);
+
+  static std::set<std::string> getParameterFilter();
+  static bool isFiltered(std::string petsname);
+
+  static void setParameterFilter(std::set<std::string> pfilter);
+
+  static void setFimexParameters(std::vector<pets::FimexParameter> par);
+  static std::vector<std::string> getAllParameters();
+
   /// Implemented from DataStream interface -------------------------------
 
   void openStream();
 
   bool closeStream();   // unimplemented
+
+  bool isOpen() const { return is_open; }
 
   // set the raw position list
   void setPositions();
@@ -137,6 +157,8 @@ public:
   bool getTimeLine(int index,std::vector<miutil::miTime>& tline, std::vector<int>& pline);
 
   int numParameters();
+
+
 
 };
 

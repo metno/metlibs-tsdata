@@ -4055,6 +4055,13 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
 
   cerr << "new fimex search for " << stationname << " : " << lat << " : " <<  lon << endl;
 
+  for(unsigned int i=0;i<inpars.size();i++) {
+    if(pets::FimexStream::isFiltered(inpars[i].alias)) {
+      inpars.erase(inpars.begin()+i);
+      i--;
+    }
+  }
+
   int nread = 0, i;
 
   vector<miutil::miTime> tline;

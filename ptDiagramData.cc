@@ -4069,7 +4069,7 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
   int index = 0;
   Range range;
 
-  cleanDataStructure_();
+  //cleanDataStructure_();
 
 
   // find station and read in data block

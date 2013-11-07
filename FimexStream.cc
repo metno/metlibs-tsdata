@@ -169,7 +169,7 @@ void FimexStream::setPositions()
 FimexStream::FimexStream(const std::string& fname,
     const std::string& modname,
     const std::string& ftype)
-:  filename(fname) , modelname(modname), filetype(ftype), progtime(0), is_open(false)
+:  filename(fname) , modelname(modname), filetype(ftype), progtime(0), is_open(false), increment(0)
 {
   timeLineIsRead=false;
   poslist = commonposlist;
@@ -354,8 +354,9 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   int maxprogress=0;
   for(unsigned int i=0;i<inpar.size();i++) {
       for( unsigned int j=0;j<fimexpar.size();j++) {
-        if ( fimexpar[j].parid == inpar[i] )
+        if ( fimexpar[j].parid == inpar[i] ){
           maxprogress++;
+        }
       }
   }
 
@@ -365,9 +366,9 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   cerr << "Filling cache" << endl;
   boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   for(unsigned int i=0;i<inpar.size();i++) {
-
     for( unsigned int j=0;j<fimexpar.size();j++) {
       if ( fimexpar[j].parid == inpar[i] ) {
+
         localProgress++;
         progress = localProgress / maxprogress * 100;
         ostringstream ost;
@@ -398,7 +399,7 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
     return false;
 
 
-  cerr << "Interpolating Parameter: " << par.parametername;
+  cerr << "Interpolating Parameter: " << par.parametername << " for model " << modelname;
   boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   MetNoFimex::SliceBuilder slice(interpol->getCDM(),par.parametername);
 

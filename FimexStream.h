@@ -88,6 +88,7 @@ private:
   static std::string  progressMessage;
   static std::set<std::string> parameterFilter;
 
+
   FimexPoslist poslist;
   int          poslistVersion;
 
@@ -99,6 +100,7 @@ private:
 
   bool timeLineIsRead;
   int  basetimelineIndex;
+  int  increment;
   void createTimeLine();
   // pets stuff
   std::vector<int>            progline;      // progline - uninitialised
@@ -145,6 +147,8 @@ public:
   // set the raw position list
   void setPositions();
 
+
+  void setIncrement(int incr);
   // use the position list to interpolate the data
   bool createPoslistInterpolator();
 

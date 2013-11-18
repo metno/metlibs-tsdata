@@ -96,9 +96,9 @@ int HDFFile::findStation(const std::string& statName)
   cout << "HDFFile::findStation:" << statName << endl;
 #endif
   int rn=-1, i;
-  std::string sname= miutil::to_upper(statName);
+  std::string sname= miutil::to_upper_latin1(statName);
   for (i=0; i<npos; ++i) {
-    if (miutil::to_upper(posList[i].name) == sname) {
+    if (miutil::to_upper_latin1(posList[i].name) == sname) {
       rn = i;
       break;
     }

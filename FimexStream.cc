@@ -45,6 +45,7 @@
 #include <puTools/miString.h>
 
 #include <fimex/CDMReaderUtils.h>
+#include <fimex/CDM.h>
 #include <fimex/Utils.h>
 
 
@@ -223,7 +224,11 @@ void FimexStream::createTimeLine()
     if(!is_open)
         return;
 
-    MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit("time","seconds since 1970-01-01 00:00:00 +00:00");
+    std::string timeAxis="time";
+    //interpol->getCDM().getTimeAxis(timeAxis);
+
+
+    MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit(timeAxis,"seconds since 1970-01-01 00:00:00 +00:00");
     boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
 
     for(size_t u = 0; u < timeData->size(); ++u) {
@@ -413,6 +418,9 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   for(unsigned int i=0; i<par.dimensions.size();i++) {
     slice.setStartAndSize(par.dimensions[i].name ,par.dimensions[i].start ,par.dimensions[i].size );
   }
+
+  if(basetimeline.empty())
+    createTimeLine();
 
 
   MetNoFimex::DataPtr sliceddata  = interpol->getScaledDataSliceInUnit( par.parametername, par.unit, slice);

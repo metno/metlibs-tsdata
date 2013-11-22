@@ -224,8 +224,16 @@ void FimexStream::createTimeLine()
     if(!is_open)
         return;
 
+    // get unlimited axis as time axis. NB! this is true for all known models
+    // at this time, but could be changed later!!!
+    // this makes only sense if all parameters share the same time axis, this is
+    // also true now (2013) ...
+
+
+    const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim();
     std::string timeAxis="time";
-    //interpol->getCDM().getTimeAxis(timeAxis);
+    if(tmpDim)
+      timeAxis=tmpDim->getName();
 
 
     MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit(timeAxis,"seconds since 1970-01-01 00:00:00 +00:00");
@@ -236,7 +244,7 @@ void FimexStream::createTimeLine()
     }
 
   } catch (exception& e) {
-    cerr << "Exception catched in createTimeline" << e.what() << endl;
+    cerr << "Exception catched in createTimeline: " << e.what() << endl;
   }
 
   timeLineIsRead=true;

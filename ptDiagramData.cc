@@ -40,6 +40,8 @@
 
 #include <cmath>
 
+#include <iostream>
+
 using namespace std;
 
 ptDiagramData::ptDiagramData() :
@@ -4048,7 +4050,7 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
 }
 
 
-
+#ifdef FIMEX
 bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString stationname,
     std::vector<ParId>& inpars, std::vector<ParId>& outpars)
 {
@@ -4128,5 +4130,5 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
   return true;
 
 }
-
+#endif
 

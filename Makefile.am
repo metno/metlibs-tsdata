@@ -19,9 +19,8 @@ libtsData_la_SOURCES = \
 	WdbQueries.cc         \
 	WdbCacheQuery.cc      \
 	DynamicFunction.cc    \
-	KlimaStream.cc        \
-	FimexStream.cc        \
-	FimexTools.cc
+	KlimaStream.cc       
+	
 
 libtsData_la_CPPFLAGS = \
 	$(LOG4CXX_CPPFLAGS) \
@@ -96,6 +95,9 @@ libtsData_la_SOURCES += ptGribStream.cc
 endif
 
 if WITH_FIMEX
+libtsData_la_SOURCES += \
+	FimexStream.cc \
+	FimexTools.cc
 libtsData_la_CPPFLAGS += \
 	-DFIMEX \
 	${FIMEX_CPPFLAGS}

@@ -36,6 +36,8 @@
 
 #include <curl/curl.h>
 
+#include <iostream>
+
 #include "KlimaStream.h"
 
 using namespace std;

@@ -45,6 +45,7 @@
 #include <fstream>
 #include <algorithm>
 #include <list>
+#include <iostream>
 //#define DEBUG
 
 const std::string SectParameters=  "TSERIES_PARAMETERS";
@@ -1201,7 +1202,8 @@ void GribStream::_setData(int index, const std::string& shortName,
   if (index <0 || index >=np) return;
   // subtracting plottype by one because HDF plottype starts at 1
   parameters[index].setType((ptPrimitiveType)(onePar->plotType-1));
-  parameters[index].setPolar((onePar->dataType == polar));
+  // TODO uncomment!
+  //parameters[index].setPolar((onePar->dataType == polar));
   parameters[index].setId(pid);
 
   float scale = pow(10.0,onePar->scale);

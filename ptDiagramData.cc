@@ -4055,15 +4055,6 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
     std::vector<ParId>& inpars, std::vector<ParId>& outpars)
 {
 
-  cerr << "new fimex search for " << stationname << " : " << lat << " : " <<  lon << endl;
-
-  for(unsigned int i=0;i<inpars.size();i++) {
-    if(pets::FimexStream::isFiltered(inpars[i].alias)) {
-      inpars.erase(inpars.begin()+i);
-      i--;
-    }
-  }
-
   int nread = 0, i;
 
   vector<miutil::miTime> tline;
@@ -4071,18 +4062,6 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
   int index = 0;
   Range range;
 
-  //cleanDataStructure_();
-
-
-  // find station and read in data block
-  try {
-    if (!fimex->readData(stationname,lat,lon,inpars,outpars)) {
-      return false;
-    }
-  } catch(exception& e) {
-    cerr << "FIMEX::READDATA FAILED: " << e.what() << endl;
-    return false;
-  }
 
   vector<int> newtimelines;
 

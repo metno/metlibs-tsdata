@@ -161,8 +161,8 @@ void FimexStream::setCommonPoslistFromStringlist(std::vector<std::string> newpos
 
 void FimexStream::setPositions()
 {
- poslist = commonposlist;
- poslistVersion = commonposlistVersion;
+  poslist = commonposlist;
+  poslistVersion = commonposlistVersion;
 }
 
 
@@ -222,7 +222,7 @@ void FimexStream::createTimeLine()
 
 
     if(!is_open)
-        return;
+      return;
 
     // get unlimited axis as time axis. NB! this is true for all known models
     // at this time, but could be changed later!!!
@@ -274,10 +274,8 @@ boost::posix_time::ptime FimexStream::getReferencetime()
 
 }
 
-
-bool FimexStream::readData(std::string placename,float lat, float lon, vector<ParId>& inpar,vector<ParId>& outpar)
+void FimexStream::filterParameters(vector<ParId>& inpar)
 {
-
   vector<ParId> tmp = inpar;
   inpar.clear();
   for(int i=0;i<tmp.size();i++) {
@@ -285,6 +283,63 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
       inpar.push_back(tmp[i]);
     }
   }
+}
+
+bool FimexStream::hasParameter(std::string parametername)
+{
+  try {
+     if(!interpol)
+       createPoslistInterpolator();
+
+     return interpol->getCDM().hasVariable(parametername);
+
+  } catch( exception& e) {
+    cerr << "Exception in hasParameter: " << e.what() << endl;
+  }
+    return false;
+}
+
+
+
+bool FimexStream::hasCompleteDataset(std::string placename,float lat, float lon, vector<ParId> inpar)
+{
+  // nothing requested  - this is complete
+
+  if(inpar.empty())
+    return false;
+
+  filterParameters(inpar);
+  // position not found
+  if( poslist.getPos(placename,lat,lon) < 0 )
+    return false;
+
+  if(cache.empty() )
+    return false;
+
+  // check if there are parameters that were not interpolated earlier
+  vector<ParId> extrapar;
+  cache[0].getExtrapars(inpar,extrapar);
+  bool setIsComplete = true;
+
+  for(unsigned int i=0;i<extrapar.size();i++) {
+    for( unsigned int j=0;j<fimexpar.size();j++) {
+      if ( fimexpar[j].parid == extrapar[i] ) {
+        // we expect this parameter to be read from the fimex file
+        // but does the file have the fimexparameter at all ?
+        if(hasParameter(fimexpar[j].parametername)) {
+          setIsComplete=false;
+          break;
+        }
+      }
+    }
+  }
+  return setIsComplete;
+}
+
+bool FimexStream::readData(std::string placename,float lat, float lon, vector<ParId>& inpar,vector<ParId>& outpar)
+{
+
+  filterParameters(inpar);
 
   try {
 
@@ -312,7 +367,6 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
       // aha the common poslist has changed - try to reload the cache
       if(poslistVersion != commonposlistVersion) {
-        cerr << "Poslist has changed - filling cache" << endl;
         poslist = commonposlist;
         poslistVersion = commonposlistVersion;
         createPoslistInterpolator();
@@ -355,9 +409,10 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
 
 
 
-void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
+bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
 {
 
+  bool foundSomeData=false;
   FimexPetsCache tmp;
   if(createPoslist)
     for(unsigned int i=0;i<poslen;i++)
@@ -366,29 +421,30 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
 
   int maxprogress=0;
   for(unsigned int i=0;i<inpar.size();i++) {
-      for( unsigned int j=0;j<fimexpar.size();j++) {
-        if ( fimexpar[j].parid == inpar[i] ){
-          maxprogress++;
-        }
+    for( unsigned int j=0;j<fimexpar.size();j++) {
+      if ( fimexpar[j].parid == inpar[i] ){
+        maxprogress++;
       }
+    }
   }
-
 
   vector<FimexParameter> activeParameters;
   int localProgress=0;
-  cerr << "Filling cache" << endl;
-  boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   for(unsigned int i=0;i<inpar.size();i++) {
     for( unsigned int j=0;j<fimexpar.size();j++) {
       if ( fimexpar[j].parid == inpar[i] ) {
 
         localProgress++;
-        progress = localProgress / maxprogress * 100;
+        progress = (localProgress * 95) / maxprogress;
+
+
         ostringstream ost;
-        ost << "Reading: " << fimexpar[j].parametername;
+        ost << modelname << ": " << fimexpar[j].parametername;
         progressMessage = ost.str();
+
         try {
-          readFromFimexSlice(fimexpar[j]);
+          if(readFromFimexSlice(fimexpar[j]))
+            foundSomeData=true;
         } catch ( exception& e) {
           cerr << e.what() << endl;
         }
@@ -400,8 +456,8 @@ void FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
     }
   }
   boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
-  cerr << "Cache filled in: "  << (last-start).total_milliseconds() << " ms   " << endl;
   progress=100;
+  return foundSomeData;
 }
 
 
@@ -478,7 +534,7 @@ bool FimexStream::getOnePar(int i, WeatherParameter& wp)
   if(i>=0 && i<(int)cache[activePosition].parameters.size()) {
     string wpname =  cache[activePosition].parameters[i].Id().alias;
     if(isFiltered(wpname))
-        return false;
+      return false;
 
     wp=cache[activePosition].parameters[i];
     return true;

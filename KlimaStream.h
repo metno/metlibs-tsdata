@@ -109,6 +109,16 @@ private:
   std::vector<KlimaData> klimaData;
   std::vector<std::string> allParameters;
   std::set<std::string> blacklist;
+
+  // result from the last queries
+  std::vector<std::string> cachedMonthly;
+  std::vector<std::string> cachedData;
+  // we asked this once before - pull it from cache instead
+  std::string cachedMonthlyQuery;
+  std::string cachedDataQuery;
+
+
+
 public:
   KlimaStream(std::string h, std::map<std::string, std::string> pars, std::map<std::string, std::string> norms, int maxd = 50) :
     DataStream("KLIMA"), initialized(false)

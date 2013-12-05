@@ -108,8 +108,9 @@ private:
 
   bool readFromFimexSlice(FimexParameter par);
   void clean();
-  void addToCache(int posstart, int poslen, std::vector<ParId>& inpar, bool createPoslist);
+  bool addToCache(int posstart, int poslen, std::vector<ParId>& inpar, bool createPoslist);
   bool is_open;
+  void filterParameters(std::vector<ParId>& inpar);
 
 public:
   FimexStream(const std::string& fname,
@@ -143,6 +144,7 @@ public:
   bool closeStream();   // unimplemented
 
   bool isOpen() const { return is_open; }
+  bool hasParameter(std::string parametername);
 
   // set the raw position list
   void setPositions();
@@ -154,8 +156,9 @@ public:
 
   bool readData(std::string placename, float lat, float lon,  std::vector<ParId>& inpar, std::vector<ParId>& outpar);
   boost::posix_time::ptime getReferencetime();
+  bool hasCompleteDataset(std::string placename,float lat, float lon, std::vector<ParId> inpar);
 
-  // to be implemented...
+
 
   bool getOnePar(int, WeatherParameter&);
   bool getTimeLine(int index,std::vector<miutil::miTime>& tline, std::vector<int>& pline);

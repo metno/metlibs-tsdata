@@ -240,9 +240,33 @@ bool KlimaStream::read(string report, string query, miutil::miTime from,
 
   string url = host + "&re=" + report + query;
 
-  cerr << "READING FROM: " << url << endl;
+  vector<string> lines;
 
-  vector<string> lines = getFromHttp(url);
+  // Decide if i have to read this or if this is in the cache
+  // if we repaint and rebuild the same diagram again and again - we
+  // pull the same klimadata out again and again - no point in that
+
+
+  if(report==MONTHNORMALREPORT ) {
+    if( url != cachedMonthlyQuery )  {
+      cerr << "READING FROM: " << url << endl;
+      cachedMonthly = getFromHttp(url);
+    }
+    lines = cachedMonthly;
+    cachedMonthlyQuery = url;
+  } else if (report==DATAREPORT) {
+    if( url != cachedDataQuery )  {
+        cerr << "READING FROM: " << url << endl;
+        cachedData = getFromHttp(url);
+      }
+      lines = cachedData;
+      cachedDataQuery = url;
+  } else {
+    lines = getFromHttp(url);
+    cerr << "READING FROM: " << url << endl;
+  }
+
+
   vector<string> data;
   vector<string> header;
 
@@ -552,21 +576,21 @@ pets::KlimaStation KlimaStream::getNearestKlimaStation(miCoordinates& pos)
 bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
     std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
 {
-cerr << "Klimastation =  " << currentStation.stationid << endl;
   // no place - no data - skipping
-  if (!currentStation.stationid)
+  if (!currentStation.stationid) {
     return false;
+  }
 
   // really ? there is no time for data here - skipping
-  if (fromTime >= toTime)
+  if (fromTime >= toTime) {
     return false;
+  }
 
   vector<string> klimaNames;
   vector<string> normalNames;
 
   map<string, KlimaParameter>::iterator pardef;
   vector<ParId> newinpars;
-
   // check the parameterlist - what to get and what not....
   for (unsigned int i = 0; i < inpars.size(); i++) {
     string alias = inpars[i].alias;

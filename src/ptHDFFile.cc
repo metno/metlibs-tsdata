@@ -1734,7 +1734,7 @@ void HDFFile::_setData(int index, const std::string& shortName,
   if (index <0 || index >=np) return;
   // subtracting plottype by one because HDF plottype starts at 1
   parameters[index].setType((ptPrimitiveType)(onePar->plotType-1));
-  parameters[index].setPolar((onePar->dataType == PETS_POLAR));
+  parameters[index].setPolar(false); // default = skalar
   parameters[index].setId(pid);
 
   float scale = pow(10.0,onePar->scale);

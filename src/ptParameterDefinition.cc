@@ -51,7 +51,7 @@ const Model    M_UNDEF= "x";
 const Run      R_UNDEF=  INT_MIN;
 const SubModel S_UNDEF= "x";
 
-vector<Parameter> ParameterDefinition::paramList;
+//vector<Parameter> ParameterDefinition::paramList;
 
 std::ostream& operator<<(std::ostream& out, const ParId& pi)
 {
@@ -177,13 +177,14 @@ void ParId::setFromString(const std::string& buffer)
 bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
 {
   for (int i=0; i<paramList.size(); i++)
-    if (strcmp(paramList[i].alias().c_str(),id.c_str())==0){
+    if (paramList[i].alias() == id ){
       p =  paramList[i];
       return true;
     }
   return false;
 }
 
+/*
 bool ParameterDefinition::readParameters(const std::string& paramdef)
 {
   // Experimental reading of parameter file
@@ -199,7 +200,7 @@ bool ParameterDefinition::readParameters(const std::string& paramdef)
   free(parlist);
   return true;
 }
-
+*/
 std::string ParameterDefinition::ParId2Str(ParId p)
 {
   return p.toString();

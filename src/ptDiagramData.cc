@@ -2663,7 +2663,7 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
 
   if (parDef.getParameter(pid.alias, pp)) {
     parameterInfo(pid, pai);
-    wp.setPolar(pp.datatype() == PETS_POLAR);
+    wp.setPolar(false); // default is scalar
     wp.setTimeLineIndex(tlindex);
     //wp.setType(pp.);
     // set wp's dimensions

@@ -28,60 +28,81 @@
 */
 
 
+// This class is an old wrapper around parameter.h from libparameter.
+// It is assumed that libparameter and the lex-based setup parser
+// is not in use anymore. libparameter reads input from parameter.def files.
+// This is part of the old pose system which is replaced by metgdata and 
+// should only be usefull for the metdat->hdf translation process.
+
 #ifndef _ptParameter_h
 #define _ptParameter_h
 
-#include <parameter/parameter.h>
 #include <string>
+#include <iostream>
+
+
+
+#define PARNSZ 32  /* Parameter name */
+#define UNITSZ 10  /* Unit */
+#define ALIASZ 16  /* Short parameter name */
+#define ROBSSZ  6  /* Name for observations */
 
 class Parameter {
-  parameter* par;
+  int num_;
+  std::string name_;
+  std::string alias_;
+  std::string unit_;
+  int  scale_;
+  int  size_;
+  int  order_;
+  unsigned datatype_;
+  unsigned plottype_;
 
 public:
-  Parameter() {
-    par=0;
-  }
-
-  Parameter(const parameter& p);
-  Parameter(const Parameter& p);
-
-  ~Parameter();
-
-  Parameter& operator=(const Parameter& p);
-  Parameter& operator=(const parameter& p);
+  Parameter() {}
+ 
 
   std::string alias() const {
-    return par->alias;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return alias_;
   }
   std::string name() const {
-    return par->name;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return name_;
   }
   std::string unit() const {
-    return par->unit;
-  }
-  std::string robsname() const {
-    return par->robsname;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return unit_;
   }
   int num() const {
-    return par->num;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return num_;
   }
   int scale() const {
-    return par->scale;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return scale_;
   }
   int size() const {
-    return par->size;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return size_;
   }
   int order() const {
-    return par->order;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return order_;
   }
   int datatype() const {
-    return par->datatype;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return datatype_;
   }
   int plottype() const {
-    return par->plottype;
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    return plottype_;
   }
 
-  void printName() const;
+  void printName() const {
+    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
+    std::cout << name_ << std::endl;
+  }
 };
 
 #endif

@@ -50,7 +50,6 @@
 #include "ptDataStream.h"
 #include "ptParameterDefinition.h"
 #include "DynamicFunction.h"
-#include <diField/diProjection.h>
 
 // the pets (tseries) wdb-connection
 
@@ -103,8 +102,6 @@ private:
   };
 
 private:
-  Projection                currentGrid;
-  Projection                geoGrid;
 
   std::vector<rotateParameters>  rot;
   WdbStream::BoundaryBox    boundaries;

@@ -97,7 +97,7 @@ WdbStream::WdbStream(const std::string& host, const map<string, string>& parlist
     const std::string& u) :
     		DataStream("WdbStream"), wdb( QUERY::CONNECT(host,u) ) , user(u)
 {
-  geoGrid.setGeographic();
+  // geoGrid.setGeographic();
   transformIndex.clear();
 
   std::map<std::string, std::string>::const_iterator itr=parlist.begin();
@@ -231,9 +231,9 @@ WdbStream::BoundaryBox WdbStream::getGeometry()
     projres.at(i).at(0).to( newProjString );
 
 
-  cout << "Using proj definition:  [ " << newProjString << " ] " <<  endl;
+  // cout << "Using proj definition:  [ " << newProjString << " ] " <<  endl;
 
-  currentGrid.set_proj_definition(newProjString,1.0,1.0);
+  //  currentGrid.set_proj_definition(newProjString,1.0,1.0);
 
   return boundaries;
 
@@ -244,10 +244,13 @@ void WdbStream::rotate2geo(float x,float y, std::vector<float>& xdata ,std::vect
 {
   if(xdata.size() != ydata.size()) return;
 
-  for(unsigned int i=0;i<xdata.size();i++) {
+  // TODO: Awaiting a new method, diField independent to
+  // rotate wind vectors, the old system is briken anyway
+  
+  // for(unsigned int i=0;i<xdata.size();i++) {
 
-    geoGrid.convertVectors(currentGrid,1, &x, &y, &xdata[i], &ydata[i]);
-  }
+  //   geoGrid.convertVectors(currentGrid,1, &x, &y, &xdata[i], &ydata[i]);
+  // }
 }
 
 
@@ -508,8 +511,8 @@ bool WdbStream::readWdbData(float lat, float lon, const std::string& model, cons
   // rotate vectors from the current grid to geographic
   if(rot.size()) {
 
-    float x_geoproj = lon * DEG_TO_RAD;
-    float y_geoproj = lat * DEG_TO_RAD;
+    float x_geoproj = lon * 0.01745329238; // DEG_TO_RAD
+    float y_geoproj = lat * 0.01745329238; // DEG_TO_RAD
 
     for ( unsigned int k=0; k< rot.size();k++)
       if(datafromWdb.count(rot[k].x) && datafromWdb.count(rot[k].y )) {

@@ -36,6 +36,7 @@
 #include "ptParameter.h"
 #include <iosfwd>
 #include <vector>
+#include <string>
 
 typedef std::string Alias;
 typedef int Level;

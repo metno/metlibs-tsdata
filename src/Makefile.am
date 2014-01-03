@@ -69,3 +69,4 @@ libtsData_la_LIBADD += \
 	$(HDF4_LIBS)
 endif
 
+INSTALL = install -p

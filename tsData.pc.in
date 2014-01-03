@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: tsData
 Description: The tsData Library
 Version: @VERSION@
-Requires: @tsData_pc_requires@
+  Requires: puTools >= 5.0.0, puMet >= 5.0.0 , puTools >= 5.0.0, puDatatypes >= 5.0.0
 Libs: -L${libdir} -ltsData @HDF4_LDFLAGS@ @HDF4_LIBS@ @CURL_LDFLAGS@ @CURL_LIBS@  @POSTGRESQL_LDFLAGS@ @POSTGRESQL_LIBS@ @FIMEX_LIBS@ 
 Cflags: -I${includedir}  @HDF4_CPPFLAGS@ @CURL_CPPFLAGS@  @POSTGRESQL_CPPFLAGS@ @FIMEX_CPPFLAGS@

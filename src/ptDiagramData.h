@@ -37,9 +37,7 @@
 #include "ptSHCinfo.h"
 #include "WdbStream.h"
 #include "KlimaStream.h"
-#ifdef FIMEX
 #include "FimexStream.h"
-#endif
 #include <puDatatypes/miPosition.h>
 #include <puMet/symbolMaker.h>
 #include <puMet/WindCalc.h>
@@ -247,10 +245,8 @@ public:
 
   bool fetchDataFromKlimaDB(pets::KlimaStream* klima, std::vector<ParId>& inpars,
       std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
-#ifdef FIMEX
   bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString fimexname,
       std::vector<ParId>& inpars, std::vector<ParId>& outpars);
-#endif
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);
   bool writeAllToFile(DataStream*, const std::string&, ErrorFlag*);

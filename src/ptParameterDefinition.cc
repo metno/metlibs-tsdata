@@ -51,7 +51,7 @@ const Model    M_UNDEF= "x";
 const Run      R_UNDEF=  INT_MIN;
 const SubModel S_UNDEF= "x";
 
-//vector<Parameter> ParameterDefinition::paramList;
+vector<Parameter> ParameterDefinition::paramList;
 
 std::ostream& operator<<(std::ostream& out, const ParId& pi)
 {

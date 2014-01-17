@@ -168,9 +168,11 @@ void FimexStream::setPositions()
 
 
 FimexStream::FimexStream(const std::string& fname,
-    const std::string& modname,
-    const std::string& ftype)
-:  filename(fname) , modelname(modname), filetype(ftype), progtime(0), is_open(false), increment(0)
+			 const std::string& modname,
+			 const std::string& ftype,
+			 const std::string cfile)
+   :  filename(fname) , modelname(modname), filetype(ftype), progtime(0), is_open(false), increment(0),
+      configfile(cfile)
 {
   timeLineIsRead=false;
   poslist = commonposlist;
@@ -255,7 +257,7 @@ void FimexStream::createTimeLine()
 void FimexStream::openStream()
 {
   try {
-    reader = MetNoFimex::CDMFileReaderFactory::create(filetype,filename);
+    reader = MetNoFimex::CDMFileReaderFactory::create(filetype,filename,configfile);
     cerr << "Stream " << filename << " opened " << endl;
     is_open=true;
   } catch (exception& e) {

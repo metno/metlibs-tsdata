@@ -75,6 +75,7 @@ private:
   std::string filename;
   std::string modelname;
   std::string filetype;
+  std::string configfile;
 
   static std::vector<pets::FimexParameter> fimexpar;
   static std::vector<std::string> allParameters; // pets parameternames to create filter
@@ -114,8 +115,9 @@ private:
 
 public:
   FimexStream(const std::string& fname,
-        const std::string& modname,
-        const std::string& ftype);
+	      const std::string& modname,
+	      const std::string& ftype,
+	      const std::string configfile="");
   ~FimexStream();
 
 

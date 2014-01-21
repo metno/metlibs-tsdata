@@ -176,8 +176,6 @@ FimexStream::FimexStream(const std::string& fname,
   filetype      =  ( typetokens.size() > 0 ? boost::trim_copy(typetokens[0]) : ftype   );
   parametertype =  ( typetokens.size() > 1 ? boost::trim_copy(typetokens[1]) : filetype);
 
-  cerr << "FimexStream " << modname << " at file " << fname << " has filetype: " << filetype << " and parametertype: "  << parametertype << endl;
-
   timeLineIsRead=false;
   poslist = commonposlist;
   poslistVersion = commonposlistVersion;

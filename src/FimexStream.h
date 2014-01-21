@@ -75,6 +75,7 @@ private:
   std::string filename;
   std::string modelname;
   std::string filetype;
+  std::string parametertype;
   std::string configfile;
 
   static std::vector<pets::FimexParameter> fimexpar;

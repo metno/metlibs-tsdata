@@ -134,12 +134,6 @@ void FimexStream::setParameterFilterFromString(std::string blist)
 
 
 
-
-
-
-
-
-
 void FimexStream::setCommonPoslist(const FimexPoslist& cposlist)
 {
   commonposlist = cposlist;
@@ -171,9 +165,19 @@ FimexStream::FimexStream(const std::string& fname,
 			 const std::string& modname,
 			 const std::string& ftype,
 			 const std::string cfile)
-   :  filename(fname) , modelname(modname), filetype(ftype), progtime(0), is_open(false), increment(0),
+   :  filename(fname) , modelname(modname), progtime(0), is_open(false), increment(0),
       configfile(cfile)
 {
+
+  vector<string> typetokens;
+  boost::split(typetokens, ftype, boost::algorithm::is_any_of(":"));
+
+
+  filetype      =  ( typetokens.size() > 0 ? boost::trim_copy(typetokens[0]) : ftype   );
+  parametertype =  ( typetokens.size() > 1 ? boost::trim_copy(typetokens[0]) : filetype);
+
+  cerr << "FimexStream " << modname << " at file " << fname << " has filetype: " << ftype << " and parametertype: "  << parametertype << endl;
+
   timeLineIsRead=false;
   poslist = commonposlist;
   poslistVersion = commonposlistVersion;
@@ -325,7 +329,7 @@ bool FimexStream::hasCompleteDataset(std::string placename,float lat, float lon,
 
   for(unsigned int i=0;i<extrapar.size();i++) {
     for( unsigned int j=0;j<fimexpar.size();j++) {
-      if ( fimexpar[j].parid == extrapar[i] ) {
+      if ( fimexpar[j].parid == extrapar[i] && fimexpar[j].streamtype == parametertype) {
         // we expect this parameter to be read from the fimex file
         // but does the file have the fimexparameter at all ?
         if(hasParameter(fimexpar[j].parametername)) {
@@ -424,7 +428,7 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   int maxprogress=0;
   for(unsigned int i=0;i<inpar.size();i++) {
     for( unsigned int j=0;j<fimexpar.size();j++) {
-      if ( fimexpar[j].parid == inpar[i] ){
+      if ( fimexpar[j].parid == inpar[i] && fimexpar[j].streamtype == parametertype){
         maxprogress++;
       }
     }
@@ -434,7 +438,7 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   int localProgress=0;
   for(unsigned int i=0;i<inpar.size();i++) {
     for( unsigned int j=0;j<fimexpar.size();j++) {
-      if ( fimexpar[j].parid == inpar[i] ) {
+      if ( fimexpar[j].parid == inpar[i] && fimexpar[j].streamtype == parametertype) {
 
         localProgress++;
         progress = (localProgress * 95) / maxprogress;

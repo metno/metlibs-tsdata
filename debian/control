@@ -1,0 +1,17 @@
+Source: metlibs-tseries-tsdata
+Priority: optional
+Maintainer: Alexander Bürger <alexander.buerger@met.no>
+Build-Depends:  debhelper (>= 7), autotools-dev, g++,
+  autoconf (>=2.61), automake (>= 1.10), libtool (>= 1.5),
+  metlibs-putools-dev (>= 5.0.0), metlibs-pumet-dev (>= 5.0.0),
+  metlibs-pudatatypes-dev (>= 5.0.0)
+Standards-Version: 3.7.3
+Section: libs
+
+Package: metlibs-tsdata-dev
+Section: libdevel
+Architecture: any
+Depends: metlibs-putools-dev (>= 5.0.0), metlibs-pumet-dev (>= 5.0.0),
+  metlibs-pudatatypes-dev (>= 5.0.0), ${misc:Depends}
+Description: pudatatypes.
+ metlibs pudatatypes.

@@ -1,0 +1,5 @@
+metlibs-tseries-tsdata (5.0.0-1) unstable; urgency=low
+
+  * Split from all-in-one metlibs
+
+ -- Alexander Carl Friedrich Bürger <alexander.buerger@met.no>  Thu, 06 Feb 2014 09:54:18 +0100

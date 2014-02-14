@@ -3666,7 +3666,7 @@ void ptDiagramData::getTimeLine(const miutil::miTime& start, const miutil::miTim
 }
 
 // addTimeLine returns index of the new timeLine
-int ptDiagramData::addTimeLine(vector<miutil::miTime>& tl)
+int ptDiagramData::addTimeLine(const vector<miutil::miTime>& tl)
 {
   return timeLine.addTimeline(tl);
 }

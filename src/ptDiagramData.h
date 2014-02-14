@@ -260,7 +260,7 @@ public:
   void getTimeLine(const int idx, std::vector<miutil::miTime>& timePoints);
   void getTimeLine(const miutil::miTime& start, const miutil::miTime& stop, std::vector<int>& indexes,
       std::vector<miutil::miTime>& timePoints, int skip = 1);
-  int addTimeLine(std::vector<miutil::miTime>&); // return index of the new timeLine
+  int addTimeLine(const std::vector<miutil::miTime>&); // return index of the new timeLine
   void deleteTimeLine(int);
   bool getProgLine(int index, std::vector<int>& prog, ErrorFlag*);
   bool addTimePoint(const miutil::miTime& tp, int tlIndex, ErrorFlag*);

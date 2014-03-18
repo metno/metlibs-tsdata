@@ -2873,7 +2873,10 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
     if (tempindex == -1) {
       cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
           << endl;
-      continue;
+      // This goes wrong after we removed libParameter. In preliminary tests
+      // there was no negative effect on this - Libparameter has to be avoided
+      // due to its ancient lex parser
+      //  continue;
     }
 
     // find reference and model wp's
@@ -2998,11 +3001,14 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
   // make default parameter
   tempindex = makeOneParameter(tempid, tlindex, inptline.size());
 
-  if (tempindex == -1) {
-    cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
-        << endl;
-    return;
-  }
+//  if (tempindex == -1) {
+//    cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
+//        << endl;
+//    return;
+      // This goes wrong after we removed libParameter. In preliminary tests
+      // there was no negative effect on this - Libparameter has to be avoided
+      // due to its ancient lex parser
+//  }  NB!!!!
 
   // find reference and model wp's
   destid = dsp.dest;

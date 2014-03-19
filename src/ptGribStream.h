@@ -37,8 +37,6 @@
 #include <puTools/miSetupParser.h>
 #include <puTools/miTime.h>
 
-#include <parameter/parameter.h>
-
 #include <set>
 #include <map>
 #include <vector>

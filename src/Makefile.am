@@ -18,9 +18,7 @@ libtsData_la_SOURCES = \
 	DynamicFunction.cc    \
 	KlimaStream.cc     \
 	FimexStream.cc  \
-	FimexTools.cc   \
-	ptHDFFile.cc    \
-	ptHDFUtils.cc
+	FimexTools.cc
 
 pkg_includedir = ${includedir}/tsData
 
@@ -39,7 +37,6 @@ libtsData_la_CPPFLAGS = \
 	$(PUTOOLS_CPPFLAGS) \
 	$(POSTGRESQL_CPPFLAGS) \
 	$(CURL_CPPFLAGS) \
-	$(HDF4_CPPFLAGS) \
 	$(FIMEX_CPPFLAGS) \
 	$(BOOST_CPPFLAGS)
 
@@ -55,8 +52,7 @@ libtsData_la_LDFLAGS +=
 	$(POSTGRESQL_LDFLAGS) \
 	${BOOST_LDFLAGS} \
 	${PROJ_LDFLAGS} \
-	$(CURL_LDFLAGS) \
-	$(HDF4_LDFLAGS)
+	$(CURL_LDFLAGS) 
 
 libtsData_la_LIBADD += \
 	$(PUDATATYPES_LIBS) \
@@ -65,8 +61,36 @@ libtsData_la_LIBADD += \
 	$(POSTGRESQL_LIBS) \
 	${BOOST_LIBS}  \
 	${PROJ_LIBS}   \
-	$(CURL_LIBS)   \
+	$(CURL_LIBS)
+endif
+
+if WITH_HDF4
+libtsData_la_SOURCES += \
+	ptHDFFile.cc \
+	ptHDFUtils.cc
+
+libtsData_la_CPPFLAGS += \
+	$(HDF4_CPPFLAGS)
+
+libtsData_la_LDFLAGS += \
+	$(HDF4_LDFLAGS)
+if ENABLE_SHARED_LIBRARY
+libtsData_la_LIBADD += \
 	$(HDF4_LIBS)
+endif
+endif
+
+if ENABLE_GRIBFILE
+libtsData_la_SOURCES += ptGribStream.cc
+libtsData_la_LDFLAGS += \
+	${DIFIELD_CPPFLAGS}
+libtsData_la_LDFLAGS += \
+	$(DIFIELD_LDFLAGS)
+if ENABLE_SHARED_LIBRARY
+libtsData_la_LIBADD += \
+	$(DIFIELD_LIBS)
+endif
+
 endif
 
 INSTALL = install -p

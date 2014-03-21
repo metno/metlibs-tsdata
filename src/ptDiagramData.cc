@@ -2653,29 +2653,35 @@ bool ptDiagramData::parameterInfo(const ParId& pid, parameter_info& pai)
 int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
     const int ntimep)
 {
-  ParameterDefinition parDef;
+// 21.03.2014: Audun
+// TEST: removing dependency on libparameter (and the old parameters.def file)
+// by forcing Dimension of parameter = 1
+
+//  ParameterDefinition parDef;
   WeatherParameter wp;
   int index = -1;
   int i, j;
   std::string alias = pid.alias;
-  Parameter pp;
+//  Parameter pp;
   parameter_info pai;
 
-  if (parDef.getParameter(pid.alias, pp)) {
+//  if (parDef.getParameter(pid.alias, pp)) {
     parameterInfo(pid, pai);
     wp.setPolar(false); // default is scalar
     wp.setTimeLineIndex(tlindex);
-    //wp.setType(pp.);
     // set wp's dimensions
-    wp.setDims(ntimep, pp.order());
+//    wp.setDims(ntimep, pp.order());
+    wp.setDims(ntimep, 1);
     wp.setId(pid);
     // fill with default data
+//    for (i = 0; i < ntimep; i++)
+//      for (j = 0; j < pp.order(); j++)
+//        wp.setData(i, j, pai.def);
     for (i = 0; i < ntimep; i++)
-      for (j = 0; j < pp.order(); j++)
-        wp.setData(i, j, pai.def);
+      wp.setData(i, 0, pai.def);
     wp.calcAllProperties();
     index = addParameter(wp);
-  }
+//  }
   return index;
 }
 
@@ -2876,7 +2882,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
       // This goes wrong after we removed libParameter. In preliminary tests
       // there was no negative effect on this - Libparameter has to be avoided
       // due to its ancient lex parser
-      //  continue;
+      continue;
     }
 
     // find reference and model wp's
@@ -3001,14 +3007,14 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
   // make default parameter
   tempindex = makeOneParameter(tempid, tlindex, inptline.size());
 
-//  if (tempindex == -1) {
-//    cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
-//        << endl;
-//    return;
+  if (tempindex == -1) {
+    cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
+        << endl;
+    return;
       // This goes wrong after we removed libParameter. In preliminary tests
       // there was no negative effect on this - Libparameter has to be avoided
       // due to its ancient lex parser
-//  }  NB!!!!
+  }
 
   // find reference and model wp's
   destid = dsp.dest;

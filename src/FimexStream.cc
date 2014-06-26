@@ -450,7 +450,7 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
           if(readFromFimexSlice(fimexpar[j]))
             foundSomeData=true;
         } catch ( exception& e) {
-          cerr << e.what() << endl;
+          cerr <<"Exception from ReadFromFimexSlice:  " <<  e.what() << endl;
         }
 
         break;
@@ -505,8 +505,11 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
       for(unsigned int pos=0;pos<numPos;pos++) {
 
         if(!MetNoFimex::mifi_isnan(valuesInSlice[tim*numPos + pos ]) ) {
-          cache[pos].tmp_times.push_back(basetimeline[tim]);
-          cache[pos].tmp_values.push_back(valuesInSlice[ tim*numPos + pos ]);
+
+	  if(tim < basetimeline.size()) {
+	    cache[pos].tmp_times.push_back(basetimeline.at(tim));
+	    cache[pos].tmp_values.push_back(valuesInSlice[ tim*numPos + pos ]);
+	  }
         }
       }
 

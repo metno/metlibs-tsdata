@@ -101,7 +101,6 @@ private:
   std::vector<FimexPetsCache>  cache;
 
   bool timeLineIsRead;
-  int  basetimelineIndex;
   int  increment;
   void createTimeLine();
   // pets stuff

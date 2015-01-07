@@ -32,6 +32,8 @@ pkg_include_HEADERS = \
 	ptParameter.h
 
 libtsData_la_CPPFLAGS = \
+    $(MILOGGER_CPPFLAGS) \
+    $(PUCTOOLS_CPPFLAGS) \
 	$(PUDATATYPES_CPPFLAGS) \
 	$(PUMET_CPPFLAGS) \
 	$(PUTOOLS_CPPFLAGS) \
@@ -45,7 +47,9 @@ libtsData_la_LDFLAGS = $(VERSION_INFO)
 libtsData_la_LIBADD =
 
 if ENABLE_SHARED_LIBRARY
-libtsData_la_LDFLAGS += 
+libtsData_la_LDFLAGS += \
+    $(MILOGGER_LDFLAGS) \
+    $(PUCTOOLS_LDFLAGS) \
 	$(PUDATATYPES_LDFLAGS) \
 	$(PUMET_LDFLAGS) \
 	$(PUTOOLS_LDFLAGS) \
@@ -55,6 +59,8 @@ libtsData_la_LDFLAGS +=
 	$(CURL_LDFLAGS) 
 
 libtsData_la_LIBADD += \
+    $(MILOGGER_LIBS) \
+    $(PUCTOOLS_LIBS) \
 	$(PUDATATYPES_LIBS) \
 	$(PUMET_LIBS) \
 	$(PUTOOLS_LIBS) \

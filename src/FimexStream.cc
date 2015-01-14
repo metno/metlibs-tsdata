@@ -48,6 +48,18 @@
 #include <fimex/CDM.h>
 #include <fimex/Utils.h>
 
+#include <boost/shared_array.hpp>
+#include "fimex/Data.h"
+
+#include <boost/interprocess/anonymous_shared_memory.hpp>
+//#include <boost/interprocess/shared_memory_object.hpp>
+#include <boost/interprocess/mapped_region.hpp>
+#include <unistd.h>
+#include <wait.h>
+
+#include <numeric>
+#include <functional>
+
 
 using namespace std;
 using namespace miutil;
@@ -61,6 +73,7 @@ std::string  FimexStream::progressMessage="";
 std::set<std::string> FimexStream::parameterFilter;
 std::vector<pets::FimexParameter> FimexStream::fimexpar;
 std::vector<std::string> FimexStream::allParameters;
+
 
 int  FimexStream::getProgress()
 {
@@ -162,11 +175,11 @@ void FimexStream::setPositions()
 
 
 FimexStream::FimexStream(const std::string& fname,
-			 const std::string& modname,
-			 const std::string& ftype,
-			 const std::string cfile)
-   :  filename(fname) , modelname(modname), progtime(0), is_open(false), increment(0),
-      configfile(cfile)
+    const std::string& modname,
+    const std::string& ftype,
+    const std::string cfile)
+:  filename(fname) , modelname(modname), progtime(0), is_open(false), increment(0),
+   configfile(cfile)
 {
 
   vector<string> typetokens;
@@ -233,11 +246,12 @@ void FimexStream::createTimeLine()
     // this makes only sense if all parameters share the same time axis, this is
     // also true now (2013) ...
 
+    std::string timeAxis="time";
 
     const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim();
-    std::string timeAxis="time";
     if(tmpDim)
       timeAxis=tmpDim->getName();
+
 
 
     MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit(timeAxis,"seconds since 1970-01-01 00:00:00 +00:00");
@@ -292,15 +306,15 @@ void FimexStream::filterParameters(vector<ParId>& inpar)
 bool FimexStream::hasParameter(std::string parametername)
 {
   try {
-     if(!interpol)
-       createPoslistInterpolator();
+    if(!interpol)
+      createPoslistInterpolator();
 
-     return interpol->getCDM().hasVariable(parametername);
+    return interpol->getCDM().hasVariable(parametername);
 
   } catch( exception& e) {
     cerr << "Exception in hasParameter: " << e.what() << endl;
   }
-    return false;
+  return false;
 }
 
 
@@ -466,6 +480,87 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
 
 
 
+
+
+
+static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<MetNoFimex::CDMReader> reader, const string& parName, const string& parUnit, const vector<MetNoFimex::SliceBuilder>& slices)
+{
+  vector<size_t> sliceLengths(slices.size(), 1);
+  for (int i = 0; i < slices.size(); i++) {
+    vector<size_t> ssize = slices.at(i).getDimensionSizes();
+    sliceLengths.at(i) = accumulate(ssize.begin(), ssize.end(), 1, std::multiplies<int>());
+  }
+  size_t total = accumulate(sliceLengths.begin(), sliceLengths.end(), 0);
+
+  //create a anonymous mapped shm-obj in this process
+  boost::interprocess::mapped_region region(boost::interprocess::anonymous_shared_memory(total*sizeof(float)));
+  // fork the sub-processes
+  pid_t pid;
+  vector<pid_t> children;
+  for (size_t i = 0; i < maxProcs; i++) {
+
+    // starting child process ---------------------
+    pid = fork();
+
+    if(pid < 0) {
+      cerr << "Error forking - no process id " << endl;
+      exit(1);
+    } else if (pid == 0) {
+      // child code, should end with exit!
+      //            boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
+      assert(region.get_size() == (total*sizeof(float)));
+      float* regionFloat = reinterpret_cast<float*>(region.get_address());
+      size_t startPos = 0;
+      for (size_t j = 0; j < slices.size(); j++) {
+        if ((j % maxProcs) == i) {
+          MetNoFimex::DataPtr data;
+          try {
+              data = reader->getScaledDataSliceInUnit(parName, parUnit, slices.at(j));
+          } catch (runtime_error& ex) {
+            cerr << "error fetching data on '" << parName << "', '" << parUnit << "' slice " << j << ": " << ex.what() << endl;
+            data = MetNoFimex::createData(MetNoFimex::CDM_FLOAT, 0);
+          }
+          boost::shared_array<float> array;
+          if (data->size() == 0) {
+            array = boost::shared_array<float>(new float[sliceLengths.at(j)]);
+            for (size_t k = 0; k < sliceLengths.at(j); k++) array[k] = MIFI_UNDEFINED_F;
+          } else {
+            assert(data->size() == sliceLengths.at(j));
+            array = data->asFloat();
+          }
+          std::copy(array.get(), array.get()+sliceLengths.at(j), regionFloat + startPos);
+        }
+        startPos += sliceLengths.at(j);
+      }
+      // ending child process without cleanup ( _exit() ) to avoid qt-trouble
+      _exit(0);
+
+    } else  {
+      // parent, handled below, should fork more
+      children.push_back(pid);
+    }
+  }
+  // parent code
+  // wait for all children
+  for (int i = 0; i < maxProcs; ++i) {
+    int status;
+    while (-1 == waitpid(children.at(i), &status, 0));
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+      std::cerr << "Process " << i << " (pid " << children.at(i) << ") failed" << std::endl;
+      throw runtime_error("child-process did not finish correctly when fetching data");
+      exit(1);
+    }
+  }
+  // read the shared_memory
+  boost::shared_array<float> allFloats(new float[total]);
+  assert(region.get_size() == (total*sizeof(float)));
+  float* regionFloat = reinterpret_cast<float*>(region.get_address());
+  std::copy(regionFloat, regionFloat+total, allFloats.get());
+
+  return MetNoFimex::createData(total, allFloats);
+}
+
+
 bool FimexStream::readFromFimexSlice(FimexParameter par)
 {
   if(!is_open)
@@ -483,15 +578,48 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   for(unsigned int i=0;i<cache.size();i++)
     cache[i].clear_tmp();
 
+  unsigned int timeId;
+
+  std::string timeAxis="time";
+
+  const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim();
+  size_t timeSize = 0;
+  if(tmpDim) {
+    timeAxis=tmpDim->getName();
+    timeSize = tmpDim->getLength();
+  } else {
+    const MetNoFimex::CDMDimension& timeDim = interpol->getCDM().getDimension(timeAxis);
+    timeSize = timeDim.getLength();
+  }
+
   for(unsigned int i=0; i<par.dimensions.size();i++) {
     slice.setStartAndSize(par.dimensions[i].name ,par.dimensions[i].start ,par.dimensions[i].size );
   }
 
+
+
+
+  cerr << endl << "timeAxis=" << timeAxis << " ID: " << timeId << endl << endl;
+
   if(basetimeline.empty())
     createTimeLine();
 
+  // dividing in small time-slices
+  vector<MetNoFimex::SliceBuilder> slices;
+  for (size_t i=0; i< timeSize; i++) {
+    slice.setStartAndSize(timeAxis ,i,1);
+    slices.push_back(slice);
+  }
 
-  MetNoFimex::DataPtr sliceddata  = interpol->getScaledDataSliceInUnit( par.parametername, par.unit, slice);
+  // get time-slices parallel
+  size_t numProcs = 0;
+#ifdef _SC_NPROCESSORS_ONLN
+  numProcs = sysconf( _SC_NPROCESSORS_ONLN );
+  // even better, but needs c++11: std::thread::hardware_concurrency();
+#endif
+  if (numProcs < 1) numProcs = 2; // default
+
+  MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
 
   if(sliceddata.get()) {
@@ -506,10 +634,10 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
         if(!MetNoFimex::mifi_isnan(valuesInSlice[tim*numPos + pos ]) ) {
 
-	  if(tim < basetimeline.size()) {
-	    cache[pos].tmp_times.push_back(basetimeline.at(tim));
-	    cache[pos].tmp_values.push_back(valuesInSlice[ tim*numPos + pos ]);
-	  }
+          if(tim < basetimeline.size()) {
+            cache[pos].tmp_times.push_back(basetimeline.at(tim));
+            cache[pos].tmp_values.push_back(valuesInSlice[ tim*numPos + pos ]);
+          }
         }
       }
 

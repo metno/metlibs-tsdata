@@ -515,7 +515,7 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
         if ((j % maxProcs) == i) {
           MetNoFimex::DataPtr data;
           try {
-              data = reader->getScaledDataSliceInUnit(parName, parUnit, slices.at(j));
+            data = reader->getScaledDataSliceInUnit(parName, parUnit, slices.at(j));
           } catch (runtime_error& ex) {
             cerr << "error fetching data on '" << parName << "', '" << parUnit << "' slice " << j << ": " << ex.what() << endl;
             data = MetNoFimex::createData(MetNoFimex::CDM_FLOAT, 0);
@@ -621,25 +621,34 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
   MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
-
+  int pardim=0;
+  int timdim=basetimeline.size();
   if(sliceddata.get()) {
 
 
     boost::shared_array<float> valuesInSlice = sliceddata->asFloat();
 
-    unsigned int numTim= sliceddata->size() / numPos;
+    // all parameters in all dimensions;
+    unsigned int numAll     = sliceddata->size() / numPos;
+    unsigned int numTimes   = basetimeline.size();
+    unsigned int numPardims = numAll / numTimes; // normally 1
 
-    for(unsigned int tim=0;tim < numTim; tim++)
-      for(unsigned int pos=0;pos<numPos;pos++) {
+    for ( unsigned int pardim = 0; pardim < numPardims; pardim++) {
 
-        if(!MetNoFimex::mifi_isnan(valuesInSlice[tim*numPos + pos ]) ) {
+      for(unsigned int tim=0;tim < numTimes; tim++) {
 
-          if(tim < basetimeline.size()) {
-            cache[pos].tmp_times.push_back(basetimeline.at(tim));
-            cache[pos].tmp_values.push_back(valuesInSlice[ tim*numPos + pos ]);
+           for(unsigned int pos=0;pos<numPos;pos++) {
+
+             if(!pardim)
+               cache[pos].tmp_times.push_back(basetimeline.at(tim));
+
+
+             if(!MetNoFimex::mifi_isnan(valuesInSlice[ pardim*numTimes +  tim*numPos + pos ]) ) {
+               cache[pos].tmp_values.push_back(valuesInSlice[  pardim*numTimes +  tim*numPos + pos ]);
           }
         }
       }
+    }
 
 
     ParId pid = par.parid;
@@ -659,9 +668,9 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   }
   cerr << " ... empty  "<< endl;
   return false;
+
+
 }
-
-
 
 
 bool FimexStream::getOnePar(int i, WeatherParameter& wp)

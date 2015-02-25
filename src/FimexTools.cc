@@ -74,7 +74,7 @@ void FimexPoslist::addEntry(std::string posname,float latitude, float longitude)
 {
   // avoid duplicates
   if(pos.count(posname))
-      return;
+    return;
 
   unsigned int lastPos=lat.size();
   lat.push_back(latitude);
@@ -213,13 +213,19 @@ void FimexPetsCache::getExtrapars(std::vector<ParId>& inpar, std::vector<ParId>&
 
 void FimexPetsCache::process(ParId pid)
 {
-
+  // add Data dimensions
   WeatherParameter wp;
-  wp.setDims(tmp_times.size(),1);
+
+  int pardims = tmp_values.size() / tmp_times.size();
+  int timdims = tmp_times.size();
+
+  wp.setDims(timdims,pardims);
   parameters.push_back(wp);
 
-  for (unsigned int j=0; j< tmp_values.size(); j++) {
-    parameters.back().setData(j,0,tmp_values[j]);
+  for (unsigned int pdim=0; pdim < pardims ; pdim++) {
+    for (unsigned int tdim=0; tdim < timdims ; tdim++) {
+      parameters.back().setData(tdim,pdim,tmp_values[pdim*timdims + tdim]);
+    }
   }
 
   int tlindex = timeLines.addTimeline(tmp_times);

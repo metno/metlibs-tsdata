@@ -619,6 +619,7 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 #endif
   if (numProcs < 1) numProcs = 2; // default
 
+
   MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
   int pardim=0;
@@ -631,25 +632,29 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
     // all parameters in all dimensions;
     unsigned int numAll     = sliceddata->size() / numPos;
     unsigned int numTimes   = basetimeline.size();
-    unsigned int numPardims = numAll / numTimes; // normally 1
+    unsigned int numPardims = numAll / numTimes; // equals 1 except for ensembles
 
     for ( unsigned int pardim = 0; pardim < numPardims; pardim++) {
+      for( unsigned int tim=0; tim < numTimes; tim++) {
 
-      for(unsigned int tim=0;tim < numTimes; tim++) {
+        for(unsigned int pos=0;pos<numPos;pos++) {
 
-           for(unsigned int pos=0;pos<numPos;pos++) {
+          if(!pardim)
+            cache[pos].tmp_times.push_back(basetimeline.at(tim));
 
-             if(!pardim)
-               cache[pos].tmp_times.push_back(basetimeline.at(tim));
+          unsigned int index = pardim*numPos +  tim*numPardims*numPos + pos;
 
+          if(!MetNoFimex::mifi_isnan(valuesInSlice[ index ]) ) {
 
-             if(!MetNoFimex::mifi_isnan(valuesInSlice[ pardim*numTimes +  tim*numPos + pos ]) ) {
-               cache[pos].tmp_values.push_back(valuesInSlice[  pardim*numTimes +  tim*numPos + pos ]);
+            cache[pos].tmp_values.push_back(valuesInSlice[ index ]);
+
+          }else {
+            cache[pos].tmp_values.push_back(100);
           }
+
         }
       }
     }
-
 
     ParId pid = par.parid;
     pid.model = modelname;

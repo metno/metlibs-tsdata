@@ -216,15 +216,19 @@ void FimexPetsCache::process(ParId pid)
   // add Data dimensions
   WeatherParameter wp;
 
-  int pardims = tmp_values.size() / tmp_times.size();
-  int timdims = tmp_times.size();
+  unsigned int numTimes   = tmp_times.size();
+  unsigned int numPardims = tmp_values.size() / numTimes; // equals 1 except for ensembles
 
-  wp.setDims(timdims,pardims);
+  wp.setDims(numTimes,numPardims);
   parameters.push_back(wp);
 
-  for (unsigned int pdim=0; pdim < pardims ; pdim++) {
-    for (unsigned int tdim=0; tdim < timdims ; tdim++) {
-      parameters.back().setData(tdim,pdim,tmp_values[pdim*timdims + tdim]);
+  for (unsigned int tim=0; tim < numTimes ; tim++) {
+    for (unsigned int pardim=0; pardim < numPardims ; pardim++) {
+
+
+      unsigned int index = pardim * numTimes + tim;
+
+      parameters.back().setData(tim,pardim,tmp_values[ index ]);
     }
   }
 

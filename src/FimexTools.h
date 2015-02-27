@@ -71,7 +71,7 @@ public:
 struct FimexDimension {
   std::string name;
   unsigned int start;
-  unsigned int size;
+  int size; // negative means all
   void setFromString(std::string);
 };
 

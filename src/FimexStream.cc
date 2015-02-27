@@ -593,13 +593,25 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   }
 
   for(unsigned int i=0; i<par.dimensions.size();i++) {
-    slice.setStartAndSize(par.dimensions[i].name ,par.dimensions[i].start ,par.dimensions[i].size );
+
+    if(interpol->getCDM().hasDimension( par.dimensions[i].name )) {
+
+
+
+      if (par.dimensions[i].size < 0 ) {
+        const MetNoFimex::CDMDimension& tmpDim = interpol->getCDM().getDimension( par.dimensions[i].name );
+        par.dimensions[i].size = tmpDim.getLength() - par.dimensions[i].start;
+
+      }
+
+      cerr << "par.dimensions[i].size for " << par.dimensions[i].name << " = "  << par.dimensions[i].size << endl;
+      slice.setStartAndSize(par.dimensions[i].name ,par.dimensions[i].start ,par.dimensions[i].size );
+    } else {
+      throw FimexstreamException(" request unknown dimension " + par.dimensions[i].name );
+    }
+
   }
 
-
-
-
-  cerr << endl << "timeAxis=" << timeAxis << " ID: " << timeId << endl << endl;
 
   if(basetimeline.empty())
     createTimeLine();
@@ -649,7 +661,7 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
             cache[pos].tmp_values.push_back(valuesInSlice[ index ]);
 
           }else {
-            cache[pos].tmp_values.push_back(100);
+            //cache[pos].tmp_values.push_back(100);
           }
 
         }

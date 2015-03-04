@@ -45,12 +45,12 @@
 using namespace std;
 
 ptDiagramData::ptDiagramData() :
-            nfetches(0), new_symbolmaker(false)
+                                            nfetches(0), new_symbolmaker(false)
 {
 }
 
 ptDiagramData::ptDiagramData(symbolMaker& wsym) :
-                  nfetches(0), wsymbols(wsym), new_symbolmaker(false)
+                                                  nfetches(0), wsymbols(wsym), new_symbolmaker(false)
 {
   makedefaultParInfo();
 }
@@ -1378,7 +1378,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     }
 
     // RR
-  } else if (inpid.alias == "RR") {
+  } else if (inpid.alias == "RR"  ) {
     //cerr << "Asked for RR" << endl;
     ParId pid = inpid;
     id1 = id2 = id3 = id4 = inpid;
@@ -1414,7 +1414,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
           //cerr << "Found COSN + CORA + STSN + STRA" << endl;
           for (j = 0; j < wp.Npoints(); j++) {
             float rr = wp.Data(j, 0) + wp2.Data(j, 0) + wp3.Data(j, 0)
-                                + wp4.Data(j, 0);
+                                                                + wp4.Data(j, 0);
             wp.setData(j, 0, rr);
           }
 
@@ -1457,8 +1457,41 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       }
     }
 
-    // SHC
-  } else if (inpid.alias == "SHC") {
+    // EPRR (from RRAC for fimex interpolation )
+  } else if (inpid.alias == "EPRR"  ) {
+    ParId pid = inpid;
+    bool fixed = true;
+
+    pid.alias = "RRAC"; // make RR from accumulated precipitation
+    if (copyParameter(pid, wp, &error) ) {
+      int numTimes= wp.Npoints();
+      int numPardims = wp.Ndim();
+
+      std::vector<float> tmp_data =  wp.copyDataVector();
+
+      if(numPardims && numTimes) {
+
+
+        for (unsigned int tim=0; tim < numTimes ; tim++) {
+          for (unsigned int pardim=0; pardim < numPardims ; pardim++) {
+            unsigned int index = pardim * numTimes  + tim;
+
+            float rrac = tmp_data[index];
+            if (!tim) {
+              wp.setData(tim,pardim,rrac);
+            } else {
+              float rr = rrac - tmp_data[index-1];
+              wp.setData(tim,pardim,rr);
+            }
+          }
+        }
+
+        wp.calcAllProperties();
+        wp.setId(newpid);
+        addParameter(wp);
+      }
+    }
+  }else if (inpid.alias == "SHC") {
     //cerr << "Asked for creation of  :" << inpid << endl;
     id1.alias = "DDPE"; // peak wave direction
     id1.level = L_UNDEF;
@@ -2653,35 +2686,35 @@ bool ptDiagramData::parameterInfo(const ParId& pid, parameter_info& pai)
 int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
     const int ntimep)
 {
-// 21.03.2014: Audun
-// TEST: removing dependency on libparameter (and the old parameters.def file)
-// by forcing Dimension of parameter = 1
+  // 21.03.2014: Audun
+  // TEST: removing dependency on libparameter (and the old parameters.def file)
+  // by forcing Dimension of parameter = 1
 
-//  ParameterDefinition parDef;
+  //  ParameterDefinition parDef;
   WeatherParameter wp;
   int index = -1;
   int i, j;
   std::string alias = pid.alias;
-//  Parameter pp;
+  //  Parameter pp;
   parameter_info pai;
 
-//  if (parDef.getParameter(pid.alias, pp)) {
-    parameterInfo(pid, pai);
-    wp.setPolar(false); // default is scalar
-    wp.setTimeLineIndex(tlindex);
-    // set wp's dimensions
-//    wp.setDims(ntimep, pp.order());
-    wp.setDims(ntimep, 1);
-    wp.setId(pid);
-    // fill with default data
-//    for (i = 0; i < ntimep; i++)
-//      for (j = 0; j < pp.order(); j++)
-//        wp.setData(i, j, pai.def);
-    for (i = 0; i < ntimep; i++)
-      wp.setData(i, 0, pai.def);
-    wp.calcAllProperties();
-    index = addParameter(wp);
-//  }
+  //  if (parDef.getParameter(pid.alias, pp)) {
+  parameterInfo(pid, pai);
+  wp.setPolar(false); // default is scalar
+  wp.setTimeLineIndex(tlindex);
+  // set wp's dimensions
+  //    wp.setDims(ntimep, pp.order());
+  wp.setDims(ntimep, 1);
+  wp.setId(pid);
+  // fill with default data
+  //    for (i = 0; i < ntimep; i++)
+  //      for (j = 0; j < pp.order(); j++)
+  //        wp.setData(i, j, pai.def);
+  for (i = 0; i < ntimep; i++)
+    wp.setData(i, 0, pai.def);
+  wp.calcAllProperties();
+  index = addParameter(wp);
+  //  }
   return index;
 }
 
@@ -3011,9 +3044,9 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
     cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
         << endl;
     return;
-      // This goes wrong after we removed libParameter. In preliminary tests
-      // there was no negative effect on this - Libparameter has to be avoided
-      // due to its ancient lex parser
+    // This goes wrong after we removed libParameter. In preliminary tests
+    // there was no negative effect on this - Libparameter has to be avoided
+    // due to its ancient lex parser
   }
 
   // find reference and model wp's
@@ -3280,7 +3313,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
       int cn = symbols[i].customNumber();
       if (cn == 999) {
         cerr << i << " Symbolmaker Error:" << symbols[i].customName()
-                            << " number:" << symbols[i].customNumber() << endl;
+                                                            << " number:" << symbols[i].customNumber() << endl;
         cn = 0;
       }
       termin.push_back(symbols[i].getTime());

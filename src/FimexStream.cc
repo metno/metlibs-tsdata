@@ -661,7 +661,9 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
             cache[pos].tmp_values.push_back(valuesInSlice[ index ]);
 
           }else {
-            //cache[pos].tmp_values.push_back(100);
+            if (par.parid.alias == "RRAC")  { // undefined accumulated precipitation means null
+              cache[pos].tmp_values.push_back(0);
+            }
           }
 
         }

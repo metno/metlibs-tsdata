@@ -13,6 +13,6 @@ Package: metlibs-tsdata-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-putools-dev (>= 5.0.0), metlibs-pumet-dev (>= 5.0.0),
-  metlibs-pudatatypes-dev (>= 5.0.0), ${misc:Depends}
+  metlibs-pudatatypes-dev (>= 5.0.0), libfimex-dev, ${misc:Depends}
 Description: pudatatypes.
  metlibs pudatatypes.

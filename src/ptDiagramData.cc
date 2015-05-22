@@ -38,8 +38,8 @@
 #include <puMet/cloudGrp.h>
 #include <puMet/iceAccretion.h>
 
-#include <weather_symbol/Factory.h>
-#include <weather_symbol/WeatherData.h>
+//#include <weather_symbol/Factory.h>
+//#include <weather_symbol/WeatherData.h>
 
 #include <cmath>
 

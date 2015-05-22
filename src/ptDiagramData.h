@@ -124,6 +124,7 @@ private:
 
   void cleanDataStructure_();
   void makeWeatherSymbols_(ParId);
+  void makeYrWeatherSymbols(ParId);
   void makeWeatherSymbols_new_(ParId p, bool update);
   float calcMedianTM01(float hst);
   float calcMedianTM02(float hst);

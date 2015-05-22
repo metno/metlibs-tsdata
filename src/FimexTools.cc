@@ -217,6 +217,10 @@ void FimexPetsCache::process(ParId pid)
   WeatherParameter wp;
 
   unsigned int numTimes   = tmp_times.size();
+
+  if(!numTimes) // the timeline is empty - nothing to to
+    return;
+
   unsigned int numPardims = tmp_values.size() / numTimes; // equals 1 except for ensembles
 
   wp.setDims(numTimes,numPardims);

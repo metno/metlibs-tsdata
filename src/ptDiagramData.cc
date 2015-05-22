@@ -30,13 +30,16 @@
 #endif
 
 
-#include <ptDiagramData.h>
+#include "ptDiagramData.h"
 
 #include <puMet/ptStatistics.h>
 #include <puMet/vision.h>
 #include <puMet/windProfile.h>
 #include <puMet/cloudGrp.h>
 #include <puMet/iceAccretion.h>
+
+#include <weather_symbol/Factory.h>
+#include <weather_symbol/WeatherData.h>
 
 #include <cmath>
 
@@ -234,6 +237,7 @@ void ptDiagramData::clearDirty()
 
 void ptDiagramData::useAlternateSymbolmaker(const bool use)
 {
+  cerr << "useAlternateSymbolmaker called" << endl;
   new_symbolmaker = use;
 }
 
@@ -2394,11 +2398,15 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
 
     // Weather symbol
   } else if (inpid.alias == "WW") {
-    if (new_symbolmaker)
-      makeWeatherSymbols_new_(inpid, false);
-    else
-      makeWeatherSymbols_(inpid);
+    if (new_symbolmaker) {
+      cerr << "USING NEW SYMBOLMAKER" << endl;
 
+      makeWeatherSymbols_new_(inpid, false);
+    } else {
+      cerr << "USING OLD SYMBOLMAKER" << endl;
+
+      makeWeatherSymbols_(inpid);
+    }
     // Mean Weather symbol
   } else if (inpid.alias == "CWW") {
     if (new_symbolmaker)
@@ -3331,6 +3339,155 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
     addParameter(wp);
   }
 }
+
+
+
+
+
+void ptDiagramData::makeYrWeatherSymbols(ParId p)
+{
+  // start by checking the precipitation frequency
+/*
+  ErrorFlag error;
+  WeatherParameter rr;
+  TimeLine times;
+  vector<miutil::miTime> weatherTimeline;
+  vector<int> weatherPeriod;
+  vector<miutil::miTime> precipitationTimeline;
+  vector<weather_symbol::WeatherData> weatherData;
+
+  if (copyParameter(17, rr, &error)) {
+    int tlidx = rr.TimeLineIndex();
+    timeLine.Timeline(tlidx, precipitationTimeline);
+
+    if(precipitationTimeline.size() < 2 )
+      return;
+
+    for(int i=1;i<precipitationTimeline.size();i++) {
+        // weathersymbol is dependend on precipitation and the period of the precipitation.
+        // Therefore the symbol generator timeline is given by the precipitation timeline,
+        // but caveat, the 1st time has no period - and gets no symbol!
+
+        weatherTimeline.push_back(precipitationTimeline[i]);
+        weatherPeriod.push_back(miutil::miTime::hourDiff(precipitationTimeline[i],precipitationTimeline[i-1]));
+        weather_symbol::WeatherData singleData;
+        singleData.precipitation= rr.Data(i);
+        weatherData.push_back(singleData);
+    }
+
+
+  }
+
+
+
+  unsigned int i;
+  int j;
+  int tlidx;
+  const unsigned int numparams = 7;
+  ErrorFlag error;
+  vector<miutil::miTime> termin, tline;
+  vector<ParId> id(numparams);
+  vector<int> num(numparams, 0);
+  vector<miSymbol> symbols;
+
+  map<miutil::miTime, float> modelIn;
+  vector<paramet> modelVec;
+  paramet modelUse;
+
+
+  float glat;
+  WeatherParameter wp;
+
+  glat = station.lat();
+
+  for (i = 0; i < numparams; i++)
+    id[i] = p;
+  id[0].alias = "FG";
+  id[1].alias = "CL";
+  id[2].alias = "CM";
+  id[3].alias = "CH";
+  id[4].alias = "CC";
+  id[5].alias = "RR";
+  id[6].alias = "TT";
+
+
+  for (i = 0; i < numparams; i++) {
+    // find parameter
+    if (copyParameter(id[i], wp, &error)) {
+
+      // get timeline
+
+
+
+
+      tlidx = wp.TimeLineIndex();
+      timeLine.Timeline(tlidx, tline);
+      // Insert time-points
+      times.insert(tline);
+      // extract data from wp's
+      for (j = 0; j < wp.Npoints(); j++)
+        modelIn[tline[j]] = wp.Data(j);
+
+      // build parameter vectors
+      modelUse.AddPara(num[i], modelIn, glat);
+      modelIn.clear();
+      modelVec.push_back(modelUse);
+    }
+  }
+
+
+
+
+
+  // get time-union of all parameters
+  tlidx = 0;
+  times.Timeline(tlidx, termin);
+
+  int dmin = 0;
+  symbols = wsymbols.compute(modelVec, termin, dmin / 2, dmin);
+
+  termin.erase(termin.begin(), termin.end());
+  if (symbols.size() > 0) {
+    wp.setDims(symbols.size(), 1);
+    for (i = 0; i < symbols.size(); i++) {
+      int cn = symbols[i].customNumber();
+      if (cn == 999) {
+        cerr << i << " Symbolmaker Error:" << symbols[i].customName()
+                                                            << " number:" << symbols[i].customNumber() << endl;
+        cn = 0;
+      }
+      termin.push_back(symbols[i].getTime());
+      wp.setData(i, 0, static_cast<float> (cn));
+      //wp.setData(i,1,symbols[i].lightStatus());
+    }
+
+
+
+
+
+
+    // check if new timeline already exist, add it
+    int tlidx;
+    if ((tlidx = timeLine.Exist(termin)) == -1)
+      tlidx = addTimeLine(termin);
+    wp.setTimeLineIndex(tlidx);
+    wp.setId(p);
+    wp.setType(SYMBOL);
+    wp.calcAllProperties();
+    addParameter(wp);
+  }
+  */
+}
+
+
+
+
+
+
+
+
+
+
 
 void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 {

@@ -45,7 +45,7 @@ protected:
 public:
   DynamicFunction(std::string nf, double f=0);
   virtual void calc(double& res);
-  ~DynamicFunction() { delete next;}
+  virtual ~DynamicFunction() { delete next;}
   std::string text() const { return txt;}
   double      getFactor() const { return factor;}
 };

@@ -631,7 +631,6 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 #endif
   if (numProcs < 1) numProcs = 2; // default
 
-
   MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
   int pardim=0;

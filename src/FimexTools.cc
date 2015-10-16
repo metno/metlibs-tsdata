@@ -218,10 +218,12 @@ void FimexPetsCache::process(ParId pid)
 
   unsigned int numTimes   = tmp_times.size();
 
-  if(!numTimes) // the timeline is empty - nothing to to
-    return;
+  //if(!numTimes) // the timeline is empty - nothing to to
+   // return;
 
-  unsigned int numPardims = tmp_values.size() / numTimes; // equals 1 except for ensembles
+
+  unsigned int numPardims = 1;
+  if(numTimes) numPardims = tmp_values.size() / numTimes; // equals 1 except for ensembles
 
   wp.setDims(numTimes,numPardims);
   parameters.push_back(wp);
@@ -236,8 +238,10 @@ void FimexPetsCache::process(ParId pid)
     }
   }
 
-  int tlindex = timeLines.addTimeline(tmp_times);
-  parameters.back().setTimeLineIndex(tlindex);
+  if(numTimes) {
+    int tlindex = timeLines.addTimeline(tmp_times);
+    parameters.back().setTimeLineIndex(tlindex);
+  }
   parameters.back().setId(pid);
   parameters.back().calcAllProperties();
 

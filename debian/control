@@ -1,19 +1,28 @@
 Source: metlibs-tseries-tsdata
 Priority: optional
 Maintainer: Alexander Bürger <alexander.buerger@met.no>
-Build-Depends:  debhelper (>= 7), autotools-dev, g++,
-  autoconf (>=2.61), automake (>= 1.10), libtool (>= 1.5),
-  metlibs-putools-dev (>= 5.0.0), metlibs-pumet-dev (>= 5.0.0),
-  metlibs-pudatatypes-dev (>= 5.0.0), python, libboost-date-time-dev,
-  libfimex-dev, libpqxx3-dev, libhdf4-dev
-Standards-Version: 3.7.3
+Build-Depends:  debhelper (>= 9), pkg-config,
+ autoconf (>=2.61), automake (>= 1.11), libtool (>= 1.5),
+ metlibs-milogger-dev (>= 5.0.0),
+ metlibs-puctools-dev (>= 5.0.0),
+ metlibs-putools-dev (>= 5.0.0),
+ metlibs-pudatatypes-dev (>= 5.0.0),
+ metlibs-pumet-dev (>= 5.0.0),
+ python,
+ libboost-dev, libboost-date-time-dev,
+ libfimex-dev (>= 0.61.1),
+ libpqxx3-dev, libhdf4-dev
+Standards-Version: 3.9.2
 Section: libs
 
 Package: metlibs-tsdata-dev
 Section: libdevel
 Architecture: any
-Depends: metlibs-putools-dev (>= 5.0.0), metlibs-pumet-dev (>= 5.0.0),
-  metlibs-pudatatypes-dev (>= 5.0.0), libpqxx3-dev, libfimex-dev,
-  ${misc:Depends}
+Depends: metlibs-putools-dev (>= 5.0.0),
+ metlibs-pumet-dev (>= 5.0.0),
+ metlibs-pudatatypes-dev (>= 5.0.0),
+ libpqxx3-dev,
+ libfimex-dev (>= 0.61.1),
+ ${misc:Depends}
 Description: pudatatypes.
  metlibs pudatatypes.

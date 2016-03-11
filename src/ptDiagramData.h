@@ -37,6 +37,7 @@
 #include "ptSHCinfo.h"
 #include "WdbStream.h"
 #include "KlimaStream.h"
+#include "SMHIMoraStream.h"
 #include "FimexStream.h"
 #include <puDatatypes/miPosition.h>
 #include <puMet/symbolMaker.h>
@@ -246,6 +247,10 @@ public:
 
   bool fetchDataFromKlimaDB(pets::KlimaStream* klima, std::vector<ParId>& inpars,
       std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
+      
+  bool fetchDataFromMoraDB(pets::MoraStream* mora, std::vector<ParId>& inpars,
+      std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
+      
   bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString fimexname,
       std::vector<ParId>& inpars, std::vector<ParId>& outpars);
 

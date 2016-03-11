@@ -3652,6 +3652,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     *ef = DF_STATION_NOT_FOUND;
     return false;
   }
+  
   if (!pfile->readData(statIndex, modelid, start, stop, ef))
     return false;
 
@@ -4236,8 +4237,6 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
     }
   }
 
-
-
   // set the index of the first and last elements appended
   //first = range.first = index + 1 - nread;
   //last = range.last = index;
@@ -4251,6 +4250,63 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
   return true;
 }
 
+bool ptDiagramData::fetchDataFromMoraDB(pets::MoraStream* mora,
+    vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
+{
+
+  vector<miutil::miTime> tline;
+  vector<int> pline;
+
+  mora->clean();
+
+  // find station and read in data block
+  try {
+    if (!mora->readMoraData(inpars,outpars,fromTime,toTime))
+      return false;
+  } catch(exception& e) {
+    cerr << "MORA::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+
+  vector<int> newtimelines;
+  int tlIndex,index;
+  int nread=0;
+  // get all parameters
+  for (signed int i = 0; i < mora->numParameters(); i++) {
+    WeatherParameter wp;
+    if (mora->getOnePar(i, wp)) {
+
+      // add timeline and progline
+      if (!mora->getTimeLine(wp.TimeLineIndex(), tline, pline))
+        break;
+
+      if ((tlIndex = timeLine.Exist(tline)) == -1) {
+        tlIndex = addTimeLine(tline);
+        if (tlIndex == -1) {
+          cerr << "Too many timelines! giving up this parameter" << endl;
+          continue;
+        }
+        progLines.push_back(pline);
+        newtimelines.push_back(tlIndex);
+      }
+      wp.setTimeLineIndex(tlIndex);
+      index = addParameter(wp);
+      ++nread;
+    }
+  }
+// set the index of the first and last elements appended
+  //first = range.first = index + 1 - nread;
+  //last = range.last = index;
+  Range range;
+  range.first = index + 1 - nread;
+  range.last = index;
+
+  fetchRange.push_back(range);
+  ++nfetches;
+
+  return true;
+}
 
 
 bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString stationname,

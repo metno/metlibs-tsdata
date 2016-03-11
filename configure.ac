@@ -40,7 +40,12 @@ METNO_REQUIRE_PKG([PUMET],[puMet])
 METNO_REQUIRE_PKG([FIMEX], [fimex])
 METNO_REQUIRE_PKG([POSTGRESQL], [libpqxx])
 
-METNO_REQUIRE_C_LIBRARY([CURL], [curl], [curl/curl.h])  
+METNO_REQUIRE_C_LIBRARY([CURL], [curl], [curl/curl.h]) 
+
+METNO_REQUIRE_QT4([
+	Core
+	Xml
+]) 
 
 #PKG_CHECK_MODULES( [WEATHERSYMBOL], [libweather-symbol])
 

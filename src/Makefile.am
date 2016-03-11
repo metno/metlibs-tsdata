@@ -17,6 +17,7 @@ libtsData_la_SOURCES = \
 	WdbCacheQuery.cc      \
 	DynamicFunction.cc    \
 	KlimaStream.cc     \
+  SMHIMoraStream.cc \
 	FimexStream.cc  \
 	FimexTools.cc
 
@@ -39,6 +40,7 @@ libtsData_la_CPPFLAGS = \
 	$(PUTOOLS_CPPFLAGS) \
 	$(POSTGRESQL_CPPFLAGS) \
 	$(CURL_CPPFLAGS) \
+  $(QT4_CPPFLAGS) \
 	$(FIMEX_CPPFLAGS) \
 	$(WEATHERSYMBOL_CFLAGS) \
 	$(BOOST_CPPFLAGS)
@@ -57,7 +59,8 @@ libtsData_la_LDFLAGS += \
 	$(POSTGRESQL_LDFLAGS) \
 	$(BOOST_LDFLAGS) \
 	$(PROJ_LDFLAGS) \
-	$(CURL_LDFLAGS) 
+	$(CURL_LDFLAGS) \
+  $(QT4_LDFLAGS)
 
 libtsData_la_LIBADD += \
     $(MILOGGER_LIBS) \
@@ -68,7 +71,8 @@ libtsData_la_LIBADD += \
 	$(POSTGRESQL_LIBS) \
 	${BOOST_LIBS}  \
 	${PROJ_LIBS}   \
-	$(CURL_LIBS)
+	$(CURL_LIBS) \
+  $(QT4_LIBS)
 endif
 
 if WITH_HDF4

@@ -306,6 +306,10 @@ void FimexStream::filterParameters(vector<ParId>& inpar)
 bool FimexStream::hasParameter(std::string parametername)
 {
   try {
+    
+    if(!reader)
+      openStream();
+    
     if(!interpol)
       createPoslistInterpolator();
 
@@ -362,6 +366,9 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
   try {
 
     clean();
+    
+    if(!reader)
+      openStream();
 
     if(!is_open)
       return false;
@@ -563,6 +570,9 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
 
 bool FimexStream::readFromFimexSlice(FimexParameter par)
 {
+  if(!reader)
+    openStream();
+  
   if(!is_open)
     return false;
 

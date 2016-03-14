@@ -4253,6 +4253,8 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
 bool ptDiagramData::fetchDataFromMoraDB(pets::MoraStream* mora,
     vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
 {
+  if(!mora)
+    return false;
 
   vector<miutil::miTime> tline;
   vector<int> pline;

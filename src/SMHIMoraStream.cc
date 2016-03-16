@@ -552,15 +552,18 @@ bool MoraStream::setDataFromResult(string& data_)
                     boost::split(tokens, time_string, boost::algorithm::is_any_of("."));
                     miutil::miTime time(tokens[0]);
                     string offset = child_element.toElement().attributeNode("offset").value().toStdString();
-                    if (offset != "PTS0") {
-                      // TBD: add offset to time...
-                      // For now, supported 15, 30 and 45 minutes
-                      if (offset == "PT15M")
-                        time.addMin(-15);
-                      if (offset == "PT30M")
-                        time.addMin(-30);
-                      if (offset == "PT45M")
-                        time.addMin(-45);
+                    if (offset != "PT0S") {
+                      // offset PTXXM
+                      vector<string> offset_tokens;
+                      string delims = "PTM";
+                      boost::split(offset_tokens, offset, boost::algorithm::is_any_of(delims));
+                      
+                      if (offset_tokens.size() == 4) {
+                        if (!offset_tokens[2].empty()) {
+                          int offset_min = miutil::to_int(offset_tokens[2]);
+                          time.addMin(-offset_min);
+                        }
+                      }
                     }
                     // The pres attribute is sortconverted
                     float value = child_element.toElement().attributeNode("pres").value().toFloat();

@@ -69,8 +69,7 @@ struct MoraStation {
   std::string subtype; // Nat, Wmo
   std::string code; // Icao
   int distance; // backward kompatibility
-  MoraStation() :
-    name("")
+  MoraStation()
   {
   }
   ;

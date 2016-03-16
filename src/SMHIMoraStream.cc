@@ -52,11 +52,17 @@ static int FLAGLEVEL = 5;
 
 void MoraStation::clear()
 {
-  name = "";
-  amsl = "";
-  distance = 0;
-  number = "";
-  type = "";
+  name.clear(); // All station types
+  type.clear(); // Valid types, Wmo, Clim, Nat, Icao
+  // Empty coordinates
+  miCoordinates tmp;
+  coordinates=tmp;
+  amsl.clear(); //stationheigth
+  number.clear(); // Wmo, Nat, Clim
+  blk.clear(); // Wmo
+  subtype.clear(); // Nat, Wmo
+  code.clear(); // Icao
+  distance = 0; // backward kompatibility
 }
 
 MoraParameter::MoraParameter(const MoraParameter& rhs) :
@@ -115,7 +121,7 @@ string MoraStream::getFromHttp(string url)
 std::string pets::MoraStation::description()
 {
   ostringstream ost;
-  ost << name << " " << distance << "km | hoh=" << amsl;
+  ost << distance << "km | hoh=" << amsl;
   return ost.str();
 }
 std::string pets::MoraStation::toString()
@@ -610,7 +616,6 @@ pets::MoraStation MoraStream::getNearestMoraStation(miCoordinates& pos)
         currentStation.distance = dist;
       }
   }
-
   return currentStation;
 }
 

@@ -78,7 +78,7 @@ struct MoraStation {
   void clear();
 };
 
-//# PETSPAR   = namn | parameterId | statisticsFormulaId | samplingTime | unit 
+//PETSPAR   = namn | parameterId | statisticsFormulaId | samplingTime | unit | levelParameterId | levelFrom | levelTo : transform (-273.15, *.01)
 struct MoraParameter {
   ParId parid;
   std::string moraName;
@@ -86,6 +86,9 @@ struct MoraParameter {
   std::string statisticsFormulaId;
   std::string samplingTime;
   std::string unit;
+  std::string levelParameterId;
+  std::string levelFrom;
+  std::string levelTo;
   
   pets::math::DynamicFunction * transform;
   MoraDatatype type;

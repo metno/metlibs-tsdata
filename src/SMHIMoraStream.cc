@@ -81,6 +81,9 @@ MoraParameter & MoraParameter::operator=(const MoraParameter & rhs)
     statisticsFormulaId = rhs.statisticsFormulaId;
     samplingTime = rhs.samplingTime;
     unit = rhs.unit;
+    levelParameterId = rhs.levelParameterId;
+    levelFrom = rhs.levelFrom;
+    levelTo = rhs.levelTo;
     type = rhs.type;
 
     if (transform) {
@@ -203,6 +206,18 @@ void MoraStream::setSingleParameterDefinition(string key, string token,
   if (subTokens.size() > 4) {
     kpar.unit = subTokens[4];
     boost::algorithm::trim(kpar.unit);
+  }
+  if (subTokens.size() > 5) {
+    kpar.levelParameterId = subTokens[5];
+    boost::algorithm::trim(kpar.levelParameterId);
+  }
+  if (subTokens.size() > 6) {
+    kpar.levelFrom = subTokens[6];
+    boost::algorithm::trim(kpar.levelFrom);
+  }
+  if (subTokens.size() > 7) {
+    kpar.levelTo = subTokens[7];
+    boost::algorithm::trim(kpar.levelTo);
   }
   kpar.parid.setFromString(key);
   kpar.type = type;
@@ -730,21 +745,30 @@ string MoraStream::createDataQuery(vector<MoraParameter> & moraPars,
   string query;
 
   if (type == pets::Mora_observation) {
-    // /value/stationsvalues/v1/stationType/%/stationId/%/parameterId/%/statisticsFormulaId/%/samplingTime/%/from/%/to/%.xml
+    // /value/stationsvalues/v1/stationType/%/stationId/%/parameterId/%/statisticsFormulaId/%/samplingTime/%/from/%/to/%/levelParameterId/%/levelFrom/%/levelTo/%.xml
     
     // Add parameters to url
     string parameterids;
     string statisticsFormulaids;
     string samplingTimes;
+    string levelParameterids;
+    string levelFroms;
+    string levelTos;
     for (unsigned int i = 0; i < moraPars.size(); i++) {
       if (i == 0) {
         parameterids = moraPars[i].parameterId;
         statisticsFormulaids = moraPars[i].statisticsFormulaId;
         samplingTimes = moraPars[i].samplingTime;
+        levelParameterids = moraPars[i].levelParameterId;
+        levelFroms = moraPars[i].levelFrom;
+        levelTos = moraPars[i].levelTo;
       } else {
         parameterids += "," + moraPars[i].parameterId;
         statisticsFormulaids += "," + moraPars[i].statisticsFormulaId;
         samplingTimes += "," + moraPars[i].samplingTime;
+        levelParameterids += "," + moraPars[i].levelParameterId;
+        levelFroms += "," + moraPars[i].levelFrom;
+        levelTos += "," + moraPars[i].levelTo;
       }
     }
     // Add station metadata to url
@@ -767,15 +791,17 @@ string MoraStream::createDataQuery(vector<MoraParameter> & moraPars,
       cerr << "Unknown station.type " << station.type << endl;
       return query;
     }
-    // /value/stationsvalues/v1/stationType/%/stationId/%/parameterId/%/statisticsFormulaId/%/samplingTime/%/from/%/to/%.xml
+    // /value/stationsvalues/v1/stationType/%/stationId/%/parameterId/%/statisticsFormulaId/%/samplingTime/%/from/%/to/%/levelParameterId/%/levelFrom/%/levelTo/%.xml
     vector<string> tokens; // size should be 8!
     boost::split(tokens, DATAREPORT, boost::algorithm::is_any_of("%"));
-    if (tokens.size() != 8) {
+    if (tokens.size() != 11) {
       cerr << "Invalid DATAREPORT: " << DATAREPORT << endl;
       return query;
     }
     query = tokens[0] + stationType + tokens[1] + stationId + tokens[2]
-      + parameterids + tokens[3] + statisticsFormulaids + tokens[4] + samplingTimes + tokens[5] + fromTime.isoTime("T") + tokens[6] + toTime.isoTime("T") + tokens[7];
+      + parameterids + tokens[3] + statisticsFormulaids + tokens[4] 
+      + samplingTimes + tokens[5] + fromTime.isoTime("T") + tokens[6] + toTime.isoTime("T") + tokens[7]
+      + levelParameterids + tokens[8] + levelFroms + tokens[9] + levelTos + tokens[10];
     // remove spaces
     miutil::replace(query, " ", "");
       

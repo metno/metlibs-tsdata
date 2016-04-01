@@ -9,9 +9,11 @@ Build-Depends:  debhelper (>= 9), pkg-config,
  metlibs-pudatatypes-dev (>= 5.0.0),
  metlibs-pumet-dev (>= 5.0.0),
  python,
+ libcurl-dev, libqt4-dev,
  libboost-dev, libboost-date-time-dev,
  libfimex-dev (>= 0.61.1),
- libpqxx3-dev, libhdf4-dev
+ libpqxx-dev | libpqxx3-dev,
+ libhdf4-dev
 Standards-Version: 3.9.2
 Section: libs
 
@@ -21,8 +23,10 @@ Architecture: any
 Depends: metlibs-putools-dev (>= 5.0.0),
  metlibs-pumet-dev (>= 5.0.0),
  metlibs-pudatatypes-dev (>= 5.0.0),
- libpqxx3-dev,
+ libboost-dev, libboost-date-time-dev,
  libfimex-dev (>= 0.61.1),
+ libpqxx-dev | libpqxx3-dev,
+ libhdf4-dev,
  ${misc:Depends}
 Description: pudatatypes.
  metlibs pudatatypes.

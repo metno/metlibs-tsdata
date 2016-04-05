@@ -1,9 +1,7 @@
 /*
   libtsData - Time Series Data
 
-  $Id$
-
-  Copyright (C) 2006 met.no
+  Copyright (C) 2006-2016 met.no
 
   Contact information:
   Norwegian Meteorological Institute

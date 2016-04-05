@@ -1,9 +1,7 @@
 /*
   libtsData - Time Series Data
 
-  $Id$
-
-  Copyright (C) 2006 met.no
+  Copyright (C) 2006-2016 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -56,8 +54,8 @@ vector<Parameter> ParameterDefinition::paramList;
 std::ostream& operator<<(std::ostream& out, const ParId& pi)
 {
     return out << " alias: " << pi.alias << " level: " << pi.level
-	       << " model: " << pi.model << " run: " << pi.run
-	       << " submodel: " << pi.submodel;
+               << " model: " << pi.model << " run: " << pi.run
+               << " submodel: " << pi.submodel;
 }
 
 bool operator==(const ParId& lhs, const ParId& rhs) {

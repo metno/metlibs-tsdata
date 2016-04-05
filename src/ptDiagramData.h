@@ -245,10 +245,10 @@ public:
 
   bool fetchDataFromKlimaDB(pets::KlimaStream* klima, std::vector<ParId>& inpars,
       std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
-      
+
   bool fetchDataFromMoraDB(pets::MoraStream* mora, std::vector<ParId>& inpars,
       std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
-      
+
   bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, const std::string& fimexname,
       std::vector<ParId>& inpars, std::vector<ParId>& outpars);
 

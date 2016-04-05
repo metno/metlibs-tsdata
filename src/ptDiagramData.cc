@@ -37,13 +37,9 @@
 #include <puMet/windProfile.h>
 #include <puMet/cloudGrp.h>
 #include <puMet/iceAccretion.h>
-
-//#include <weather_symbol/Factory.h>
-//#include <weather_symbol/WeatherData.h>
 #include <puTools/miStringFunctions.h>
 
 #include <cmath>
-
 #include <iostream>
 
 using namespace std;
@@ -4316,7 +4312,6 @@ bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, dou
     const std::string& stationname,
     std::vector<ParId>& inpars, std::vector<ParId>& outpars)
 {
-
   int nread = 0, i;
 
   vector<miutil::miTime> tline;

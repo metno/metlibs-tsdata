@@ -1,3 +1,10 @@
+metlibs-tseries-tsdata (5.2.0-1) unstable; urgency=low
+
+  * removed puTools/miString
+  * update dependencies in debian/control
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 05 Apr 2016 14:00:00 +0200
+
 metlibs-tseries-tsdata (5.1.0-1) unstable; urgency=low
 
   * new version with SMHI Mora

@@ -3,7 +3,7 @@
 #
 
 AC_PREREQ(2.59)
-AC_INIT([tsData], [5.1.0], [diana@met.no])
+AC_INIT([tsData], [5.2.0], [diana@met.no])
 AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_SRCDIR([src/FimexStream.h])
@@ -36,7 +36,7 @@ METNO_REQUIRE_PKG([MILOGGER], [miLogger])
 METNO_REQUIRE_PKG([PUCTOOLS], [puCtools])
 METNO_REQUIRE_PKG([PUTOOLS],[puTools])
 METNO_REQUIRE_PKG([PUDATATYPES],[puDatatypes])
-METNO_REQUIRE_PKG([PUMET],[puMet])
+METNO_REQUIRE_PKG([PUMET],[puMet], [5.1.0])
 METNO_REQUIRE_PKG([FIMEX], [fimex])
 METNO_REQUIRE_PKG([POSTGRESQL], [libpqxx])
 

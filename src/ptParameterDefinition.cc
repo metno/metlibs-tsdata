@@ -36,7 +36,7 @@
 
 #include "ptParameterDefinition.h"
 
-#include <puTools/miString.h>
+#include <puTools/miStringFunctions.h>
 
 #include <fstream>
 #include <algorithm>
@@ -127,11 +127,11 @@ bool ParId::wdbCompare(const ParId& lhs)
 
 std::string ParId::toString()
 {
-  const std::string palias    =  ( alias    != A_UNDEF ? alias           : "x");
-  const std::string plevel    =  ( level    != L_UNDEF ? miString(level) : "x");
-  const std::string pmodel    =  ( model    != M_UNDEF ? model           : "x");
-  const std::string prun      =  ( run      != R_UNDEF ? miString(run)   : "x");
-  const std::string psubmodel =  ( submodel != S_UNDEF ? submodel        : "x");
+  const std::string palias    =  ( alias    != A_UNDEF ? alias    : "x");
+  const std::string plevel    =  ( level    != L_UNDEF ? miutil::from_number(level) : "x");
+  const std::string pmodel    =  ( model    != M_UNDEF ? model    : "x");
+  const std::string prun      =  ( run      != R_UNDEF ? miutil::from_number(run) : "x");
+  const std::string psubmodel =  ( submodel != S_UNDEF ? submodel : "x");
   return palias + "," + plevel + "," + pmodel + "," + prun + "," + psubmodel;
 }
 

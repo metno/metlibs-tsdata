@@ -42,7 +42,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <puTools/miString.h>
 
 #include <fimex/CDMReaderUtils.h>
 #include <fimex/CDM.h>

@@ -42,7 +42,6 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include <puTools/miString.h>
 
 using namespace std;
 using namespace miutil;

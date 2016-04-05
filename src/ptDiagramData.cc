@@ -40,6 +40,7 @@
 
 //#include <weather_symbol/Factory.h>
 //#include <weather_symbol/WeatherData.h>
+#include <puTools/miStringFunctions.h>
 
 #include <cmath>
 
@@ -4311,7 +4312,8 @@ bool ptDiagramData::fetchDataFromMoraDB(pets::MoraStream* mora,
 }
 
 
-bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString stationname,
+bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon,
+    const std::string& stationname,
     std::vector<ParId>& inpars, std::vector<ParId>& outpars)
 {
 

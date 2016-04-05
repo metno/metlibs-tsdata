@@ -42,6 +42,7 @@
 #include <math.h>
 #include <float.h>
 #include <puCtools/puMath.h>
+#include <puTools/miStringFunctions.h>
 
 #include <algorithm>
 #include <iostream>

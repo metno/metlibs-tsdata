@@ -51,8 +51,6 @@
 #define MERGE_RAW   0
 #define MERGE_ADAPT 1
 
-//typedef std::vector<miString> StringVector;
-
 struct time_interval {
   miutil::miTime from;
   miutil::miTime until;
@@ -251,7 +249,7 @@ public:
   bool fetchDataFromMoraDB(pets::MoraStream* mora, std::vector<ParId>& inpars,
       std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
       
-  bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, miutil::miString fimexname,
+  bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, const std::string& fimexname,
       std::vector<ParId>& inpars, std::vector<ParId>& outpars);
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);

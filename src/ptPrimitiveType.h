@@ -31,7 +31,7 @@
 #ifndef _ptPrimitiveType_h
 #define _ptPrimitiveType_h
 
-#include <puTools/miString.h>
+#include <string>
 
 enum ptPrimitiveType {
   DUM_PRIMITIVE,// 0
@@ -67,7 +67,7 @@ enum ptPrimitiveType {
 
 extern bool filePrimitive(ptPrimitiveType);
 extern int zOrder(const ptPrimitiveType);
-extern ptPrimitiveType Str2Primitive(miutil::miString);
-extern miutil::miString Primitive2Str(ptPrimitiveType);
+extern ptPrimitiveType Str2Primitive(const std::string&);
+extern std::string Primitive2Str(ptPrimitiveType);
 
 #endif

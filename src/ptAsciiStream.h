@@ -36,6 +36,7 @@
    at Fri Aug  9 07:08:18 2002 */
 
 #include "ptDataStream.h"
+#include <puTools/miStringFunctions.h>
 #include <set>
 
 class AsciiStream : public DataStream {

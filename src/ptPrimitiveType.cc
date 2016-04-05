@@ -33,13 +33,15 @@
 
 #include "ptPrimitiveType.h"
 
+#include <puTools/miStringFunctions.h>
+
 using namespace std;
 using namespace miutil;
 
 
-ptPrimitiveType Str2Primitive(miString buffer){
-  miString prim = buffer.upcase();
-  prim.trim(true,true);
+ptPrimitiveType Str2Primitive(const std::string& buffer)
+{
+  const std::string prim = miutil::trimmed(miutil::to_upper(buffer), true, true);
 
   if (prim=="DUM_PRIMITIVE") return DUM_PRIMITIVE;
   else if (prim=="LINE") return LINE;
@@ -75,7 +77,8 @@ ptPrimitiveType Str2Primitive(miString buffer){
   }
 }
 
-miString Primitive2Str(ptPrimitiveType prim){
+std::string Primitive2Str(ptPrimitiveType prim)
+{
   if (prim==DUM_PRIMITIVE) return "DUM_PRIMITIVE";
   else if (prim==LINE) return "LINE";
   else if (prim==DOUBLE_LINE) return "DOUBLE_LINE";

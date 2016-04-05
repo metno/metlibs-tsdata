@@ -31,7 +31,7 @@
 #ifndef PTSHCINFO_H
 #define PTSHCINFO_H
 
-#include <puTools/miString.h>
+#include <string>
 #include <vector>
 
 class SHCdir {
@@ -50,7 +50,7 @@ public:
 
 class SHCinfo {
 public:
-  miutil::miString name;
+  std::string name;
   std::vector<SHClevel> levels;
   int levelIndex(const int& level);
   int lowLevel();
@@ -61,7 +61,7 @@ class SHCcollection {
 public:
   std::vector<SHCinfo> list;
   SHCinfo total;
-  bool readList(const miutil::miString& filename);
+  bool readList(const std::string& filename);
   SHCinfo totalSHC(){return total;}
 };
 

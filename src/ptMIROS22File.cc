@@ -31,6 +31,8 @@
 #include "config.h"
 #endif
 
+#include <puTools/miStringFunctions.h>
+
 #include <fstream>
 #include <iostream>
 #include <set>

@@ -31,6 +31,8 @@
 #include "config.h"
 #endif
 
+#include <puTools/miStringFunctions.h>
+
 #include <fstream>
 #include <iostream>
 #include "ptSHCinfo.h"
@@ -84,7 +86,7 @@ int SHCinfo::highLevel()
   } else return 0;
 }
 
-bool SHCcollection::readList(const miString& filename)
+bool SHCcollection::readList(const std::string& filename)
 {
   cerr << "++ READ SHC-information from:" << filename << endl;
   // first clean up
@@ -103,8 +105,8 @@ bool SHCcollection::readList(const miString& filename)
     read_val
   };
   read_mode mode= read_common;
-  miString buf;
-  miString totalname;
+  std::string buf;
+  std::string totalname;
   int numloc= -1;
   int numlev=-1, numdir=-1, ilevel;
   SHCdir dir;
@@ -113,13 +115,13 @@ bool SHCcollection::readList(const miString& filename)
   vector<float> fdir;
   
   while (getline(f, buf)){
-    buf.trim();
+    miutil::trim(buf);
     if (buf.length()==0) continue;
     if (buf[0]=='#') continue;
 
-    vector<miString> vs= buf.split("=");
+    const vector<std::string> vs= miutil::split(buf, "=");
 
-    if (buf.contains("[LOCATION]")){
+    if (miutil::contains(buf, "[LOCATION]")){
       if (numlev<0 || numdir<0){
 	cerr << "directions and levels before locations" << endl;
 	f.close();
@@ -144,7 +146,6 @@ bool SHCcollection::readList(const miString& filename)
       }
       
     } else if (mode==read_loc) {
-      if (buf.contains("name=")){
 	list[numloc].name = vs[1];
 // 	cerr << "Locations name:" << list[numloc].name << endl;
 	
@@ -157,9 +158,10 @@ bool SHCcollection::readList(const miString& filename)
 	  return false;
 	}
 // 	cerr << "Start of values" << endl;
+      if (miutil::contains(buf, "name=")){
       }
 
-    } else if (buf.contains("name=")){
+    } else if (miutil::contains(buf, "name=")) {
       totalname= vs[1];
 //       cerr << "Totalname " << totalname << endl;
       
@@ -171,17 +173,17 @@ bool SHCcollection::readList(const miString& filename)
       numdir= atoi(vs[1].c_str());
 //       cerr << "Found " << numdir << " directions" << endl;
       
-    } else if (buf.contains("directions=")){
+    } else if (miutil::contains(buf, "directions=")){
       if (numdir<0) {
 	cerr << "numdirections before directions" << endl;
 	f.close();
 	return false;
       }
-      vector<miString> vvs= vs[1].split(",");
-      if (vvs.size()!=numdir+1){
 	cerr << "numdirections doesn't match" << endl;
 	f.close();
 	return false;
+      const vector<std::string> vvs = miutil::split(vs[1], ",");
+      if (vvs.size()!=numdir+1) {
       }
       for (int i=0; i<numdir+1; i++)
 	fdir.push_back(atof(vvs[i].c_str()));
@@ -194,7 +196,7 @@ bool SHCcollection::readList(const miString& filename)
 	f.close();
 	return false;
       }
-      vector<miString> vals= buf.split(",");
+      const vector<std::string> vals = miutil::split(buf, ",");
       int nd= vals.size();
       if (nd!=numdir){
 	cerr << "values' number of directions doesn't match" << endl;

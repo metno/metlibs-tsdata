@@ -368,7 +368,7 @@ bool MoraStream::setStationsFromResult(string& data_)
                   }
                 }
                 // No need to have garbage in list
-                if (!s.name.empty())
+                if (!s.name.empty() && (s.type != "Ikv"))
                   stationlist.push_back(s);
               }          
             } // End StationPlace

@@ -25,6 +25,7 @@ pkg_includedir = ${includedir}/tsData
 
 pkg_include_HEADERS = \
 	$(libtsData_la_SOURCES:.cc=.h) \
+	tsDataVersion.h  \
 	HDFdefs.h        \
 	ptDataStream.h   \
 	ptError.h	 \

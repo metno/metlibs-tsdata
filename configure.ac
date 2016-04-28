@@ -3,7 +3,7 @@
 #
 
 AC_PREREQ(2.59)
-AC_INIT([tsData], [5.2.0], [diana@met.no])
+AC_INIT([tsData], [5.3.0], [diana@met.no])
 AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_SRCDIR([src/FimexStream.h])
@@ -38,10 +38,14 @@ METNO_REQUIRE_PKG([PUTOOLS],[puTools])
 METNO_REQUIRE_PKG([PUDATATYPES],[puDatatypes])
 METNO_REQUIRE_PKG([PUMET],[puMet], [5.1.0])
 METNO_REQUIRE_PKG([FIMEX], [fimex])
+
+# for wdb
 METNO_REQUIRE_PKG([POSTGRESQL], [libpqxx])
 
-METNO_REQUIRE_C_LIBRARY([CURL], [curl], [curl/curl.h]) 
+# klimastream, SMHI mora
+METNO_REQUIRE_C_LIBRARY([CURL], [curl], [curl/curl.h])
 
+# for SMHI mora
 METNO_REQUIRE_QT4([
 	Core
 	Xml

@@ -4,10 +4,8 @@
 DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
-DH_COMMAND = dh --with python2 # python2 not available on lucid
-
 %:
-	$(DH_COMMAND) $@ --parallel
+	dh $@ --parallel
 
 override_dh_auto_configure:
 	./autogen.sh

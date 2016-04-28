@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (5.3.0-1) unstable; urgency=low
+
+  * remove GribStream, can be read via fimex
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Thu, 28 Apr 2016 08:00:00 +0200
+
 metlibs-tseries-tsdata (5.2.0-2) unstable; urgency=low
 
   * bugfix in debian/control

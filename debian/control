@@ -21,7 +21,7 @@ Package: metlibs-tsdata-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-putools-dev (>= 5.0.0),
- metlibs-pumet-dev (>= 5.0.0),
+ metlibs-pumet-dev (>= 5.1.0),
  metlibs-pudatatypes-dev (>= 5.0.0),
  libboost-dev, libboost-date-time-dev,
  libfimex-dev (>= 0.61.1),

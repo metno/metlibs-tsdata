@@ -91,17 +91,4 @@ libtsData_la_LIBADD += \
 endif
 endif
 
-if ENABLE_GRIBFILE
-libtsData_la_SOURCES += ptGribStream.cc
-libtsData_la_LDFLAGS += \
-	${DIFIELD_CPPFLAGS}
-libtsData_la_LDFLAGS += \
-	$(DIFIELD_LDFLAGS)
-if ENABLE_SHARED_LIBRARY
-libtsData_la_LIBADD += \
-	$(DIFIELD_LIBS)
-endif
-
-endif
-
 INSTALL = install -p

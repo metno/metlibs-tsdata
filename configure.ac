@@ -47,17 +47,8 @@ METNO_REQUIRE_QT4([
 	Xml
 ])
 
-#PKG_CHECK_MODULES( [WEATHERSYMBOL], [libweather-symbol])
-
 METNO_WITH_HDF4([yes])
 METNO_WITH_CONDITIONAL([HDF4], [hdf4])
-
-METNO_ENABLE([GRIBFILE], [gribfile], [support for fields in Grib file], [no])
-METNO_ENABLE_CONDITIONAL([GRIBFILE], [gribfile])
-METNO_IF_ENABLED([gribfile], [
-    METNO_REQUIRE_PKG([DIFIELD],[diField])
-])
-
 
 AC_CONFIG_FILES([
 	tsData.pc

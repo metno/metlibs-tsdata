@@ -22,6 +22,7 @@ Architecture: any
 Depends: metlibs-putools-dev (>= 5.0.0),
  metlibs-pumet-dev (>= 5.1.0),
  metlibs-pudatatypes-dev (>= 5.0.0),
+ libqt4-dev,
  libboost-dev, libboost-date-time-dev,
  libfimex-dev (>= 0.61.1),
  libpqxx-dev | libpqxx3-dev,

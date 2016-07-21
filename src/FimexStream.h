@@ -9,9 +9,7 @@
 #define FIMEXSTREAM_H_
 
 /*
- $Id$
-
- Copyright (C) 2006 met.no
+ Copyright (C) 2006-2016 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -69,9 +67,7 @@
 namespace pets {
 
 class FimexStream  {
-
 private:
-
   std::string filename;
   std::string modelname;
   std::string filetype;
@@ -95,7 +91,6 @@ private:
   int          poslistVersion;
 
 
-
   int activePosition;
 
   std::vector<FimexPetsCache>  cache;
@@ -114,30 +109,27 @@ private:
   void filterParameters(std::vector<ParId>& inpar);
 
 public:
-  FimexStream(const std::string& fname,
-	      const std::string& modname,
-	      const std::string& ftype,
-	      const std::string configfile="");
+  FimexStream(const std::string& fname, const std::string& modname,
+      const std::string& ftype, const std::string& configfile="");
   ~FimexStream();
 
-
   static void setCommonPoslist(const FimexPoslist& newCommonPoslist);
-  static void setCommonPoslistFromStringlist(std::vector<std::string> newposlist);
+  static void setCommonPoslistFromStringlist(const std::vector<std::string>& newposlist);
 
-  static int  getProgress();
+  static int getProgress();
   static std::string getProgressMessage();
 
   static std::string getParameterFilterAsString();
-  static void setParameterFilterFromString(std::string blist);
-  static void addToAllParameters(std::vector<std::string>);
+  static void setParameterFilterFromString(const std::string& blist);
+  static void addToAllParameters(const std::vector<std::string>&);
 
-  static std::set<std::string> getParameterFilter();
-  static bool isFiltered(std::string petsname);
+  static const std::set<std::string>& getParameterFilter();
+  static bool isFiltered(const std::string& petsname);
 
-  static void setParameterFilter(std::set<std::string> pfilter);
+  static void setParameterFilter(const std::set<std::string>& pfilter);
 
-  static void setFimexParameters(std::vector<pets::FimexParameter> par);
-  static std::vector<std::string> getAllParameters();
+  static void setFimexParameters(const std::vector<pets::FimexParameter>& par);
+  static const std::vector<std::string>& getAllParameters();
 
   /// Implemented from DataStream interface -------------------------------
 
@@ -146,7 +138,7 @@ public:
   bool closeStream();   // unimplemented
 
   bool isOpen() const { return is_open; }
-  bool hasParameter(std::string parametername);
+  bool hasParameter(const std::string& parametername);
 
   // set the raw position list
   void setPositions();
@@ -156,25 +148,17 @@ public:
   // use the position list to interpolate the data
   bool createPoslistInterpolator();
 
-  bool readData(std::string placename, float lat, float lon,  std::vector<ParId>& inpar, std::vector<ParId>& outpar);
+  bool readData(const std::string& placename, float lat, float lon, std::vector<ParId>& inpar, std::vector<ParId>& outpar);
   boost::posix_time::ptime getReferencetime();
-  bool hasCompleteDataset(std::string placename,float lat, float lon, std::vector<ParId> inpar);
-
+  bool hasCompleteDataset(const std::string& placename,float lat, float lon, std::vector<ParId> inpar);
 
 
   bool getOnePar(int, WeatherParameter&);
-  bool getTimeLine(int index,std::vector<miutil::miTime>& tline, std::vector<int>& pline);
+  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline);
 
   int numParameters();
-
-
-
 };
 
-
-
-
-
-
 } /* namespace pets */
+
 #endif /* FIMESTREAM_H_ */

@@ -6,9 +6,7 @@
  */
 
 /*
- $Id$
-
- Copyright (C) 2006 met.no
+ Copyright (C) 2006-2016 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -45,10 +43,10 @@
 
 #include <fimex/CDMReaderUtils.h>
 #include <fimex/CDM.h>
+#include <fimex/Data.h>
 #include <fimex/Utils.h>
 
 #include <boost/shared_array.hpp>
-#include "fimex/Data.h"
 
 #include <boost/interprocess/anonymous_shared_memory.hpp>
 //#include <boost/interprocess/shared_memory_object.hpp>
@@ -84,25 +82,22 @@ std::string FimexStream::getProgressMessage()
   return progressMessage;
 }
 
-std::set<std::string> FimexStream::getParameterFilter()
+const std::set<std::string>& FimexStream::getParameterFilter()
 {
   return parameterFilter;
 }
 
-bool FimexStream::isFiltered(std::string petsname)
+bool FimexStream::isFiltered(const std::string& petsname)
 {
   return bool(parameterFilter.count(petsname));
 }
 
-
-
-void FimexStream::setParameterFilter(std::set<std::string> pfilter)
+void FimexStream::setParameterFilter(const std::set<std::string>& pfilter)
 {
   parameterFilter=pfilter;
 }
 
-
-void FimexStream::setFimexParameters(std::vector<pets::FimexParameter> par)
+void FimexStream::setFimexParameters(const std::vector<pets::FimexParameter>& par)
 {
   fimexpar=par;
   vector<string> apar;
@@ -111,17 +106,15 @@ void FimexStream::setFimexParameters(std::vector<pets::FimexParameter> par)
   allParameters=apar;
 }
 
-void FimexStream::addToAllParameters(std::vector<std::string> newpar)
+void FimexStream::addToAllParameters(const std::vector<std::string>& newpar)
 {
-  allParameters.insert(allParameters.end(),newpar.begin(),newpar.end());
+  allParameters.insert(allParameters.end(), newpar.begin(), newpar.end());
 }
 
-std::vector<std::string> FimexStream::getAllParameters()
+const std::vector<std::string>& FimexStream::getAllParameters()
 {
   return allParameters;
 }
-
-
 
 std::string FimexStream::getParameterFilterAsString()
 {
@@ -133,18 +126,14 @@ std::string FimexStream::getParameterFilterAsString()
     delimiter = ":";
   }
   return ost.str();
-
 }
 
-void FimexStream::setParameterFilterFromString(std::string blist)
+void FimexStream::setParameterFilterFromString(const std::string& blist)
 {
   set<string> tokens;
   boost::split(tokens, blist, boost::algorithm::is_any_of(":"));
   parameterFilter = tokens;
 }
-
-
-
 
 void FimexStream::setCommonPoslist(const FimexPoslist& cposlist)
 {
@@ -152,18 +141,15 @@ void FimexStream::setCommonPoslist(const FimexPoslist& cposlist)
   commonposlistVersion++;
 }
 
-void FimexStream::setCommonPoslistFromStringlist(std::vector<std::string> newposlist)
+void FimexStream::setCommonPoslistFromStringlist(const std::vector<std::string>& newposlist)
 {
   FimexPoslist newFimexposlist;
 
-  for(unsigned int i=0;i<newposlist.size();i++)
+  for(unsigned int i=0; i<newposlist.size(); i++)
     newFimexposlist.addEntry(newposlist[i]);
 
   setCommonPoslist(newFimexposlist);
-
 }
-
-
 
 void FimexStream::setPositions()
 {
@@ -171,19 +157,18 @@ void FimexStream::setPositions()
   poslistVersion = commonposlistVersion;
 }
 
-
-
-FimexStream::FimexStream(const std::string& fname,
-    const std::string& modname,
-    const std::string& ftype,
-    const std::string cfile)
-:  filename(fname) , modelname(modname), progtime(0), is_open(false), increment(0),
-   configfile(cfile), activePosition(0)
+FimexStream::FimexStream(const std::string& fname, const std::string& modname,
+    const std::string& ftype, const std::string& cfile)
+  : filename(fname)
+  , modelname(modname)
+  , progtime(0)
+  , is_open(false)
+  , increment(0)
+  , configfile(cfile)
+  , activePosition(0)
 {
-
   vector<string> typetokens;
   boost::split(typetokens, ftype, boost::algorithm::is_any_of(":"));
-
 
   filetype      =  ( typetokens.size() > 0 ? boost::trim_copy(typetokens[0]) : ftype   );
   parametertype =  ( typetokens.size() > 1 ? boost::trim_copy(typetokens[1]) : filetype);
@@ -191,35 +176,30 @@ FimexStream::FimexStream(const std::string& fname,
   timeLineIsRead=false;
   poslist = commonposlist;
   poslistVersion = commonposlistVersion;
-
 }
 
 
 FimexStream::~FimexStream()
 {
-
 }
 
 void FimexStream::clean()
 {
-
 }
 
 
 bool FimexStream::createPoslistInterpolator()
 {
   try {
-    if(!reader)
+    if (!reader)
       openStream();
 
     interpol.reset( new MetNoFimex::CDMInterpolator (reader));
     interpol->changeProjection(MIFI_INTERPOL_BILINEAR,poslist.getLon(), poslist.getLat() );
-
   } catch (exception& e) {
     cerr << e.what() << endl;
     return false;
   }
-
   return true;
 }
 
@@ -231,13 +211,11 @@ void FimexStream::createTimeLine()
 {
   basetimeline.clear();
 
-
   try {
-    if(!interpol)
+    if (!interpol)
       createPoslistInterpolator();
 
-
-    if(!is_open)
+    if (!is_open)
       return;
 
     // get unlimited axis as time axis. NB! this is true for all known models
@@ -250,8 +228,6 @@ void FimexStream::createTimeLine()
     const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim();
     if(tmpDim)
       timeAxis=tmpDim->getName();
-
-
 
     MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit(timeAxis,"seconds since 1970-01-01 00:00:00 +00:00");
     boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
@@ -266,20 +242,17 @@ void FimexStream::createTimeLine()
         break;
       }
     }
-
   } catch (exception& e) {
     cerr << "Exception catched in createTimeline: " << e.what() << endl;
   }
 
-  timeLineIsRead=true;
+  timeLineIsRead = true;
 }
-
-
 
 void FimexStream::openStream()
 {
   try {
-    reader = MetNoFimex::CDMFileReaderFactory::create(filetype,filename,configfile);
+    reader = MetNoFimex::CDMFileReaderFactory::create(filetype, filename, configfile);
     cerr << "Stream " << filename << " opened " << endl;
     is_open=true;
   } catch (exception& e) {
@@ -287,74 +260,67 @@ void FimexStream::openStream()
   }
 }
 
-
 boost::posix_time::ptime FimexStream::getReferencetime()
 {
-
-  if(!reader)
+  if (!reader)
     openStream();
 
   return MetNoFimex::getUniqueForecastReferenceTime(reader);
-
 }
 
 void FimexStream::filterParameters(vector<ParId>& inpar)
 {
-  vector<ParId> tmp = inpar;
-  inpar.clear();
-  for(int i=0;i<tmp.size();i++) {
-    if(!parameterFilter.count(tmp[i].alias)) {
+  vector<ParId> tmp;
+  std::swap(tmp, inpar);
+  for (int i=0; i<tmp.size(); i++) {
+    if (!parameterFilter.count(tmp[i].alias)) {
       inpar.push_back(tmp[i]);
     }
   }
 }
 
-bool FimexStream::hasParameter(std::string parametername)
+bool FimexStream::hasParameter(const std::string& parametername)
 {
   try {
-    
-    if(!reader)
+    if (!reader)
       openStream();
-    
-    if(!interpol)
+
+    if (!interpol)
       createPoslistInterpolator();
 
     return interpol->getCDM().hasVariable(parametername);
 
-  } catch( exception& e) {
+  } catch (exception& e) {
     cerr << "Exception in hasParameter: " << e.what() << endl;
   }
   return false;
 }
 
-
-
-bool FimexStream::hasCompleteDataset(std::string placename,float lat, float lon, vector<ParId> inpar)
+bool FimexStream::hasCompleteDataset(const std::string& placename, float lat, float lon, vector<ParId> inpar)
 {
   // nothing requested  - this is complete
-
-  if(inpar.empty())
+  if (inpar.empty())
     return false;
 
   filterParameters(inpar);
   // position not found
-  if( poslist.getPos(placename,lat,lon) < 0 )
+  if (poslist.getPos(placename, lat, lon) < 0)
     return false;
 
-  if(cache.empty() )
+  if (cache.empty())
     return false;
 
   // check if there are parameters that were not interpolated earlier
   vector<ParId> extrapar;
-  cache[0].getExtrapars(inpar,extrapar);
+  cache[0].getExtrapars(inpar, extrapar);
   bool setIsComplete = true;
 
   for(unsigned int i=0;i<extrapar.size();i++) {
     for( unsigned int j=0;j<fimexpar.size();j++) {
-      if ( fimexpar[j].parid == extrapar[i] && fimexpar[j].streamtype == parametertype) {
+      if (fimexpar[j].parid == extrapar[i] && fimexpar[j].streamtype == parametertype) {
         // we expect this parameter to be read from the fimex file
         // but does the file have the fimexparameter at all ?
-        if(hasParameter(fimexpar[j].parametername)) {
+        if (hasParameter(fimexpar[j].parametername)) {
           setIsComplete=false;
           break;
         }
@@ -364,40 +330,35 @@ bool FimexStream::hasCompleteDataset(std::string placename,float lat, float lon,
   return setIsComplete;
 }
 
-bool FimexStream::readData(std::string placename,float lat, float lon, vector<ParId>& inpar,vector<ParId>& outpar)
+bool FimexStream::readData(const std::string& placename,float lat, float lon, vector<ParId>& inpar, vector<ParId>& outpar)
 {
-
   filterParameters(inpar);
 
   try {
-
     clean();
-    
-    if(!reader)
+
+    if (!reader)
       openStream();
-
-    if(!is_open)
+    if (!is_open)
       return false;
-
-    if(!interpol) {
+    if (!interpol)
       createPoslistInterpolator();
-    }
 
     if(!timeLineIsRead) {
       createTimeLine();
     }
 
-    if(placename.empty()) {
+    if (placename.empty()) {
       return false;
     }
 
-    activePosition = poslist.getPos(placename,lat,lon);
+    activePosition = poslist.getPos(placename, lat, lon);
 
     // position not found
-    if(activePosition < 0 ) {
+    if (activePosition < 0) {
 
       // aha the common poslist has changed - try to reload the cache
-      if(poslistVersion != commonposlistVersion) {
+      if (poslistVersion != commonposlistVersion) {
         poslist = commonposlist;
         poslistVersion = commonposlistVersion;
         createPoslistInterpolator();
@@ -406,31 +367,25 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
       }
     }
 
-
-    if(cache.empty() ) {
+    if (cache.empty() ) {
       addToCache(0,poslist.getNumPos(),inpar,true);
     } else {
       // check if there are parameters that were not interpolated earlier
       vector<ParId> extrapar;
       cache[0].getExtrapars(inpar,extrapar);
 
-
       // try to interpolate the missing parameters
       addToCache(0,poslist.getNumPos(),extrapar,false);
-
     }
 
-
-
-    if(activePosition < 0 ) {
+    if (activePosition < 0) {
       cerr << placename << " not found " << endl;
       return false;
-
     }
 
     cache[activePosition].getOutpars(inpar,outpar);
 
-  } catch ( exception& e) {
+  } catch (exception& e) {
     cerr << "exception caught  in Fimex read : " << e.what();
     return false;
   }
@@ -438,22 +393,19 @@ bool FimexStream::readData(std::string placename,float lat, float lon, vector<Pa
   return true;
 }
 
-
-
 bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
 {
-
   bool foundSomeData=false;
   FimexPetsCache tmp;
-  if(createPoslist)
-    for(unsigned int i=0;i<poslen;i++)
+  if (createPoslist)
+    for(unsigned int i=0; i<poslen; i++)
       cache.push_back(tmp);
   // check the parameterlist - what to get and what not....
 
   int maxprogress=0;
-  for(unsigned int i=0;i<inpar.size();i++) {
-    for( unsigned int j=0;j<fimexpar.size();j++) {
-      if ( fimexpar[j].parid == inpar[i] && fimexpar[j].streamtype == parametertype){
+  for (unsigned int i=0; i<inpar.size(); i++) {
+    for (unsigned int j=0; j<fimexpar.size(); j++) {
+      if (fimexpar[j].parid == inpar[i] && fimexpar[j].streamtype == parametertype) {
         maxprogress++;
       }
     }
@@ -461,42 +413,34 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
 
   vector<FimexParameter> activeParameters;
   int localProgress=0;
-  for(unsigned int i=0;i<inpar.size();i++) {
-    for( unsigned int j=0;j<fimexpar.size();j++) {
-      if ( fimexpar[j].parid == inpar[i] && fimexpar[j].streamtype == parametertype) {
+  for (unsigned int i=0; i<inpar.size(); i++) {
+    for (unsigned int j=0; j<fimexpar.size(); j++) {
+      if (fimexpar[j].parid == inpar[i] && fimexpar[j].streamtype == parametertype) {
 
         localProgress++;
         progress = (localProgress * 95) / maxprogress;
-
 
         ostringstream ost;
         ost << modelname << ": " << fimexpar[j].parametername;
         progressMessage = ost.str();
 
         try {
-          if(readFromFimexSlice(fimexpar[j]))
-            foundSomeData=true;
-        } catch ( exception& e) {
+          if (readFromFimexSlice(fimexpar[j]))
+            foundSomeData = true;
+        } catch (exception& e) {
           cerr <<"Exception from ReadFromFimexSlice:  " <<  e.what() << endl;
         }
 
         break;
-
-
       }
     }
   }
-  boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
   progress=100;
   return foundSomeData;
 }
 
-
-
-
-
-
-static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<MetNoFimex::CDMReader> reader, const string& parName, const string& parUnit, const vector<MetNoFimex::SliceBuilder>& slices)
+static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<MetNoFimex::CDMReader> reader,
+    const string& parName, const string& parUnit, const vector<MetNoFimex::SliceBuilder>& slices)
 {
   vector<size_t> sliceLengths(slices.size(), 1);
   for (int i = 0; i < slices.size(); i++) {
@@ -576,12 +520,11 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
 
 bool FimexStream::readFromFimexSlice(FimexParameter par)
 {
-  if(!reader)
+  if (!reader)
     openStream();
-  
-  if(!is_open)
-    return false;
 
+  if (!is_open)
+    return false;
 
   cerr << "Interpolating Parameter: " << par.parametername << " for model " << modelname;
   boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
@@ -596,46 +539,40 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
   unsigned int timeId;
 
-  std::string timeAxis="time";
+  std::string timeAxis;
+  size_t timeSize;
 
-  const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim();
-  size_t timeSize = 0;
-  if(tmpDim) {
-    timeAxis=tmpDim->getName();
+  if (const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim()) {
+    timeAxis = tmpDim->getName();
     timeSize = tmpDim->getLength();
   } else {
+    timeAxis = "time";
     const MetNoFimex::CDMDimension& timeDim = interpol->getCDM().getDimension(timeAxis);
     timeSize = timeDim.getLength();
   }
 
-  for(unsigned int i=0; i<par.dimensions.size();i++) {
+  for (unsigned int i=0; i<par.dimensions.size();i++) {
 
-    if(interpol->getCDM().hasDimension( par.dimensions[i].name )) {
-
-
-
-      if (par.dimensions[i].size < 0 ) {
-        const MetNoFimex::CDMDimension& tmpDim = interpol->getCDM().getDimension( par.dimensions[i].name );
+    if (interpol->getCDM().hasDimension(par.dimensions[i].name)) {
+      if (par.dimensions[i].size < 0) {
+        const MetNoFimex::CDMDimension& tmpDim = interpol->getCDM().getDimension(par.dimensions[i].name);
         par.dimensions[i].size = tmpDim.getLength() - par.dimensions[i].start;
-
       }
 
       cerr << "par.dimensions[i].size for " << par.dimensions[i].name << " = "  << par.dimensions[i].size << endl;
-      slice.setStartAndSize(par.dimensions[i].name ,par.dimensions[i].start ,par.dimensions[i].size );
+      slice.setStartAndSize(par.dimensions[i].name, par.dimensions[i].start, par.dimensions[i].size);
     } else {
-      throw FimexstreamException(" request unknown dimension " + par.dimensions[i].name );
+      throw FimexstreamException(" request unknown dimension " + par.dimensions[i].name);
     }
-
   }
 
-
-  if(basetimeline.empty())
+  if (basetimeline.empty())
     createTimeLine();
 
   // dividing in small time-slices
   vector<MetNoFimex::SliceBuilder> slices;
-  for (size_t i=0; i< timeSize; i++) {
-    slice.setStartAndSize(timeAxis ,i,1);
+  for (size_t i=0; i < timeSize; i++) {
+    slice.setStartAndSize(timeAxis, i, 1);
     slices.push_back(slice);
   }
 
@@ -649,42 +586,38 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
   MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
-  int pardim=0;
-  int timdim=basetimeline.size();
-  if(sliceddata.get()) {
-
-
+  int pardim = 0;
+  int timdim = basetimeline.size();
+  if (sliceddata.get()) {
     boost::shared_array<float> valuesInSlice = sliceddata->asFloat();
 
     // all parameters in all dimensions;
     unsigned int numAll     = sliceddata->size() / numPos;
     unsigned int numTimes   = basetimeline.size();
     unsigned int numPardims = 1;
-    if(numTimes)
+    if (numTimes)
       numPardims = numAll / numTimes; // equals 1 except for ensembles
 
-    for ( unsigned int pardim = 0; pardim < numPardims; pardim++) {
-      for( unsigned int tim=0; tim < numTimes; tim++) {
+    for (unsigned int pardim = 0; pardim < numPardims; pardim++) {
+      for (unsigned int tim=0; tim < numTimes; tim++) {
 
-        for(unsigned int pos=0;pos<numPos;pos++) {
+        for (unsigned int pos=0; pos<numPos; pos++) {
 
           unsigned int index = pardim*numPos +  tim*numPardims*numPos + pos;
 
-          if(!MetNoFimex::mifi_isnan(valuesInSlice[ index ]) ) {
-            if(!pardim)
+          if (!MetNoFimex::mifi_isnan(valuesInSlice[index])) {
+            if (!pardim)
               cache[pos].tmp_times.push_back(basetimeline.at(tim));
 
-            cache[pos].tmp_values.push_back(valuesInSlice[ index ]);
+            cache[pos].tmp_values.push_back(valuesInSlice[index]);
 
-          }else {
+          } else {
             if (par.parid.alias == "RRAC")  { // undefined accumulated precipitation means null
-              if(!pardim)
+              if (!pardim)
                 cache[pos].tmp_times.push_back(basetimeline.at(tim));
               cache[pos].tmp_values.push_back(0);
-
             }
           }
-
         }
       }
     }
@@ -694,10 +627,8 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
     pid.run   = 0;
     pid.level = 0;
 
-    for(unsigned int i=0;i<cache.size();i++)
+    for(unsigned int i=0; i<cache.size(); i++)
       cache[i].process(pid);
-
-
 
     boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
     cerr << " ... done. Used : "  << (last-start).total_milliseconds() << " ms   " << endl;
@@ -706,19 +637,16 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   }
   cerr << " ... empty  "<< endl;
   return false;
-
-
 }
-
 
 bool FimexStream::getOnePar(int i, WeatherParameter& wp)
 {
-  if(i>=0 && i<(int)cache[activePosition].parameters.size()) {
-    string wpname =  cache[activePosition].parameters[i].Id().alias;
-    if(isFiltered(wpname))
+  if (i>=0 && i<(int)cache[activePosition].parameters.size()) {
+    const string& wpname =  cache[activePosition].parameters[i].Id().alias;
+    if (isFiltered(wpname))
       return false;
 
-    wp=cache[activePosition].parameters[i];
+    wp = cache[activePosition].parameters[i];
     return true;
   }
   return false;
@@ -727,7 +655,6 @@ bool FimexStream::getOnePar(int i, WeatherParameter& wp)
 bool FimexStream::getTimeLine(int index,vector<miTime>& tline, vector<int>& pline)
 {
   pline=progline;
-
   return cache[activePosition].timeLines.Timeline(index,tline);
 }
 
@@ -735,7 +662,5 @@ int FimexStream::numParameters()
 {
   return cache[activePosition].parameters.size();
 }
-
-
 
 } /* namespace pets */

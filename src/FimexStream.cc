@@ -257,7 +257,14 @@ void FimexStream::createTimeLine()
     boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
 
     for(size_t u = 0; u < timeData->size(); ++u) {
-      basetimeline.push_back( miutil::miTime(uTimes[u]) );
+      const miutil::miTime t(uTimes[u]);
+      if (!t.undef()) {
+        basetimeline.push_back(t);
+      } else {
+        cerr << "Invalid time value " << uTimes[u] << ", clearing basetimeline and giving up." << endl;
+        basetimeline.clear();
+        break;
+      }
     }
 
   } catch (exception& e) {

@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (5.4.0-1) unstable; urgency=low
+
+  * added RRAC_x parameters
+
+ -- Juergen Schulze <juergen.schulze@met.no>  Tue, 09 Aug 2016 12:40:31 +0200
+
 metlibs-tseries-tsdata (5.3.0-2) unstable; urgency=low
 
   * add libqt4-dev to Depends

@@ -3,7 +3,7 @@
 #
 
 AC_PREREQ(2.59)
-AC_INIT([tsData], [5.3.0], [diana@met.no])
+AC_INIT([tsData], [5.4.0], [diana@met.no])
 AM_INIT_AUTOMAKE([foreign])
 
 AC_CONFIG_SRCDIR([src/FimexStream.h])

@@ -45,12 +45,12 @@
 using namespace std;
 
 ptDiagramData::ptDiagramData() :
-                                            nfetches(0), new_symbolmaker(false)
+                                                        nfetches(0), new_symbolmaker(false)
 {
 }
 
 ptDiagramData::ptDiagramData(symbolMaker& wsym) :
-                                                  nfetches(0), wsymbols(wsym), new_symbolmaker(false)
+                                                              nfetches(0), wsymbols(wsym), new_symbolmaker(false)
 {
   makedefaultParInfo();
 }
@@ -1415,7 +1415,7 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
           //cerr << "Found COSN + CORA + STSN + STRA" << endl;
           for (j = 0; j < wp.Npoints(); j++) {
             float rr = wp.Data(j, 0) + wp2.Data(j, 0) + wp3.Data(j, 0)
-                                                                + wp4.Data(j, 0);
+                                                                            + wp4.Data(j, 0);
             wp.setData(j, 0, rr);
           }
 
@@ -1457,13 +1457,44 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
         addParameter(wp);
       }
     }
+  } else if (inpid.alias.substr(0,3) == "RR_"  ) {
+
+
+    bool fixed=true;
+
+    id1.alias = inpid.alias;
+    id1.alias.insert(2, "AC"); // make RR_xx from accumulated RRAC_xx precipitation
+
+    if (copyParameter(id1, wp, &error) ) {
+      int last= wp.Npoints();
+      if (last>0) {
+        for (j = last; j > 0 ; j--) {
+          float rr = wp.Data(j, 0) - wp.Data(j-1, 0);
+          wp.setData(j,0,rr);
+        }
+        fixed=true;
+      } else
+        fixed=false;
+    } else{
+      fixed = false; // failed
+    }
+
+    if (fixed) {
+      wp.calcAllProperties();
+      wp.setId(newpid);
+      addParameter(wp);
+    }
+
 
     // EPRR (from RRAC for fimex interpolation )
-  } else if (inpid.alias == "EPRR"  ) {
+  } else if (inpid.alias == "EPRR" || inpid.alias == "MPRR" ) {
     ParId pid = inpid;
     bool fixed = true;
 
+
     pid.alias = "RRAC"; // make RR from accumulated precipitation
+    if(inpid.alias == "MPRR") pid.alias = "MRRAC";
+
     if (copyParameter(pid, wp, &error) ) {
       int numTimes= wp.Npoints();
       int numPardims = wp.Ndim();
@@ -3318,7 +3349,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
       int cn = symbols[i].customNumber();
       if (cn == 999) {
         cerr << i << " Symbolmaker Error:" << symbols[i].customName()
-                                                            << " number:" << symbols[i].customNumber() << endl;
+                                                                        << " number:" << symbols[i].customNumber() << endl;
         cn = 0;
       }
       termin.push_back(symbols[i].getTime());
@@ -3344,7 +3375,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
 void ptDiagramData::makeYrWeatherSymbols(ParId p)
 {
   // start by checking the precipitation frequency
-/*
+  /*
   ErrorFlag error;
   WeatherParameter rr;
   TimeLine times;
@@ -3473,7 +3504,7 @@ void ptDiagramData::makeYrWeatherSymbols(ParId p)
     wp.calcAllProperties();
     addParameter(wp);
   }
-  */
+   */
 }
 
 
@@ -3649,7 +3680,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     *ef = DF_STATION_NOT_FOUND;
     return false;
   }
-  
+
   if (!pfile->readData(statIndex, modelid, start, stop, ef))
     return false;
 
@@ -4294,7 +4325,7 @@ bool ptDiagramData::fetchDataFromMoraDB(pets::MoraStream* mora,
       ++nread;
     }
   }
-// set the index of the first and last elements appended
+  // set the index of the first and last elements appended
   //first = range.first = index + 1 - nread;
   //last = range.last = index;
   Range range;

@@ -178,7 +178,7 @@ FimexStream::FimexStream(const std::string& fname,
     const std::string& ftype,
     const std::string cfile)
 :  filename(fname) , modelname(modname), progtime(0), is_open(false), increment(0),
-   configfile(cfile)
+   configfile(cfile), activePosition(0)
 {
 
   vector<string> typetokens;

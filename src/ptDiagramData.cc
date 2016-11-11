@@ -264,8 +264,8 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
   const float ktms = float(1847.0 / 3600.0);
   int j, n;
   ErrorFlag error;
-  ParId id1, id2, id3, id4;
-  int wpx, wpx1, wpx2, wpx3, wpx4;
+  ParId id1, id2, id3, id4, id5;
+  int wpx, wpx1, wpx2, wpx3, wpx4, wpx5;
   float d, f1, f2, f3;
   int level;
   Uprofile profs;
@@ -276,7 +276,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
   bool locked;
   vector<float> fdata;
 
-  id1 = id2 = id3 = inpid;
+  id1 = id2 = id3 = id4 = id5 = inpid;
 
   //    cerr << "Update one parameter:" << inpid << endl;
 
@@ -472,17 +472,48 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       parList[wpx].calcAllProperties();
     }
 
+    // TM02
+  } else if (inpid.alias == "TM02") {
+    id1.alias = "HST";
+    if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)) {
+
+      // check for identical timelines
+      int n = parList[wpx].Npoints();
+      if (n != parList[wpx1].Npoints()) {
+        return;
+      }
+      //cerr << "Updating " << inpid << endl;
+
+      locked = parList[wpx].isLocked();
+      for (j = 0; j < n; j++) {
+        if (!locked || parList[wpx1].isModified(j)) {
+          float tm02 = calcMedianTM02(parList[wpx1].Data(j));
+          parList[wpx].setData(j, tm02);
+        }
+      }
+      parList[wpx].calcAllProperties();
+    }
+
+    //#define OLD_CMC_CALC
+
     // EMC
   } else if (inpid.alias == "EMC") {
     id1.alias = "HST";
     id2.alias = "HS";
     id3.alias = "TM01";
+    id4.alias = "TM02";
+#ifdef OLD_CMC_CALC
     id4.alias = "TST";
+#endif
+
+    //cerr << "--------- calling for EMC" << endl;
 
     if (findParameter(inpid, wpx, &error) && findParameter(id1, wpx1, &error)
         && findParameter(id2, wpx2, &error) && findParameter(id3, wpx3, &error)
         && findParameter(id4, wpx4, &error)) {
       locked = parList[wpx].isLocked();
+
+      //cerr << "         FOUND input pars" << endl;
 
       // check for identical timelines
       int n = parList[wpx].TimeLineIndex();
@@ -493,19 +524,18 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
         return;
       }
 
-
-      //cerr << "--- updateParameter:" << inpid << " TM01:" << wpx3 << " TM02:" << wpx4 << endl;
-      //if (wpx3 >= 0) cerr << " size of emc:" << parList[wpx].Npoints() << " size of TM01:" << parList[wpx3].Npoints() << endl;
-      //if (wpx4 >= 0) cerr << " size of emc:" << parList[wpx].Npoints() << " size of TM02:" << parList[wpx4].Npoints() << endl;
+      //cerr << "         identical timelines" << endl;
 
 
       for (j = 0; j < parList[wpx].Npoints(); j++) {
         if (!locked || parList[wpx1].isModified(j) || parList[wpx2].isModified(j) ||
             parList[wpx3].isModified(j) || parList[wpx4].isModified(j)) {
+
           float hst = parList[wpx1].Data(j);
           float hs = parList[wpx2].Data(j);
           float tm01 = parList[wpx3].Data(j);
           float tm02 = parList[wpx4].Data(j);
+	  // calculation in separate function
           float emc = calcCMC_(hst, hs, tm01, tm02);
           parList[wpx].setData(j, emc);
         }
@@ -1372,6 +1402,19 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     if (copyParameter(id1, wp, &error)) {
       for (j = 0; j < wp.Npoints(); j++){
         wp.setData(j, calcMedianTM01(wp.Data(j)));
+      }
+      wp.calcAllProperties();
+      wp.setId(newpid);
+      addParameter(wp);
+    }
+
+    // TM02
+  } else if (inpid.alias == "TM02") {
+    //cerr << "Making " << inpid << endl;
+    id1.alias = "HST";
+    if (copyParameter(id1, wp, &error)) {
+      for (j = 0; j < wp.Npoints(); j++){
+        wp.setData(j, calcMedianTM02(wp.Data(j)));
       }
       wp.calcAllProperties();
       wp.setId(newpid);
@@ -2626,6 +2669,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["DDPT"] = parameter_info("DDPT", 1, 0, 360, 360, true, false, false); //
   parInfo["TST"] = parameter_info("TST", 1, true, false);
   parInfo["TM01"] = parameter_info("TM01", 1, true, false);
+  parInfo["TM02"] = parameter_info("TM02", 1, true, false);
   parInfo["HSP"] = parameter_info("HSP", 0, true, false);
   parInfo["TSP"] = parameter_info("TSP", 1, true, false);
   parInfo["DDPP"] = parameter_info("DDPP", 1, 0, 360, 360, true, false, false); //
@@ -3240,6 +3284,10 @@ float ptDiagramData::calcHec_(float hst, float hs)
 // hs:  sealevel (stormsurge+tide)
 // tm01
 // tm02
+
+
+#ifdef OLD_CMC_CALC
+
 float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
 {
   const float d = 75.0;
@@ -3274,8 +3322,70 @@ float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
   float xn = t / tm02;
   // calculate characteristic largest crest
   float crx = hs + afc * hst * powf(logf(xn), (1. / bfc));
+
+  cout << "--> OLD hst, hs, tm01, tm02, EMC:" 
+       << hst << ", "
+       << hs << ", "
+       << tm01 << ", "
+       << tm02 << ", "
+       << crx << endl;
+
+
   return crx;
 }
+
+#else
+
+/* Algorithm from october 2016 */
+
+float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
+{
+  const float d = 76.0;
+  const float tau = 3600.0;
+  const float pi = 4 * atanf(1.0);
+  const float g = 9.81;
+
+  const float a1 = 0.666;
+  const float a2 = 0.445;
+  const float a3 = -0.105;
+  const float a4 = 0.272;
+  const float deltah = 0.67;
+
+  float fpid = 4*pi*pi*d;
+
+  float HM0 = hst;
+  float hLAT = hs;
+  //hLAT += deltah;
+
+  // calculate K1
+  float om1 = fpid / (g * tm01 * tm01);
+  float om2 = om1 * om1;
+  float om3 = om2 * om1;
+  float om4 = om3 * om1;
+  float fomega = 1 + a1*om1 + a2*om2 + a3*om3 + a4*om4;
+  float lambda1 = tm01 * sqrtf(g*d) * sqrtf(fomega / (1 + om1*fomega));
+  
+  float K1 = 2*pi / lambda1;
+
+  // calculate EMC
+  float urs = HM0 / (K1*K1*d*d*d);
+  float S1  = (2*pi/g) * HM0/(tm01*tm01);
+  float alfacSC = 0.3536 + 0.2568*S1 + 0.08*urs;
+  float betacSC = 2 - (1.7912*S1) - (0.5302*urs) + (0.2824*urs*urs);
+  float EMC = hLAT + alfacSC*HM0*powf(logf(tau/tm02), 1/betacSC);
+
+  //  cout << "--> NEW hst, hs, tm01, tm02, EMC:" 
+  //     << hst << ", "
+  //     << hs << ", "
+  //     << tm01 << ", "
+  //     << tm02 << ", "
+  //     << EMC << endl;
+
+  return EMC;
+}
+
+
+#endif
 
 void ptDiagramData::makeWeatherSymbols_(ParId p)
 {

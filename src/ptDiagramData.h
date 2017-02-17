@@ -35,10 +35,7 @@
 #include "ptParameterDefinition.h"
 #include "ptError.h"
 #include "ptSHCinfo.h"
-#include "WdbStream.h"
-#include "KlimaStream.h"
-#include "SMHIMoraStream.h"
-#include "FimexStream.h"
+
 #include <puDatatypes/miPosition.h>
 #include <puMet/symbolMaker.h>
 #include <puMet/WindCalc.h>
@@ -239,20 +236,7 @@ public:
   bool fetchDataFromFile(DataStream*, const miPosition&, const ParId&, const Model&, const miutil::miTime&,
       const miutil::miTime&, int* first, int* last, std::vector<ParId>& outPars, bool append, ErrorFlag*);
 
-  bool fetchDataFromWDB(pets::WdbStream*, float lat, float lon, const std::string& model, miutil::miTime run,
-      std::vector<ParId>& inpars, std::vector<ParId>& outpars, unsigned long& readtime,
-      const std::string& stationname);
-
-  bool fetchDataFromKlimaDB(pets::KlimaStream* klima, std::vector<ParId>& inpars,
-      std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
-
-  bool fetchDataFromMoraDB(pets::MoraStream* mora, std::vector<ParId>& inpars,
-      std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime);
-
-  bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, const std::string& fimexname,
-      std::vector<ParId>& inpars, std::vector<ParId>& outpars);
-
-  bool fetchDataFromStream(AbstractDataStream* fimex, bool dropIfEmpty);
+  bool fetchDataFromStream(AbstractDataStream* stream, bool dropIfEmpty);
   void setStationFromLatLon(double lat, double lon, const std::string& stationname);
 
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);

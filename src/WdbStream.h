@@ -51,6 +51,8 @@
 
 // the pets (tseries) wdb-connection
 
+class ptDiagramData;
+
 namespace pets {
 
 class WdbStream : public DataStream {
@@ -98,7 +100,6 @@ private:
   };
 
 private:
-
   std::vector<rotateParameters>  rot;
   WdbStream::BoundaryBox    boundaries;
   std::set<std::string>     dataProviders;
@@ -120,7 +121,7 @@ private:
 public:
   WdbStream(const std::string& host, const std::map<std::string,std::string>& pars, const std::vector<std::string>& vfunctions,
       const std::string& u="proffread");
-   ~WdbStream();
+  ~WdbStream();
 
     /// Implemented from DataStream interface -------------------------------
 
@@ -176,6 +177,10 @@ public:
   bool getOnePar(int, WeatherParameter&, ErrorFlag* ef=0) /* override */;
   bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef=0) /* override */;
 };
+
+bool fetchDataFromWDB(ptDiagramData* diagram, WdbStream*, float lat, float lon, const std::string& model, const miutil::miTime& run,
+      std::vector<ParId>& inpars, std::vector<ParId>& outpars, unsigned long& readtime,
+      const std::string& stationname);
 
 } // namespace pets
 

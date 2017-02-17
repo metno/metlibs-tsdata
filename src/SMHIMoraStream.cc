@@ -25,13 +25,17 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "SMHIMoraStream.h"
+#include "ptDiagramData.h"
+
+#include <puTools/miDate.h>
+#include <puTools/miStringFunctions.h>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <sstream>
-#include <puTools/miDate.h>
-#include <puTools/miStringFunctions.h>
 #include <set>
 
 #include <curl/curl.h>
@@ -40,8 +44,6 @@
 
 #include <QDomDocument>
 #include <QRegExp>
-
-#include "SMHIMoraStream.h"
 
 using namespace std;
 
@@ -234,11 +236,15 @@ void MoraStream::setSingleParameterDefinition(string key, string token,
     parameterDefinitions[parameterkey].transform =
         new pets::math::DynamicFunction(tokens[1]);
   }
-
 }
 
-bool MoraStream::read(string report, string query, miutil::miTime from,
-    miutil::miTime to)
+bool MoraStream::read(const std::string& report, const std::string& query)
+{
+  const miutil::miTime now = miutil::miTime::nowTime();
+  return read(report, query, now, now);
+}
+
+bool MoraStream::read(const std::string& report, const std::string& query, const miutil::miTime& from, const miutil::miTime& to)
 {
   if (host.empty())
     return false;
@@ -1030,6 +1036,26 @@ void MoraStream::clean()
   moraPars.clear();
   normalPars.clear();
   IsCleaned = true;
+}
+
+bool fetchDataFromMoraDB(ptDiagramData* diagram, MoraStream* mora,
+    vector<ParId>& inpars, vector<ParId>& outpars, const miutil::miTime& fromTime, const miutil::miTime& toTime)
+{
+  if (!mora)
+    return false;
+
+  mora->clean();
+
+  // find station and read in data block
+  try {
+    if (!mora->readMoraData(inpars,outpars,fromTime,toTime))
+      return false;
+  } catch(exception& e) {
+    cerr << "MORA::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+  return diagram->fetchDataFromStream(mora, false);
 }
 
 } // namespace pets end

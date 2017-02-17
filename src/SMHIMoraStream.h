@@ -36,29 +36,12 @@
 #include "ptDataStream.h"
 #include "DynamicFunction.h"
 
+class ptDiagramData;
+
 namespace pets {
 
 enum MoraDatatype { Mora_observation, Mora_monthly_normal };
 
-// The old one
-/*
-struct MoraStation {
-  std::string name;
-  miCoordinates coordinates;
-  int amsl;
-  int distance;
-  int stationid;
-  int wmo;
-  MoraStation() :
-    stationid(0)
-  {
-  }
-  ;
-  std::string description();
-  void clear();
-};
-*/
-/* The new */
 struct MoraStation {
   std::string name; // All station types
   std::string type; // Valid types, Wmo, Clim, Nat, Icao
@@ -70,9 +53,8 @@ struct MoraStation {
   std::string code; // Icao
   int distance; // backward kompatibility
   MoraStation()
-  {
-  }
-  ;
+    { }
+
   std::string description();
   std::string toString();
   void clear();
@@ -89,22 +71,18 @@ struct MoraParameter {
   std::string levelParameterId;
   std::string levelFrom;
   std::string levelTo;
-  
+
   pets::math::DynamicFunction * transform;
   MoraDatatype type;
 
-  MoraParameter() :
-    transform(NULL)
-  {
-  }
+  MoraParameter()
+    : transform(0) { }
 
   MoraParameter(const MoraParameter&);
 
   ~MoraParameter()
-  {
-    if (transform)
-      delete transform;
-  }
+    { delete transform; }
+
   MoraParameter & operator= (const MoraParameter & rhs);
 };
 
@@ -113,13 +91,11 @@ struct MoraData {
   std::vector<float> data;
   std::vector<miutil::miTime> times;
   int col; // column in datafile
-
 };
 
 
 class MoraStream: public DataStream {
 private:
-
   MoraStation currentStation;
   bool initialized;
   std::vector<MoraStation> stationlist;
@@ -163,19 +139,17 @@ public:
     initialize(h, stationreport, datareport, monthlynormalreport, pars, norms, maxd);
   }
   ~MoraStream()
-  {
-  }
+    { }
   void initialize(std::string h, std::string stationreport, std::string datareport, std::string monthlynormalreport,
     std::map<std::string, std::string> pars, std::map<std::string, std::string> norms, int maxd = 50);
 
   void setSingleParameterDefinition(std::string key, std::string token, pets::MoraDatatype type);
 
-  bool read(std::string report_, std::string query = "", miutil::miTime from = miutil::miTime::nowTime(), miutil::miTime to =miutil::miTime::nowTime() );
- 
+  bool read(const std::string& report_, const std::string& query="");
+  bool read(const std::string& report_, const std::string& query, const miutil::miTime& from, const miutil::miTime& to);
+
   bool isInitialized() const
-  {
-    return initialized;
-  }
+    { return initialized; }
 
   pets::MoraStation getNearestMoraStation(miCoordinates& pos);
 
@@ -208,6 +182,9 @@ public:
   bool close();
   void getTextLines(const ParId p, std::vector<std::string>& tl);
 };
+
+bool fetchDataFromMoraDB(ptDiagramData* diagram, MoraStream* mora, std::vector<ParId>& inpars,
+      std::vector<ParId>& outpars, const miutil::miTime& fromTime, const miutil::miTime& toTime);
 
 } // namespace pets
 

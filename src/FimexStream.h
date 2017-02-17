@@ -65,6 +65,7 @@
 
 #include "FimexTools.h"
 
+class ptDiagramData;
 
 namespace pets {
 
@@ -161,6 +162,9 @@ public:
   int numParameters() /* override */;
 };
 
+bool fetchDataFromFimex(ptDiagramData* diagram, FimexStream* fimex, double lat, double lon, const std::string& fimexname,
+    std::vector<ParId>& inpars, std::vector<ParId>& outpars);
+
 } /* namespace pets */
 
-#endif /* FIMESTREAM_H_ */
+#endif /* FIMEXSTREAM_H_ */

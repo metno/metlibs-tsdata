@@ -9,9 +9,7 @@
 #define FIMEXTOOLS_H_
 
 /*
- $Id$
-
- Copyright (C) 2006 met.no
+ Copyright (C) 2006-2017 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -98,8 +96,6 @@ struct FimexPetsCache {
   void clear_tmp();
 };
 
+} /* namespace pets */
 
-
-
-}; /* namespace pets */
 #endif /* FIMEXTOOLS_H_ */

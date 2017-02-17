@@ -26,6 +26,10 @@
  */
 
 //"http://klapp.oslo.dnmi.no/metnopub/production/metno?ct=text/plain&del=semicolon"
+
+#include "KlimaStream.h"
+#include "ptDiagramData.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -37,8 +41,6 @@
 #include <curl/curl.h>
 
 #include <iostream>
-
-#include "KlimaStream.h"
 
 using namespace std;
 
@@ -230,8 +232,13 @@ void KlimaStream::setSingleParameterDefinition(string key, string token,
 
 }
 
-bool KlimaStream::read(string report, string query, miutil::miTime from,
-    miutil::miTime to)
+bool KlimaStream::read(const std::string& report, const std::string& query)
+{
+  const miutil::miTime now = miutil::miTime::nowTime();
+  return read(report, query, now, now);
+}
+
+bool KlimaStream::read(const std::string& report, const std::string& query, const miutil::miTime& from, const miutil::miTime& to)
 {
   if (host.empty())
     return false;
@@ -856,6 +863,24 @@ void KlimaStream::clean()
   DataIsRead = false;
   TimeLineIsRead = false;
   IsCleaned = true;
+}
+
+bool fetchDataFromKlimaDB(ptDiagramData* diagram, KlimaStream* klima,
+    vector<ParId>& inpars, vector<ParId>& outpars,
+    const miutil::miTime& fromTime, const miutil::miTime& toTime)
+{
+  klima->clean();
+
+  // find station and read in data block
+  try {
+    if (!klima->readKlimaData(inpars,outpars,fromTime,toTime))
+      return false;
+  } catch(exception& e) {
+    cerr << "KLIMA::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+  return diagram->fetchDataFromStream(klima, false);
 }
 
 } // namespace pets end

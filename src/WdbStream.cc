@@ -6,9 +6,8 @@
  */
 
 /*
- $Id$
 
- Copyright (C) 2006 met.no
+ Copyright (C) 2006-2017 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -35,6 +34,7 @@
  */
 
 #include "WdbStream.h"
+#include "ptDiagramData.h"
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -727,6 +727,30 @@ void WdbStream::getTextLines(const ParId p, vector<std::string>& tl)
 {
   unimplemented("getTextLines");
   tl = textLines;
+}
+
+bool fetchDataFromWDB(ptDiagramData* diagram, WdbStream* wdb,float lat, float lon,
+    const std::string& model, const miutil::miTime& run,vector<ParId>& inpars, vector<ParId>& outpars,
+    unsigned long& readtime, const std::string& stationname)
+{
+  diagram->Erase();
+
+  wdb->clean();
+
+  // find station and read in data block
+  try {
+    if (!wdb->readWdbData(lat,lon, model,run,inpars,outpars,readtime))
+      return false;
+  } catch(exception& e) {
+    cerr << "WDB::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+  if (!diagram->fetchDataFromStream(wdb, true))
+    return false;
+
+  diagram->setStationFromLatLon(lat, lon, stationname);
+  return true;
 }
 
 } // namespace pets

@@ -28,13 +28,18 @@
 #ifndef KLIMASTREAM_H
 #define KLIMASTREAM_H
 
+#include "ptDataStream.h"
+#include "DynamicFunction.h"
+
+#include <puDatatypes/miCoordinates.h>
+
+#include <list>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
-#include <puDatatypes/miCoordinates.h>
-#include "ptDataStream.h"
-#include "DynamicFunction.h"
+
+class ptDiagramData;
 
 namespace pets {
 
@@ -47,11 +52,9 @@ struct KlimaStation {
   int distance;
   int stationid;
   int wmo;
-  KlimaStation() :
-    stationid(0)
-  {
-  }
-  ;
+  KlimaStation()
+    : stationid(0) { }
+
   std::string description();
   void clear();
 };
@@ -63,18 +66,14 @@ struct KlimaParameter {
   pets::math::DynamicFunction * transform;
   KlimaDatatype type;
 
-  KlimaParameter() :
-    transform(NULL)
-  {
-  }
+  KlimaParameter()
+    : transform(0) { }
 
   KlimaParameter(const KlimaParameter&);
 
   ~KlimaParameter()
-  {
-    if (transform)
-      delete transform;
-  }
+    { delete transform; }
+
   KlimaParameter & operator= (const KlimaParameter & rhs);
 };
 
@@ -83,7 +82,6 @@ struct KlimaData {
   std::vector<float> data;
   std::vector<miutil::miTime> times;
   int col; // column in datafile
-
 };
 
 
@@ -125,14 +123,18 @@ public:
   {
     initialize(h, pars, norms, maxd);
   }
+
   ~KlimaStream()
   {
   }
+
   void initialize(std::string h, std::map<std::string, std::string> pars, std::map<std::string, std::string> norms, int maxd = 50);
 
   void setSingleParameterDefinition(std::string key, std::string token, pets::KlimaDatatype type);
 
-  bool read(std::string report_, std::string query = "", miutil::miTime from = miutil::miTime::nowTime(), miutil::miTime to =miutil::miTime::nowTime() );
+  bool read(const std::string& report_, const std::string& query="");
+  bool read(const std::string& report_, const std::string& query, const miutil::miTime& from, const miutil::miTime& to);
+
   // see documentation for flaglevel
   // at http://metklim.met.no/klima/userservices/urlinterface/brukerdok#observasjoner
   // default=5
@@ -173,11 +175,14 @@ public:
   bool getModelSeq(int, Model&, Run&, int&);
   bool getModelSeq(int, Model&, Run&, int&, std::vector<std::string>&);
   int putStation(const miPosition& s, ErrorFlag*);
-  bool
-  writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel);
+  bool writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel);
   bool close();
   void getTextLines(const ParId p, std::vector<std::string>& tl);
 };
+
+bool fetchDataFromKlimaDB(ptDiagramData* diagram, KlimaStream* klima,
+    std::vector<ParId>& inpars, std::vector<ParId>& outpars,
+    const miutil::miTime& fromTime, const miutil::miTime& toTime);
 
 } // namespace pets
 

@@ -34,18 +34,18 @@
 
 
 #include "FimexStream.h"
-#include <iostream>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/replace.hpp>
+
+#include "ptDiagramData.h"
 
 #include <fimex/CDMReaderUtils.h>
 #include <fimex/CDM.h>
 #include <fimex/Data.h>
 #include <fimex/Utils.h>
 
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/shared_array.hpp>
 
 #include <boost/interprocess/anonymous_shared_memory.hpp>
@@ -54,6 +54,7 @@
 #include <unistd.h>
 #include <wait.h>
 
+#include <iostream>
 #include <numeric>
 #include <functional>
 
@@ -661,6 +662,17 @@ bool FimexStream::getTimeLine(int index,vector<miTime>& tline, vector<int>& plin
 int FimexStream::numParameters()
 {
   return cache[activePosition].parameters.size();
+}
+
+bool fetchDataFromFimex(ptDiagramData* diagram, FimexStream* fimex, double lat, double lon,
+    const std::string& stationname,
+    std::vector<ParId>& inpars, std::vector<ParId>& outpars)
+{
+  if (!diagram->fetchDataFromStream(fimex, false))
+    return false;
+
+  diagram->setStationFromLatLon(lat, lon, stationname);
+  return true;
 }
 
 } /* namespace pets */

@@ -9,9 +9,7 @@
 #define WDBSTREAM_H_
 
 /*
- $Id$
-
- Copyright (C) 2006 met.no
+ Copyright (C) 2006-2017 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -53,9 +51,7 @@
 
 // the pets (tseries) wdb-connection
 
-namespace pets{
-
-
+namespace pets {
 
 class WdbStream : public DataStream {
 
@@ -133,15 +129,13 @@ public:
     bool writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel);    // unimplemented
     bool getModelSeq(int, Model&, Run&, int&, std::vector<std::string>&);                              // unimplemented
     bool readData(const int posIndex, const ParId&, const miutil::miTime&, const miutil::miTime&, ErrorFlag*); // unimplemented
-    bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*); // unimplemented
-    bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*); // unimplemented
+    bool putTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*); // unimplemented
     bool putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*);                            // unimplemented
     int findStation(const std::string&);                      // unimplemented
     int findDataPar(const ParId&);                         // unimplemented
     void clean();                                          // unimplemented
     void cleanParData();                                   // unimplemented
     bool openStreamForWrite(ErrorFlag*);                   // unimplemented
-    bool getOnePar(int, WeatherParameter&, ErrorFlag*);    // unimplemented
     bool putOnePar(WeatherParameter&, ErrorFlag*);         // unimplemented
     bool getStations(std::vector<miPosition>&);                 // unimplemented
     bool getStationSeq(int, miPosition&);                  // unimplemented
@@ -179,9 +173,10 @@ public:
 
   bool readWdbData(float lat, float lon, const std::string& model, const miutil::miTime& run,std::vector<ParId>& inpar,
       std::vector<ParId>& outpar, unsigned long& readtime);
-  bool getOnePar(int, WeatherParameter&);
-  bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline);
+  bool getOnePar(int, WeatherParameter&, ErrorFlag* ef=0) /* override */;
+  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef=0) /* override */;
 };
-}
+
+} // namespace pets
 
 #endif /* WDBSTREAM_H_ */

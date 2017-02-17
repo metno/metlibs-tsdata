@@ -639,23 +639,23 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   return false;
 }
 
-bool FimexStream::getOnePar(int i, WeatherParameter& wp)
+bool FimexStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 {
   if (i>=0 && i<(int)cache[activePosition].parameters.size()) {
     const string& wpname =  cache[activePosition].parameters[i].Id().alias;
     if (isFiltered(wpname))
-      return false;
+      return setErrorFlag(false, ef);
 
     wp = cache[activePosition].parameters[i];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorFlag(false, ef);
 }
 
-bool FimexStream::getTimeLine(int index,vector<miTime>& tline, vector<int>& pline)
+bool FimexStream::getTimeLine(int index,vector<miTime>& tline, vector<int>& pline, ErrorFlag* ef)
 {
   pline=progline;
-  return cache[activePosition].timeLines.Timeline(index,tline);
+  return setErrorFlag(cache[activePosition].timeLines.Timeline(index,tline), ef);
 }
 
 int FimexStream::numParameters()

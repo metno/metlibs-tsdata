@@ -35,6 +35,8 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "ptDataStream.h"
+
 #include <string>
 #include <set>
 #include <vector>
@@ -66,7 +68,7 @@
 
 namespace pets {
 
-class FimexStream  {
+class FimexStream : public AbstractDataStream  {
 private:
   std::string filename;
   std::string modelname;
@@ -153,10 +155,10 @@ public:
   bool hasCompleteDataset(const std::string& placename,float lat, float lon, std::vector<ParId> inpar);
 
 
-  bool getOnePar(int, WeatherParameter&);
-  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline);
+  bool getOnePar(int, WeatherParameter&, ErrorFlag* ef) /* override */;
+  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef) /* override */;
 
-  int numParameters();
+  int numParameters() /* override */;
 };
 
 } /* namespace pets */

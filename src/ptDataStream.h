@@ -1,9 +1,7 @@
 /*
  libtsData - Time Series Data
 
- $Id$
-
- Copyright (C) 2006 met.no
+ Copyright (C) 2006-2017 met.no
 
  Contact information:
  Norwegian Meteorological Institute
@@ -29,8 +27,8 @@
 
 // ptDataStream.h
 
-#ifndef DataStream_h
-#define DataStream_h
+#ifndef METLIBS_TSDATA_PTDATASTREAM_H
+#define METLIBS_TSDATA_PTDATASTREAM_H 1
 
 #include "ptError.h"
 #include "ptParameterDefinition.h"
@@ -42,17 +40,24 @@
 
 #include <vector>
 
-class DataStream {
+class AbstractDataStream {
+public:
+  AbstractDataStream();
+  virtual ~AbstractDataStream();
+  virtual int numParameters() = 0;
+  virtual bool getOnePar(int, WeatherParameter&, ErrorFlag* ef=0) = 0;
+  virtual bool getTimeLine(int index, std::vector<miutil::miTime>& tline,
+      std::vector<int>& pline, ErrorFlag* ef=0) = 0;
+};
+
+
+class DataStream : public AbstractDataStream {
 public:
   DataStream(const std::string& fname) :
     numTimeLines(0), IsOpen(false), InfoIsRead(false), IsCleaned(true),
         DataIsRead(false), TimeLineIsRead(false), npar(0), npos(0), nmod(0)
   {
     Name = fname;
-  }
-
-  virtual ~DataStream()
-  {
   }
 
   const std::string& name()
@@ -75,7 +80,7 @@ public:
   {
     return TimeLineIsRead;
   }
-  int numParameters()
+  int numParameters() /* override */
   {
     return npar;
   }
@@ -100,9 +105,7 @@ public:
   virtual bool openStreamForWrite(ErrorFlag*)=0;
   virtual bool readData(const int posIndex, const ParId&, const miutil::miTime&,
       const miutil::miTime&, ErrorFlag*)=0;
-  virtual bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline,
-      std::vector<int>& pline, ErrorFlag*)=0;
-  virtual bool putTimeLine(const int& /*index*/, std::vector<miutil::miTime>& /*tline*/,
+  virtual bool putTimeLine(int /*index*/, std::vector<miutil::miTime>& /*tline*/,
       std::vector<int>& /*pline*/, ErrorFlag*)
   {
     return false;
@@ -111,7 +114,6 @@ public:
   {
     return false;
   }
-  virtual bool getOnePar(int, WeatherParameter&, ErrorFlag*)=0;
   virtual bool putOnePar(WeatherParameter&, ErrorFlag*)
   {
     return false;
@@ -161,4 +163,4 @@ protected:
   int nmod;
 };
 
-#endif
+#endif // METLIBS_TSDATA_PTDATASTREAM_H

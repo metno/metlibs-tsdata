@@ -1,9 +1,7 @@
 /*
   libtsData - Time Series Data
-  
-  $Id$
 
-  Copyright (C) 2006 met.no
+  Copyright (C) 2006-2017 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -27,13 +25,13 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-
-#ifndef error_h
-#define error_h
+#ifndef METLIBS_TSDATA_PTERROR_H
+#define METLIBS_TSDATA_PTERROR_H
 
 enum ErrorFlag {
   OK = 0,
 
+  UNKNOWN_ERROR = 1,
   MEMORY_ALLOC_ERROR = 10,
 
   // numbers 100 .... 199 reserved for file errors
@@ -41,7 +39,7 @@ enum ErrorFlag {
   DF_STATION_NOT_FOUND = 102,
   DF_MODEL_NOT_FOUND = 103,
   DF_PARAMETER_NOT_FOUND = 104,
-  DF_FILE_ACCESS_ERROR = 105,  
+  DF_FILE_ACCESS_ERROR = 105,
   DF_DATA_READING_ERROR = 106,
   DF_PARAMETERLIST_NOT_FOUND = 107,
   DF_POSITIONLIST_NOT_FOUND = 108,
@@ -57,7 +55,16 @@ enum ErrorFlag {
   DD_SOME_PARAMETERS_NOT_FOUND = 203,
   DD_PARAMETER_NOT_FOUND
 };
-  
 
+bool setErrorFlag(bool ok, ErrorFlag* ef);
 
-#endif
+inline bool setErrorFlag(ErrorFlag* ef, ErrorFlag value)
+{ if (ef) *ef = value; return (value == OK); }
+
+inline bool setErrorOK(ErrorFlag* ef)
+{ if (ef) *ef = OK; return true; }
+
+inline bool setErrorUnknown(ErrorFlag* ef)
+{ if (ef) *ef = UNKNOWN_ERROR; return false; }
+
+#endif // METLIBS_TSDATA_PTERROR_H

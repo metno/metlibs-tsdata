@@ -566,24 +566,23 @@ bool WdbStream::readWdbData(float lat, float lon, const std::string& model, cons
 
 
 
-bool WdbStream::getOnePar(int i, WeatherParameter& wp)
+bool WdbStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 {
-
-  if(i>=0 && i<(int)parameters.size()) {
+  if (i>=0 && i<(int)parameters.size()) {
     wp=parameters[i];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorUnknown(ef);
 }
 
-bool WdbStream::getTimeLine(const int& index, vector<miTime>& tline, vector<int>& pline)
+bool WdbStream::getTimeLine(int index, vector<miTime>& tline, vector<int>& pline, ErrorFlag* ef)
 {
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
     if (index>0 && index<(int)progLines.size())
       pline = progLines[index];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorUnknown(ef);
 }
 
 void WdbStream::clean()
@@ -660,15 +659,7 @@ bool WdbStream::readData(const int posIndex, const ParId&,
   return true;
 }
 
-
-bool WdbStream::getTimeLine(const int& index, vector<miTime>& tline,
-    vector<int>& pline, ErrorFlag* e)
-{
-  unimplemented("getTimeLine");
-  return true;
-}
-
-bool WdbStream::putTimeLine(const int& index, vector<miTime>& tline, vector<int>& pline, ErrorFlag* e)
+bool WdbStream::putTimeLine(int index, vector<miTime>& tline, vector<int>& pline, ErrorFlag* e)
 {
   unimplemented("putTimeLine 1");
   return false;
@@ -678,14 +669,6 @@ bool WdbStream::putTimeLine(TimeLine& tl, vector<int>& pline, ErrorFlag* e)
 {
   unimplemented("putTimeLine 2");
   return false;
-}
-
-
-
-bool WdbStream::getOnePar(int i, WeatherParameter& w, ErrorFlag* e)
-{
-  unimplemented("getOnePar");
-  return true;
 }
 
 bool WdbStream::putOnePar(WeatherParameter& w, ErrorFlag* e)
@@ -746,4 +729,4 @@ void WdbStream::getTextLines(const ParId p, vector<std::string>& tl)
   tl = textLines;
 }
 
-}
+} // namespace pets

@@ -252,6 +252,9 @@ public:
   bool fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon, const std::string& fimexname,
       std::vector<ParId>& inpars, std::vector<ParId>& outpars);
 
+  bool fetchDataFromStream(AbstractDataStream* fimex, bool dropIfEmpty);
+  void setStationFromLatLon(double lat, double lon, const std::string& stationname);
+
   //bool fetchTextLinesFromFile(DataStream*, int* nlines);
   bool writeAllToFile(DataStream*, const std::string&, ErrorFlag*);
   bool writeWeatherparametersToFile(DataStream*, const miPosition&, const std::vector<int>& wpindexes,

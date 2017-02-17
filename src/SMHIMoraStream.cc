@@ -635,7 +635,7 @@ pets::MoraStation MoraStream::getNearestMoraStation(miCoordinates& pos)
 }
 
 bool MoraStream::readMoraData(std::vector<ParId>& inpars,
-    std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
+    std::vector<ParId>& outpars, const miutil::miTime& fromTime, const miutil::miTime& toTime)
 {
   // no place - no data - skipping
   if (currentStation.name.empty()) {
@@ -889,7 +889,7 @@ bool MoraStream::openStreamForWrite(ErrorFlag*)
 
 bool MoraStream::readData(const int posIndex, const ParId& id,
     const miutil::miTime& fromTime, const miutil::miTime& toTime, ErrorFlag*)
-{  
+{
   miutil::miTime _toTime = miutil::miTime::nowTime();
   _toTime.setTime(_toTime.year(),_toTime.month(),_toTime.day(),_toTime.hour(), _toTime.min(), 0);
   miutil::miTime _fromTime;
@@ -909,25 +909,18 @@ bool MoraStream::readData(const int posIndex, const ParId& id,
   return readMoraData(inpars, outpars, _fromTime, _toTime);
 }
 
-bool MoraStream::getTimeLine(const int& index,
-    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
-{
-  
-  return getTimeLine(index,tline,pline);
-}
-
-bool MoraStream::getTimeLine(const int& index, vector<miutil::miTime>& tline,
-    vector<int>& pline)
+bool MoraStream::getTimeLine(int index,
+    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef)
 {
   if (TimeLineIsRead && timeLines.Timeline(index, tline)) {
     if (index < progLines.size())
       pline = progLines[index];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorUnknown(ef);
 }
 
-bool MoraStream::putTimeLine(const int& index,
+bool MoraStream::putTimeLine(int index,
     std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in MoraStream " << endl;
@@ -940,18 +933,13 @@ bool MoraStream::putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
   return false;
 }
 
-bool MoraStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag*)
-{
-  return getOnePar(i,wp);
-}
-
-bool MoraStream::getOnePar(int i, WeatherParameter& wp)
+bool MoraStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 {
   if (i >= 0 && i < parameters.size()) {
     wp = parameters[i];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorUnknown(ef);
 }
 
 bool MoraStream::putOnePar(WeatherParameter&, ErrorFlag*)

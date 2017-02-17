@@ -33,9 +33,9 @@
 
 #include "ptDataStream.h"
 
-#include <puCtools/porttypes.h>  
+#include <puCtools/porttypes.h>
 
-//#include <parameter/parameter.h> 
+//#include <parameter/parameter.h>
 
 class HDFFile : public DataStream {
 public:
@@ -52,10 +52,10 @@ public:
   bool readData(const int posIndex, const ParId&,
 		const miutil::miTime&, const miutil::miTime&,
 		ErrorFlag*);
-  bool getTimeLine(const int& index,
+  bool getTimeLine(int index,
 		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
-  bool putTimeLine(const int& index,
+  bool putTimeLine(int index,
 		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
 		   ErrorFlag*);
   bool putTimeLine(TimeLine& tl, std::vector<int>& pline,

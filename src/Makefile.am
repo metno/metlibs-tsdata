@@ -6,7 +6,9 @@ lib_LTLIBRARIES = libtsData.la
 
 libtsData_la_SOURCES = \
 	ptAsciiStream.cc \
+	ptDataStream.cc \
 	ptDiagramData.cc \
+	ptError.cc \
 	ptMIROS22File.cc \
 	ptParameterDefinition.cc \
 	ptPrimitiveType.cc \
@@ -17,7 +19,7 @@ libtsData_la_SOURCES = \
 	WdbCacheQuery.cc      \
 	DynamicFunction.cc    \
 	KlimaStream.cc     \
-  SMHIMoraStream.cc \
+	SMHIMoraStream.cc \
 	FimexStream.cc  \
 	FimexTools.cc
 
@@ -27,8 +29,6 @@ pkg_include_HEADERS = \
 	$(libtsData_la_SOURCES:.cc=.h) \
 	tsDataVersion.h  \
 	HDFdefs.h        \
-	ptDataStream.h   \
-	ptError.h	 \
 	PetsExceptions.h \
 	ptTimeLine.h     \
 	ptParameter.h

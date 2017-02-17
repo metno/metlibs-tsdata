@@ -79,15 +79,15 @@ public:
   bool readData(const int posIndex, const ParId&,
       const miutil::miTime&, const miutil::miTime&,
       ErrorFlag*);
-  bool getTimeLine(const int& index,
+  bool getTimeLine(int index,
       std::vector<miutil::miTime>& tline, std::vector<int>& pline,
-      ErrorFlag*);
-  bool putTimeLine(const int& index,
+      ErrorFlag* ef=0) /* override */;
+  bool putTimeLine(int index,
       std::vector<miutil::miTime>& tline, std::vector<int>& pline,
       ErrorFlag*);
   bool putTimeLine(TimeLine& tl, std::vector<int>& pline,
       ErrorFlag*);
-  bool getOnePar(int,WeatherParameter&,ErrorFlag*);
+  bool getOnePar(int,WeatherParameter&,ErrorFlag* ef=0) /* override */;
   bool putOnePar(WeatherParameter&,ErrorFlag*);
   bool getStations(std::vector<miPosition>&);
   bool getStationSeq(int, miPosition&);

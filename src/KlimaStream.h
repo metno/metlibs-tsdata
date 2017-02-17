@@ -162,13 +162,11 @@ public:
   bool readData(const int posIndex, const ParId&, const miutil::miTime&, const miutil::miTime&, ErrorFlag*);
 
   bool readKlimaData(std::vector<ParId>& inpars, std::vector<ParId>& outpars,
-      miutil::miTime fromTime, miutil::miTime toTime);
-  bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);
-  bool getTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline);
-  bool putTimeLine(const int& index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);
+      const miutil::miTime& fromTime, const miutil::miTime& toTime);
+  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*) /* override */;
+  bool putTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*);
   bool putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*);
-  bool getOnePar(int, WeatherParameter&, ErrorFlag*);
-  bool getOnePar(int, WeatherParameter&);
+  bool getOnePar(int, WeatherParameter&, ErrorFlag*) /* override */;
   bool putOnePar(WeatherParameter&, ErrorFlag*);
   bool getStations(std::vector<miPosition>&);
   bool getStationSeq(int, miPosition&);
@@ -179,9 +177,8 @@ public:
   writeData(const int posIndex, const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel);
   bool close();
   void getTextLines(const ParId p, std::vector<std::string>& tl);
-
 };
-}
-;
+
+} // namespace pets
 
 #endif /* KURL_H_ */

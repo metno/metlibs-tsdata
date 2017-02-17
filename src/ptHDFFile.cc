@@ -890,7 +890,7 @@ bool HDFFile::writeData(const int posIndex,
 
 
 
-bool HDFFile::getTimeLine(const int& index,
+bool HDFFile::getTimeLine(int index,
 			  vector<miTime>& tline,
 			  vector<int>& pline,
 			  ErrorFlag* ef)
@@ -910,7 +910,7 @@ bool HDFFile::getTimeLine(const int& index,
   }
 }
 
-bool HDFFile::putTimeLine(const int& index,
+bool HDFFile::putTimeLine(int index,
 			  vector<miTime>& tline,
 			  vector<int>& pline,
 			  ErrorFlag* ef)

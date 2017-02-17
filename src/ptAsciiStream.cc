@@ -1,9 +1,7 @@
 /*
   libtsData - Time Series Data
   
-  $Id$
-
-  Copyright (C) 2006 met.no
+  Copyright (C) 2006-2017 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -46,7 +44,7 @@ using namespace std;
 
 AsciiStream::AsciiStream(const std::string& fname)
   : DataStream(fname)
-{ 
+{
 #ifdef DEBUG
   cout << "Inside AsciiStream:constructor" << endl;
 #endif
@@ -113,7 +111,7 @@ int AsciiStream::putStation(const miPosition& s,
 {
   posList.push_back(s);
   npos++;
-  *ef = OK;
+  setErrorOK(ef);
   return posList.size()-1;
 }
 
@@ -131,7 +129,7 @@ bool AsciiStream::getModelSeq(int idx, Model& mod,
   }
 }
 
-// return index of model 'modelName' and run modelRun 
+// return index of model 'modelName' and run modelRun
 // in modList, -1 if not found
 int AsciiStream::findModel(const std::string& modelName,
 			   const int& modelRun)
@@ -189,7 +187,7 @@ bool AsciiStream::openStream(ErrorFlag* ef)
   if (!_openFile(ef))
     return false;
   InfoIsRead = true;
-  *ef = OK;
+  setErrorOK(ef);
   return true;
 }
 
@@ -202,13 +200,13 @@ bool AsciiStream::openStreamForWrite(ErrorFlag* ef)
 }
 
 //---------------------------------------------------------------
-// Reads data from file for position "posIndex" and model and 
+// Reads data from file for position "posIndex" and model and
 // modelrun as specified in the ParId "modid"
 // If modid.model is undefined the first model found for "posIndex"
 // is taken.
 // The same goes for modid.run.
 //---------------------------------------------------------------
-bool AsciiStream::readData(const int posIndex, 
+bool AsciiStream::readData(const int posIndex,
 			   const ParId& modid,
 			   const miTime& start,
 			   const miTime& stop,
@@ -222,11 +220,10 @@ bool AsciiStream::readData(const int posIndex,
 #endif
 
   if (posIndex < 0 || posIndex >= npos) {
-    *ef = DF_RANGE_ERROR;
-    return false;
+    return setErrorFlag(ef, DF_RANGE_ERROR);
   }
 
-  *ef = DF_MODEL_NOT_FOUND;
+  setErrorFlag(ef, DF_MODEL_NOT_FOUND);
 
   // find name of requested model
   modname = modid.model;
@@ -257,7 +254,7 @@ bool AsciiStream::readData(const int posIndex,
     return false;
   }
 
-  *ef = DF_DATA_READING_ERROR;
+  setErrorFlag(ef, DF_DATA_READING_ERROR);
 
   WeatherParameter wp; // basis for all weatherparameters found
   ParId pid = ID_UNDEF;
@@ -331,13 +328,12 @@ bool AsciiStream::readData(const int posIndex,
 	cout << "the complete wp:"<<  parameters[ipar]<<endl;
 #endif
       }
-    }    
+    }
   }
 
   npar= parameters.size();
-  *ef = OK;
   DataIsRead = true;
-  return true;
+  return setErrorOK(ef);
 }
 
 
@@ -352,7 +348,7 @@ bool AsciiStream::writeData(const int posIndex,
 
 
 
-bool AsciiStream::getTimeLine(const int& index,
+bool AsciiStream::getTimeLine(int index,
 			      vector<miTime>& tline,
 			      vector<int>& pline,
 			      ErrorFlag* ef)
@@ -363,16 +359,13 @@ bool AsciiStream::getTimeLine(const int& index,
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
     if (index<progLines.size())
       pline = progLines[index];
-    *ef = OK;
-    return true;
-  } 
-  else {
-    *ef = DF_TIMELINE_NOT_READ;
-    return false;
+    return setErrorOK(ef);
+  } else {
+    return setErrorFlag(ef, DF_TIMELINE_NOT_READ);
   }
 }
 
-bool AsciiStream::putTimeLine(const int& index,
+bool AsciiStream::putTimeLine(int index,
 			      vector<miTime>& tline,
 			      vector<int>& pline,
 			      ErrorFlag* ef)
@@ -407,16 +400,13 @@ bool AsciiStream::getOnePar(int index, WeatherParameter& wp, ErrorFlag* ef)
 #endif
   npar= parameters.size();
   if (index < 0 || index >= npar) {
-    *ef = DF_RANGE_ERROR;
-    return false;
+    return setErrorFlag(ef, DF_RANGE_ERROR);
   }
   if (!DataIsRead) {
-    *ef = DF_DATA_NOT_READ;
-    return false;
+    return setErrorFlag(ef, DF_DATA_NOT_READ);
   }
   wp = parameters[index];
-  *ef = OK;
-  return true;
+  return setErrorOK(ef);
 }
 
 bool AsciiStream::putOnePar(WeatherParameter& wp, ErrorFlag* ef)

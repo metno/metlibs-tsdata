@@ -574,7 +574,7 @@ pets::KlimaStation KlimaStream::getNearestKlimaStation(miCoordinates& pos)
 }
 
 bool KlimaStream::readKlimaData(std::vector<ParId>& inpars,
-    std::vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
+    std::vector<ParId>& outpars, const miutil::miTime& fromTime, const miutil::miTime& toTime)
 {
   // no place - no data - skipping
   if (!currentStation.stationid) {
@@ -756,25 +756,18 @@ bool KlimaStream::readData(const int posIndex, const ParId&,
   return false;
 }
 
-bool KlimaStream::getTimeLine(const int& index,
-    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
-{
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
-  return false;
-}
-
-bool KlimaStream::getTimeLine(const int& index, vector<miutil::miTime>& tline,
-    vector<int>& pline)
+bool KlimaStream::getTimeLine(int index,
+    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef)
 {
   if (TimeLineIsRead && timeLines.Timeline(index, tline)) {
     if (index < progLines.size())
       pline = progLines[index];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorUnknown(ef);
 }
 
-bool KlimaStream::putTimeLine(const int& index,
+bool KlimaStream::putTimeLine(int index,
     std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
@@ -787,19 +780,13 @@ bool KlimaStream::putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
   return false;
 }
 
-bool KlimaStream::getOnePar(int, WeatherParameter&, ErrorFlag*)
-{
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
-  return false;
-}
-
-bool KlimaStream::getOnePar(int i, WeatherParameter& wp)
+bool KlimaStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 {
   if (i >= 0 && i < parameters.size()) {
     wp = parameters[i];
-    return true;
+    return setErrorOK(ef);
   }
-  return false;
+  return setErrorUnknown(ef);
 }
 
 bool KlimaStream::putOnePar(WeatherParameter&, ErrorFlag*)

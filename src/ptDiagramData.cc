@@ -155,22 +155,20 @@ bool ptDiagramData::findParameter(const ParId& id, int& index, ErrorFlag* ef)
   for (unsigned int i = 0; i < parList.size(); i++)
     if (id == parList[i].Id())
       index = i;
-  *ef = index != -1 ? OK : DD_PARAMETER_NOT_FOUND;
-  return *ef == OK ? true : false;
+  return setErrorFlag(ef, index != -1 ? OK : DD_PARAMETER_NOT_FOUND);
 }
 
 bool ptDiagramData::copyParameter(int index, WeatherParameter& wp,
     ErrorFlag* ef)
 {
   if (index < 0 || index >= parList.size())
-    *ef = DD_RANGE_ERROR;
+    return setErrorFlag(ef, DD_RANGE_ERROR);
   else {
     wp = parList[index];
     wp.setLocked(false);
     wp.clearTempDirty();
-    *ef = OK;
+    return setErrorOK(ef);
   }
-  return *ef == OK ? true : false;
 }
 
 bool ptDiagramData::copyParameter(const ParId& id, WeatherParameter& wp,
@@ -182,9 +180,9 @@ bool ptDiagramData::copyParameter(const ParId& id, WeatherParameter& wp,
     wp = parList[index];
     wp.setLocked(false);
     wp.clearTempDirty();
-    return true;
+    return setErrorOK(ef);
   } else
-    return false;
+    return setErrorUnknown(ef);
 }
 
 // returns index of added parameter
@@ -3787,8 +3785,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
   // find station and read in data block
   int statIndex;
   if ((statIndex = pfile->findStation(stat.Name())) == -1) {
-    *ef = DF_STATION_NOT_FOUND;
-    return false;
+    return setErrorFlag(ef, DF_STATION_NOT_FOUND);
   }
 
   if (!pfile->readData(statIndex, modelid, start, stop, ef))
@@ -3867,8 +3864,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
       deleteTimeLine(newtimelines[i]);
       progLines.pop_back();
     }
-    *ef = DD_NO_PARAMETERS_FOUND;
-    return false;
+    return setErrorFlag(ef, DD_NO_PARAMETERS_FOUND);
   }
 
   // set the index of the first and last elements appended
@@ -3878,12 +3874,10 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
   ++nfetches;
 
   if (nread < inPars.size()) { // check if all parameters are found
-    *ef = DD_SOME_PARAMETERS_NOT_FOUND;
-    return false;
+    return setErrorFlag(ef, DD_SOME_PARAMETERS_NOT_FOUND);
   }
 
-  *ef = OK;
-  return true;
+  return setErrorOK(ef);
 }
 
 // fetch all parameters for first model for this station
@@ -3900,7 +3894,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
 bool ptDiagramData::writeAllToFile(DataStream* pf, const std::string& modelName,
     ErrorFlag* ef)
 {
-  return false;
+  return setErrorUnknown(ef);
 }
 
 bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
@@ -3963,8 +3957,7 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
     return false;
   }
 
-  *ef = OK;
-  return true;
+  return setErrorOK(ef);
 }
 
 // returns all timePoints belonging to timeline idx
@@ -4022,24 +4015,19 @@ void ptDiagramData::deleteTimeLine(int index)
 bool ptDiagramData::getProgLine(int i, vector<int>& prog, ErrorFlag* ef)
 {
   if (i < 0 || i >= progLines.size()) {
-    *ef = DD_RANGE_ERROR;
-    return false;
+    return setErrorFlag(ef, DD_RANGE_ERROR);
   }
   prog = progLines[i];
-  *ef = OK;
-  return true;
+  return setErrorOK(ef);
 }
 
 bool ptDiagramData::addTimePoint(const miutil::miTime& tp, int tlIndex, ErrorFlag *ef)
 {
-  *ef = OK;
-  bool ok = timeLine.insert(tp, tlIndex);
-  if (!ok)
-    *ef = DD_RANGE_ERROR;
-  return ok;
+  if (timeLine.insert(tp, tlIndex))
+    return setErrorOK(ef);
+  else
+    return setErrorFlag(ef, DD_RANGE_ERROR);
 }
-
-
 
 // make a vector from two components
 bool ptDiagramData::makeVector(const ParId& comp1, const ParId& comp2,
@@ -4250,17 +4238,7 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
     const std::string& model, miutil::miTime run,vector<ParId>& inpars, vector<ParId>& outpars,
     unsigned long& readtime, const std::string& stationname)
 {
-
-
-  int nread = 0, i;
-
-  vector<miutil::miTime> tline;
-  vector<int> pline;
-  int index = 0;
-  Range range;
-
   cleanDataStructure_();
-
 
   wdb->clean();
 
@@ -4273,16 +4251,89 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
     return false;
   }
 
+  if (!fetchDataFromStream(wdb, true))
+    return false;
 
+  setStationFromLatLon(lat, lon, stationname);
+  return true;
+}
+
+bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
+    vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
+{
+  klima->clean();
+
+  // find station and read in data block
+  try {
+    if (!klima->readKlimaData(inpars,outpars,fromTime,toTime))
+      return false;
+  } catch(exception& e) {
+    cerr << "KLIMA::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+  return fetchDataFromStream(klima, false);
+}
+
+bool ptDiagramData::fetchDataFromMoraDB(pets::MoraStream* mora,
+    vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
+{
+  if (!mora)
+    return false;
+
+  mora->clean();
+
+  // find station and read in data block
+  try {
+    if (!mora->readMoraData(inpars,outpars,fromTime,toTime))
+      return false;
+  } catch(exception& e) {
+    cerr << "MORA::READDATA FAILED: " << e.what() << endl;
+    return false;
+  }
+
+  return fetchDataFromStream(mora, false);
+}
+
+bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon,
+    const std::string& stationname,
+    std::vector<ParId>& inpars, std::vector<ParId>& outpars)
+{
+  if (!fetchDataFromStream(fimex, false))
+    return false;
+
+  setStationFromLatLon(lat, lon, stationname);
+  return true;
+}
+
+void ptDiagramData::setStationFromLatLon(double lat, double lon, const std::string& stationname)
+{
+  station.setLat(lat);
+  station.setLon(lon);
+  miCoordinates c=station.Coordinates();
+  if(!stationname.empty())
+    station.setName(stationname);
+  else
+    station.setName( c.str() );
+}
+
+bool ptDiagramData::fetchDataFromStream(AbstractDataStream* stream, bool dropIfEmpty)
+{
+  if (!stream)
+    return false;
+
+  vector<miutil::miTime> tline;
+  vector<int> pline;
   vector<int> newtimelines;
+  int index = 0;
   int tlIndex;
+  int nread = 0;
   // get all parameters
-  for (i = 0; i < wdb->numParameters(); i++) {
+  for (int i = 0; i < stream->numParameters(); i++) {
     WeatherParameter wp;
-    if (wdb->getOnePar(i, wp)) {
-
+    if (stream->getOnePar(i, wp)) {
       // add timeline and progline
-      if (!wdb->getTimeLine(wp.TimeLineIndex(), tline, pline))
+      if (!stream->getTimeLine(wp.TimeLineIndex(), tline, pline))
         break;
 
       if ((tlIndex = timeLine.Exist(tline)) == -1) {
@@ -4301,8 +4352,8 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
   }
 
   // if no parameters are found, delete the timeline we added previously
-  if (nread == 0) {
-    for (i = 0; i < newtimelines.size(); i++) {
+  if (dropIfEmpty && nread == 0) {
+    for (int i = 0; i < newtimelines.size(); i++) {
       deleteTimeLine(newtimelines[i]);
       progLines.pop_back();
     }
@@ -4310,74 +4361,6 @@ bool ptDiagramData::fetchDataFromWDB(pets::WdbStream* wdb,float lat, float lon,
   }
 
   // set the index of the first and last elements appended
-  //*first = range.first = index + 1 - nread;
-  //*last = range.last = index;
-  range.first = index + 1 - nread;
-  range.last = index;
-
-  fetchRange.push_back(range);
-  ++nfetches;
-
-  station.setLat(lat);
-  station.setLon(lon);
-  miCoordinates c=station.Coordinates();
-  if(not stationname.empty())
-    station.setName(stationname);
-  else
-    station.setName( c.str() );
-
-  return true;
-}
-
-bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
-    vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
-{
-
-  vector<miutil::miTime> tline;
-  vector<int> pline;
-
-  klima->clean();
-
-  // find station and read in data block
-  try {
-    if (!klima->readKlimaData(inpars,outpars,fromTime,toTime))
-      return false;
-  } catch(exception& e) {
-    cerr << "KLIMA::READDATA FAILED: " << e.what() << endl;
-    return false;
-  }
-
-
-  vector<int> newtimelines;
-  int tlIndex,index;
-  int nread=0;
-  // get all parameters
-  for (signed int i = 0; i < klima->numParameters(); i++) {
-    WeatherParameter wp;
-    if (klima->getOnePar(i, wp)) {
-
-      // add timeline and progline
-      if (!klima->getTimeLine(wp.TimeLineIndex(), tline, pline))
-        break;
-
-      if ((tlIndex = timeLine.Exist(tline)) == -1) {
-        tlIndex = addTimeLine(tline);
-        if (tlIndex == -1) {
-          cerr << "Too many timelines! giving up this parameter" << endl;
-          continue;
-        }
-        progLines.push_back(pline);
-        newtimelines.push_back(tlIndex);
-      }
-      wp.setTimeLineIndex(tlIndex);
-      index = addParameter(wp);
-      ++nread;
-    }
-  }
-
-  // set the index of the first and last elements appended
-  //first = range.first = index + 1 - nread;
-  //last = range.last = index;
   Range range;
   range.first = index + 1 - nread;
   range.last = index;
@@ -4387,124 +4370,3 @@ bool ptDiagramData::fetchDataFromKlimaDB(pets::KlimaStream* klima,
 
   return true;
 }
-
-bool ptDiagramData::fetchDataFromMoraDB(pets::MoraStream* mora,
-    vector<ParId>& inpars, vector<ParId>& outpars, miutil::miTime fromTime, miutil::miTime toTime)
-{
-  if(!mora)
-    return false;
-
-  vector<miutil::miTime> tline;
-  vector<int> pline;
-
-  mora->clean();
-
-  // find station and read in data block
-  try {
-    if (!mora->readMoraData(inpars,outpars,fromTime,toTime))
-      return false;
-  } catch(exception& e) {
-    cerr << "MORA::READDATA FAILED: " << e.what() << endl;
-    return false;
-  }
-
-
-  vector<int> newtimelines;
-  int tlIndex,index;
-  int nread=0;
-  // get all parameters
-  for (signed int i = 0; i < mora->numParameters(); i++) {
-    WeatherParameter wp;
-    if (mora->getOnePar(i, wp)) {
-
-      // add timeline and progline
-      if (!mora->getTimeLine(wp.TimeLineIndex(), tline, pline))
-        break;
-
-      if ((tlIndex = timeLine.Exist(tline)) == -1) {
-        tlIndex = addTimeLine(tline);
-        if (tlIndex == -1) {
-          cerr << "Too many timelines! giving up this parameter" << endl;
-          continue;
-        }
-        progLines.push_back(pline);
-        newtimelines.push_back(tlIndex);
-      }
-      wp.setTimeLineIndex(tlIndex);
-      index = addParameter(wp);
-      ++nread;
-    }
-  }
-  // set the index of the first and last elements appended
-  //first = range.first = index + 1 - nread;
-  //last = range.last = index;
-  Range range;
-  range.first = index + 1 - nread;
-  range.last = index;
-
-  fetchRange.push_back(range);
-  ++nfetches;
-
-  return true;
-}
-
-
-bool ptDiagramData::fetchDataFromFimex(pets::FimexStream* fimex, double lat, double lon,
-    const std::string& stationname,
-    std::vector<ParId>& inpars, std::vector<ParId>& outpars)
-{
-  int nread = 0, i;
-
-  vector<miutil::miTime> tline;
-  vector<int> pline;
-  int index = 0;
-  Range range;
-
-
-  vector<int> newtimelines;
-
-  // get all parameters
-
-  int tlIndex;
-  // get all parameters
-  for (i = 0; i < fimex->numParameters(); i++) {
-    WeatherParameter wp;
-    if (fimex->getOnePar(i, wp)) {
-      // add timeline and progline
-      if (!fimex->getTimeLine(wp.TimeLineIndex(), tline, pline))
-        break;
-
-      if ((tlIndex = timeLine.Exist(tline)) == -1) {
-        tlIndex = addTimeLine(tline);
-        if (tlIndex == -1) {
-          cerr << "Too many timelines! giving up this parameter" << endl;
-          continue;
-        }
-        progLines.push_back(pline);
-      }
-      wp.setTimeLineIndex(tlIndex);
-      index = addParameter(wp);
-      ++nread;
-    }
-  }
-  // set the index of the first and last elements appended
-  //*first = range.first = index + 1 - nread;
-  //*last = range.last = index;
-  range.first = index + 1 - nread;
-  range.last = index;
-
-  fetchRange.push_back(range);
-  ++nfetches;
-
-  station.setLat(lat);
-  station.setLon(lon);
-  miCoordinates c=station.Coordinates();
-  if(!stationname.empty())
-    station.setName(stationname);
-  else
-    station.setName( c.str() );
-
-  return true;
-
-}
-

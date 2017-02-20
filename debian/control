@@ -35,6 +35,7 @@ Depends: metlibs-putools-dev (>= 5.0.0),
  metlibs-pumet-dev (>= 5.1.0),
  metlibs-pudatatypes-dev (>= 5.0.0),
  libboost-dev,
+ libcurl-dev,
  ${shlibs:Depends},
  ${misc:Depends}
 Description: MET Norway time series plotting lib -- core

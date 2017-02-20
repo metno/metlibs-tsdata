@@ -14,3 +14,4 @@
 /usr/include/metlibs/tsData/ptError.h
 /usr/include/metlibs/tsData/PetsExceptions.h
 /usr/include/metlibs/tsData/DynamicFunction.h
+/usr/lib/libmetlibs-tsdata-core.a

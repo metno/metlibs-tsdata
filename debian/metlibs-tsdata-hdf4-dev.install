@@ -2,3 +2,4 @@
 /usr/include/metlibs/tsData/HDFdefs.h
 /usr/include/metlibs/tsData/ptHDFFile.h
 /usr/include/metlibs/tsData/ptHDFUtils.h
+/usr/lib/libmetlibs-tsdata-hdf4.a

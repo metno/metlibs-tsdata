@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (5.5.0-2) RELEASED; urgency=medium
+
+  * include library files in package
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 20 Feb 2017 08:00:08 +0100
+
 metlibs-tseries-tsdata (5.5.0-1) RELEASED; urgency=medium
 
   * moved fimex, hdf4, smhi mora, wdb functionality into separate libs

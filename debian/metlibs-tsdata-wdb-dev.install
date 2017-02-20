@@ -2,3 +2,4 @@
 /usr/include/metlibs/tsData/WdbCacheQuery.h
 /usr/include/metlibs/tsData/WdbQueries.h
 /usr/include/metlibs/tsData/WdbStream.h
+/usr/lib/libmetlibs-tsdata-wdb.a

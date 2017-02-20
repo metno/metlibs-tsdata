@@ -1,2 +1,3 @@
 /usr/lib/pkgconfig/metlibs-tsdata-mora.pc
 /usr/include/metlibs/tsData/SMHIMoraStream.h
+/usr/lib/libmetlibs-tsdata-mora.a

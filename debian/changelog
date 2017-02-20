@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (5.5.0-4) RELEASED; urgency=medium
+
+  * use correct name for metlibs-tsdata-mora-qt4-dev
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 20 Feb 2017 08:00:08 +0100
+
 metlibs-tseries-tsdata (5.5.0-3) RELEASED; urgency=medium
 
   * make metlibs-tsdata-core-dev depend on libcurl-dev

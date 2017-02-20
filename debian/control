@@ -22,7 +22,7 @@ Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
  metlibs-tsdata-fimex-dev (= ${binary:Version}),
  metlibs-tsdata-wdb-dev (= ${binary:Version}),
- metlibs-tsdata-mora-dev (= ${binary:Version})
+ metlibs-tsdata-mora-qt4-dev (= ${binary:Version})
 Description: MET Norway time series plotting lib -- all
  MET Norway time series plotting library.
  .

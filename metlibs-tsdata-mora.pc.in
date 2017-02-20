@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: metlibs-tsdata-mora
+Description: MET Norway time series -- mora
+Version: @VERSION@
+Requires: metlibs-tsdata-core = @VERSION@, QtXml
+Libs: @QT4_LDFLAGS@ -lmetlibs-tsdata-mora @QT4_LIBS@
+Cflags: @QT4_CPPFLAGS@

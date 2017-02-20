@@ -19,14 +19,75 @@ Section: libs
 Package: metlibs-tsdata-dev
 Section: libdevel
 Architecture: any
+Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ metlibs-tsdata-fimex-dev (= ${binary:Version}),
+ metlibs-tsdata-wdb-dev (= ${binary:Version}),
+ metlibs-tsdata-mora-dev (= ${binary:Version})
+Description: MET Norway time series plotting lib -- all
+ MET Norway time series plotting library.
+ .
+ This dependency package pulls in all functionality.
+
+Package: metlibs-tsdata-core-dev
+Section: libdevel
+Architecture: any
 Depends: metlibs-putools-dev (>= 5.0.0),
  metlibs-pumet-dev (>= 5.1.0),
  metlibs-pudatatypes-dev (>= 5.0.0),
- libqt4-dev,
- libboost-dev, libboost-date-time-dev,
- libfimex-dev (>= 0.61.1),
- libpqxx-dev | libpqxx3-dev,
- libhdf4-dev,
+ libboost-dev,
+ ${shlibs:Depends},
  ${misc:Depends}
-Description: pudatatypes.
- metlibs pudatatypes.
+Description: MET Norway time series plotting lib -- core
+ MET Norway time series plotting library.
+ .
+ This package provides the core functionality.
+
+Package: metlibs-tsdata-fimex-dev
+Section: libdevel
+Architecture: any
+Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libfimex-dev (>= 0.61.1),
+ libboost-date-time-dev,
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- fimex
+ MET Norway time series plotting library.
+ .
+ This package provides the fimex datastream functionality.
+
+Package: metlibs-tsdata-hdf4-dev
+Section: libdevel
+Architecture: any
+Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libhdf4-dev,
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- HDF4
+ MET Norway time series plotting library.
+ .
+ This package provides the HDF4 datastream functionality.
+
+Package: metlibs-tsdata-mora-qt4-dev
+Section: libdevel
+Architecture: any
+Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libqt4-dev,
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- SMHI Mora
+ MET Norway time series plotting library.
+ .
+ This package provides the SMHI Mora datastream functionality.
+
+Package: metlibs-tsdata-wdb-dev
+Section: libdevel
+Architecture: any
+Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libpqxx-dev | libpqxx3-dev,
+ libboost-date-time-dev,
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- wdb
+ MET Norway time series plotting library.
+ .
+ This package provides the wdb datastream functionality.

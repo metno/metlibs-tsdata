@@ -1,0 +1,4 @@
+/usr/lib/pkgconfig/metlibs-tsdata-wdb.pc
+/usr/include/metlibs/tsData/WdbCacheQuery.h
+/usr/include/metlibs/tsData/WdbQueries.h
+/usr/include/metlibs/tsData/WdbStream.h

@@ -1,0 +1,3 @@
+/usr/lib/pkgconfig/metlibs-tsdata-fimex.pc
+/usr/include/metlibs/tsData/FimexStream.h
+/usr/include/metlibs/tsData/FimexTools.h

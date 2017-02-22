@@ -39,6 +39,8 @@ Depends: metlibs-putools-dev (>= 5.0.0),
  libcurl-dev,
  ${shlibs:Depends},
  ${misc:Depends}
+Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
+Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
 Description: MET Norway time series plotting lib -- core
  MET Norway time series plotting library.
  .
@@ -52,6 +54,8 @@ Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
  libboost-date-time-dev,
  ${shlibs:Depends},
  ${misc:Depends}
+Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
+Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
 Description: MET Norway time series plotting lib -- fimex
  MET Norway time series plotting library.
  .
@@ -64,6 +68,8 @@ Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
  libhdf4-dev,
  ${shlibs:Depends},
  ${misc:Depends}
+Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
+Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
 Description: MET Norway time series plotting lib -- HDF4
  MET Norway time series plotting library.
  .
@@ -76,6 +82,8 @@ Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
  libqt4-dev,
  ${shlibs:Depends},
  ${misc:Depends}
+Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
+Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
 Description: MET Norway time series plotting lib -- SMHI Mora
  MET Norway time series plotting library.
  .
@@ -89,6 +97,8 @@ Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
  libboost-date-time-dev,
  ${shlibs:Depends},
  ${misc:Depends}
+Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
+Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
 Description: MET Norway time series plotting lib -- wdb
  MET Norway time series plotting library.
  .

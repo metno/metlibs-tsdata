@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (5.5.0-6) RELEASED; urgency=medium
+
+  * metlibs-tsdata-*-dev replace files in metlibs-tsdata-dev
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Wed, 22 Feb 2017 08:00:08 +0100
+
 metlibs-tseries-tsdata (5.5.0-5) RELEASED; urgency=medium
 
   * metlibs-tsdata-dev depends on metlibs-tsdata-hdf4-dev

@@ -1,4 +1,4 @@
-/usr/lib/pkgconfig/metlibs-tsdata-core.pc
+/usr/lib/*/pkgconfig/metlibs-tsdata-core.pc
 /usr/include/metlibs/tsData/ptParameter.h
 /usr/include/metlibs/tsData/tsDataVersion.h
 /usr/include/metlibs/tsData/KlimaStream.h
@@ -14,4 +14,4 @@
 /usr/include/metlibs/tsData/ptError.h
 /usr/include/metlibs/tsData/PetsExceptions.h
 /usr/include/metlibs/tsData/DynamicFunction.h
-/usr/lib/libmetlibs-tsdata-core.a
+/usr/lib/*/libmetlibs-tsdata-core*.so

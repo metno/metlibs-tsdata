@@ -1,4 +1,4 @@
-/usr/lib/pkgconfig/metlibs-tsdata-fimex.pc
+/usr/lib/*/pkgconfig/metlibs-tsdata-fimex.pc
 /usr/include/metlibs/tsData/FimexStream.h
 /usr/include/metlibs/tsData/FimexTools.h
-/usr/lib/libmetlibs-tsdata-fimex.a
+/usr/lib/*/libmetlibs-tsdata-fimex*.so

@@ -1,3 +1,10 @@
+metlibs-tseries-tsdata (6.0.0-1) RELEASED; urgency=medium
+
+  * CMake build
+  * shared library
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Fri, 03 Mar 2017 08:00:08 +0100
+
 metlibs-tseries-tsdata (5.5.0-6) RELEASED; urgency=medium
 
   * metlibs-tsdata-*-dev replace files in metlibs-tsdata-dev

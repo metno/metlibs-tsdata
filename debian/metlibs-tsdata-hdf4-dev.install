@@ -1,5 +1,4 @@
-/usr/lib/pkgconfig/metlibs-tsdata-hdf4.pc
-/usr/include/metlibs/tsData/HDFdefs.h
+/usr/lib/*/pkgconfig/metlibs-tsdata-hdf4.pc
 /usr/include/metlibs/tsData/ptHDFFile.h
 /usr/include/metlibs/tsData/ptHDFUtils.h
-/usr/lib/libmetlibs-tsdata-hdf4.a
+/usr/lib/*/libmetlibs-tsdata-hdf4*.so

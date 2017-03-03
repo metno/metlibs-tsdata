@@ -1,15 +1,19 @@
 Source: metlibs-tseries-tsdata
 Priority: optional
-Maintainer: Alexander Bürger <alexander.buerger@met.no>
-Build-Depends:  debhelper (>= 9), pkg-config,
- autoconf (>=2.61), automake (>= 1.11), libtool (>= 1.5),
- metlibs-milogger-dev (>= 5.0.0),
- metlibs-puctools-dev (>= 5.0.0),
- metlibs-putools-dev (>= 5.0.0),
- metlibs-pudatatypes-dev (>= 5.0.0),
- metlibs-pumet-dev (>= 5.1.0),
- libcurl-dev, libqt4-dev,
- libboost-dev, libboost-date-time-dev,
+Maintainer: MET Norway <diana@met.no>
+Build-Depends: debhelper (>= 9),
+ cmake,
+ pkg-config,
+ metlibs-milogger-dev (>= 6.0.0),
+ metlibs-puctools-dev (>= 6.0.0),
+ metlibs-putools-dev (>= 6.0.0),
+ metlibs-pudatatypes-dev (>= 6.0.0),
+ metlibs-pumet-dev (>= 6.0.0),
+ libcurl-dev | libcurl4-gnutls-dev,
+ qtbase5-dev, qtbase5-dev-tools, qttools5-dev-tools,
+ libboost-dev,
+ libboost-date-time-dev,
+ libboost-system-dev,
  libfimex-dev (>= 0.61.1),
  libpqxx-dev | libpqxx3-dev,
  libhdf4-dev
@@ -23,36 +27,54 @@ Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
  metlibs-tsdata-fimex-dev (= ${binary:Version}),
  metlibs-tsdata-hdf4-dev (= ${binary:Version}),
  metlibs-tsdata-wdb-dev (= ${binary:Version}),
- metlibs-tsdata-mora-qt4-dev (= ${binary:Version})
+ metlibs-tsdata-mora-qt5-dev (= ${binary:Version})
 Description: MET Norway time series plotting lib -- all
  MET Norway time series plotting library.
  .
  This dependency package pulls in all functionality.
 
+Package: libmetlibs-tsdata6-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Depends: libmetlibs-tsdata-core6 (= ${binary:Version})
+Description: MET Norway time series plotting lib -- debug
+ MET Norway time series plotting library.
+ .
+ This package provides debug information.
+
 Package: metlibs-tsdata-core-dev
 Section: libdevel
 Architecture: any
-Depends: metlibs-putools-dev (>= 5.0.0),
+Depends: libmetlibs-tsdata-core6 (= ${binary:Version}),
+ metlibs-putools-dev (>= 5.0.0),
  metlibs-pumet-dev (>= 5.1.0),
  metlibs-pudatatypes-dev (>= 5.0.0),
- libboost-dev,
- libcurl-dev,
- ${shlibs:Depends},
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
 Description: MET Norway time series plotting lib -- core
  MET Norway time series plotting library.
  .
- This package provides the core functionality.
+ This package provides the core functionality development files.
+
+Package: libmetlibs-tsdata-core6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- core
+ MET Norway time series plotting library.
+ .
+ This package provides the core functionality shared library.
 
 Package: metlibs-tsdata-fimex-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libmetlibs-tsdata-fimex6 (= ${binary:Version}),
  libfimex-dev (>= 0.61.1),
  libboost-date-time-dev,
- ${shlibs:Depends},
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -61,12 +83,23 @@ Description: MET Norway time series plotting lib -- fimex
  .
  This package provides the fimex datastream functionality.
 
+Package: libmetlibs-tsdata-fimex6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- fimex
+ MET Norway time series plotting library.
+ .
+ This package provides the fimex datastream functionality shared
+ library.
+
 Package: metlibs-tsdata-hdf4-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libmetlibs-tsdata-hdf4-6 (= ${binary:Version}),
  libhdf4-dev,
- ${shlibs:Depends},
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -75,12 +108,22 @@ Description: MET Norway time series plotting lib -- HDF4
  .
  This package provides the HDF4 datastream functionality.
 
-Package: metlibs-tsdata-mora-qt4-dev
+Package: libmetlibs-tsdata-hdf4-6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- HDF4
+ MET Norway time series plotting library.
+ .
+ This package provides the HDF4 datastream functionality shared
+ library.
+
+Package: metlibs-tsdata-mora-qt5-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libqt4-dev,
- ${shlibs:Depends},
+ libmetlibs-tsdata-mora-qt5-6 (= ${binary:Version}),
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -89,13 +132,23 @@ Description: MET Norway time series plotting lib -- SMHI Mora
  .
  This package provides the SMHI Mora datastream functionality.
 
+Package: libmetlibs-tsdata-mora-qt5-6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- SMHI Mora
+ MET Norway time series plotting library.
+ .
+ This package provides the SMHI Mora datastream functionality shared
+ library.
+
 Package: metlibs-tsdata-wdb-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
+ libmetlibs-tsdata-wdb6 (= ${binary:Version}),
  libpqxx-dev | libpqxx3-dev,
- libboost-date-time-dev,
- ${shlibs:Depends},
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -103,3 +156,14 @@ Description: MET Norway time series plotting lib -- wdb
  MET Norway time series plotting library.
  .
  This package provides the wdb datastream functionality.
+
+Package: libmetlibs-tsdata-wdb6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway time series plotting lib -- wdb
+ MET Norway time series plotting library.
+ .
+ This package provides the wdb datastream functionality shared
+ library.

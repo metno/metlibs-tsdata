@@ -54,6 +54,7 @@
 #include <unistd.h>
 #include <wait.h>
 
+#include <algorithm>
 #include <iostream>
 #include <numeric>
 #include <functional>
@@ -444,14 +445,21 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
     const string& parName, const string& parUnit, const vector<MetNoFimex::SliceBuilder>& slices)
 {
   vector<size_t> sliceLengths(slices.size(), 1);
-  for (int i = 0; i < slices.size(); i++) {
+  for (size_t i = 0; i < slices.size(); i++) {
     vector<size_t> ssize = slices.at(i).getDimensionSizes();
-    sliceLengths.at(i) = accumulate(ssize.begin(), ssize.end(), 1, std::multiplies<int>());
+    sliceLengths.at(i) = accumulate(ssize.begin(), ssize.end(), size_t(1), std::multiplies<size_t>());
   }
-  size_t total = accumulate(sliceLengths.begin(), sliceLengths.end(), 0);
+  const size_t total = accumulate(sliceLengths.begin(), sliceLengths.end(), size_t(0));
+  boost::shared_array<float> allFloats(new float[total]);
+
+#ifndef TSDATA_FIMEX_DISABLE_FORK
+  // fork: there seems to be some problem with fork() and OpenMP when
+  // libomp-dev is installed (for llvm/clang), even when compiling
+  // with g++
 
   //create a anonymous mapped shm-obj in this process
   boost::interprocess::mapped_region region(boost::interprocess::anonymous_shared_memory(total*sizeof(float)));
+  assert(region.get_size() == (total*sizeof(float)));
   // fork the sub-processes
   pid_t pid;
   vector<pid_t> children;
@@ -468,9 +476,14 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
       //            boost::interprocess::mapped_region region(shm_obj, boost::interprocess::read_write);
       assert(region.get_size() == (total*sizeof(float)));
       float* regionFloat = reinterpret_cast<float*>(region.get_address());
+#else // TSDATA_FIMEX_DISABLE_FORK
+      float* regionFloat = allFloats.get();
+#endif
       size_t startPos = 0;
       for (size_t j = 0; j < slices.size(); j++) {
+#ifndef TSDATA_FIMEX_DISABLE_FORK
         if ((j % maxProcs) == i) {
+#endif
           MetNoFimex::DataPtr data;
           try {
             data = reader->getScaledDataSliceInUnit(parName, parUnit, slices.at(j));
@@ -479,17 +492,21 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
             data = MetNoFimex::createData(MetNoFimex::CDM_FLOAT, 0);
           }
           boost::shared_array<float> array;
+          const size_t array_size = sliceLengths.at(j);
           if (data->size() == 0) {
-            array = boost::shared_array<float>(new float[sliceLengths.at(j)]);
-            for (size_t k = 0; k < sliceLengths.at(j); k++) array[k] = MIFI_UNDEFINED_F;
+            array = boost::shared_array<float>(new float[array_size]);
+            std::fill(array.get(), array.get() + array_size, MIFI_UNDEFINED_F);
           } else {
-            assert(data->size() == sliceLengths.at(j));
+            assert(data->size() == array_size);
             array = data->asFloat();
           }
           std::copy(array.get(), array.get()+sliceLengths.at(j), regionFloat + startPos);
-        }
+#ifndef TSDATA_FIMEX_DISABLE_FORK
+        } // j % maxProcs
+#endif
         startPos += sliceLengths.at(j);
       }
+#ifndef TSDATA_FIMEX_DISABLE_FORK
       // ending child process without cleanup ( _exit() ) to avoid qt-trouble
       _exit(0);
 
@@ -500,20 +517,18 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
   }
   // parent code
   // wait for all children
-  for (int i = 0; i < maxProcs; ++i) {
+  for (size_t i = 0; i < maxProcs; ++i) {
     int status;
     while (-1 == waitpid(children.at(i), &status, 0));
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
       std::cerr << "Process " << i << " (pid " << children.at(i) << ") failed" << std::endl;
       throw runtime_error("child-process did not finish correctly when fetching data");
-      exit(1);
     }
   }
-  // read the shared_memory
-  boost::shared_array<float> allFloats(new float[total]);
-  assert(region.get_size() == (total*sizeof(float)));
+  // copy the shared_memory
   float* regionFloat = reinterpret_cast<float*>(region.get_address());
   std::copy(regionFloat, regionFloat+total, allFloats.get());
+#endif // !TSDATA_FIMEX_DISABLE_FORK
 
   return MetNoFimex::createData(total, allFloats);
 }

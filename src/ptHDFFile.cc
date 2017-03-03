@@ -1,7 +1,7 @@
 /*
   libtsData - Time Series Data
 
-  Copyright (C) 2006-2016 met.no
+  Copyright (C) 2006-2017 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -26,24 +26,22 @@
 */
 
 
-// ptHDFFile.cc
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <hdf.h>
 #include "ptHDFFile.h"
 #include "ptHDFUtils.h"
 #include "HDFdefs.h"
-#include <string.h>
-#include <math.h>
-#include <float.h>
+
+#include <puCtools/porttypes.h>
 #include <puCtools/puMath.h>
+
 #include <puTools/miStringFunctions.h>
 
 #include <algorithm>
 #include <iostream>
+
+#include <string.h>
+#include <math.h>
+#include <float.h>
 
 #ifdef DEBUG
 void out_of_store()
@@ -56,8 +54,49 @@ void out_of_store()
 using namespace miutil;
 using namespace std;
 
+class HDFFilePrivate {
+public:
+  int32 fid;            // HDF file handler
+  int32 posVG;          // the main position vgroup
+  bool hasposVG;
+
+  struct HDFPar {
+    uint16 num;
+    std::string name;
+    std::string alias;
+    std::string unit;
+    int8   scale;
+    int32  size;     // size in bytes
+    int32  order;    // scalar, vector
+    uint16 dataType; // cartesian, polar
+    uint16 plotType; // line, histogram etc.
+  };
+  struct HDFPos {
+    int32    ref;       // Reference number in HDF file
+    std::string name;      // Modelname
+    float32  geopos[2]; // Longitude/latitude (before: int16)
+    float32  topo;      // Topography
+  };
+  struct HDFMod {
+    uint16   modelPn; // production number
+    std::string name;    // model name
+    uint32   run[6];  // year,month,day,hour,minute,second
+    Model    modelid; // model id
+    Run      runid;   // run id
+    std::vector<std::string> textlines;
+  };
+
+  std::vector<HDFPar> parList;
+  std::vector<HDFPos> posList;
+  std::vector<HDFMod> modList;
+
+  HDFFilePrivate()
+      : hasposVG(false) { }
+};
+
 HDFFile::HDFFile(const std::string& fname)
-  : DataStream(fname), hasposVG(false)
+  : DataStream(fname)
+  , p_(new HDFFilePrivate)
 {
 #ifdef DEBUG
   cout << "Inside HDFFile:constructor" << endl;
@@ -80,8 +119,8 @@ bool HDFFile::close()
 {
   // close the HDF file
   if (IsOpen) {
-    Vend(fid);
-    Hclose(fid);
+    Vend(p_->fid);
+    Hclose(p_->fid);
 
     IsOpen= false;
   }
@@ -97,7 +136,7 @@ int HDFFile::findStation(const std::string& statName)
   int rn=-1, i;
   std::string sname= miutil::to_upper_latin1(statName);
   for (i=0; i<npos; ++i) {
-    if (miutil::to_upper_latin1(posList[i].name) == sname) {
+    if (miutil::to_upper_latin1(p_->posList[i].name) == sname) {
       rn = i;
       break;
     }
@@ -114,8 +153,8 @@ bool HDFFile::getStations(vector<miPosition>& poslist){
   miPosition pos;
   miCoordinates c;
   for (int i=0; i<npos; i++) {
-    c= miCoordinates(posList[i].geopos[1],posList[i].geopos[0]);
-    pos.setPos(c,0,0,posList[i].name,0,0,"");
+    c= miCoordinates(p_->posList[i].geopos[1],p_->posList[i].geopos[0]);
+    pos.setPos(c,0,0,p_->posList[i].name,0,0,"");
     poslist.push_back(pos);
   }
   return true;
@@ -127,9 +166,9 @@ bool HDFFile::getStationSeq(int idx, miPosition& pos){
   cout << "HDFFile::getStationSeq" << endl;
 #endif
   if (idx >= 0 && idx < npos) {
-    miCoordinates c(posList[idx].geopos[1],posList[idx].geopos[0]);
-    int hoh=int(posList[idx].topo);
-    pos.setPos(c,0,0,posList[idx].name,hoh,0,"");
+    miCoordinates c(p_->posList[idx].geopos[1],p_->posList[idx].geopos[0]);
+    int hoh=int(p_->posList[idx].topo);
+    pos.setPos(c,0,0,p_->posList[idx].name,hoh,0,"");
     return true;
   } else {
     return false;
@@ -142,17 +181,17 @@ int HDFFile::putStation(const miPosition& s,
 #ifdef DEBUG
   cout << "HDFFile::putStation" << endl;
 #endif
-  HDFPos temp;
+  HDFFilePrivate::HDFPos temp;
   temp.ref = 0;
   temp.name = s.Name();
   temp.topo = 0; // obs..
   temp.geopos[0] = s.lat();
   temp.geopos[1] = s.lon();
 
-  posList.push_back(temp);
+  p_->posList.push_back(temp);
   npos++;
   *ef = OK;
-  return posList.size()-1;
+  return p_->posList.size()-1;
 }
 
 
@@ -164,9 +203,9 @@ bool HDFFile::getModelSeq(int idx, Model& mod,
   cout << "nmod:"<<nmod<<" idx:"<<idx<<endl;
 #endif
   if (idx >= 0 && idx < nmod) {
-    mod  = modList[idx].modelid;
-    run  = modList[idx].runid;
-    id   = modList[idx].modelPn;
+    mod  = p_->modList[idx].modelid;
+    run  = p_->modList[idx].runid;
+    id   = p_->modList[idx].modelPn;
 #ifdef DEBUG
     cout << "HDFFile::getModelSeq model,run,id:"<<mod<<" "<<run<<" "<<id<<endl;
 #endif
@@ -185,10 +224,10 @@ bool HDFFile::getModelSeq(int idx, Model& mod,
   cout << "nmod:"<<nmod<<" idx:"<<idx<<endl;
 #endif
   if (idx >= 0 && idx < nmod) {
-    mod  = modList[idx].modelid;
-    run  = modList[idx].runid;
-    id   = modList[idx].modelPn;
-    vtl  = modList[idx].textlines;
+    mod  = p_->modList[idx].modelid;
+    run  = p_->modList[idx].runid;
+    id   = p_->modList[idx].modelPn;
+    vtl  = p_->modList[idx].textlines;
 #ifdef DEBUG
     cout << "HDFFile::getModelSeq model,run,id:"<<mod<<" "<<run<<" "<<id<<endl;
 #endif
@@ -208,8 +247,8 @@ int HDFFile::findModel(const std::string& modelName,
 #endif
   int rn=-1, i;
   for (i=0; i<nmod; ++i) {
-    if ((modList[i].name==modelName) &&
-	(modList[i].run[3]==modelRun || modelRun==R_UNDEF)) {
+    if ((p_->modList[i].name==modelName) &&
+	(p_->modList[i].run[3]==modelRun || modelRun==R_UNDEF)) {
       rn = i;
       break;
     }
@@ -219,10 +258,10 @@ int HDFFile::findModel(const std::string& modelName,
 
 bool HDFFile::getFullModeltime(int id, miTime& t)
 {
-  if ( id<0 || id>=modList.size() ) return false;
+  if ( id<0 || id>=p_->modList.size() ) return false;
 
-  t =  miTime(modList[id].run[0],modList[id].run[1],modList[id].run[2],
-	      modList[id].run[3],modList[id].run[4],modList[id].run[5]);
+  t =  miTime(p_->modList[id].run[0],p_->modList[id].run[1],p_->modList[id].run[2],
+	      p_->modList[id].run[3],p_->modList[id].run[4],p_->modList[id].run[5]);
 
   return true;
 }
@@ -350,11 +389,11 @@ bool HDFFile::readData(const int posIndex,
     modidx = findModel(modname, modrun);
     if (modidx==-1) return false;
     // set correct modelrun
-    modrun=modList[modidx].run[3];
+    modrun=p_->modList[modidx].run[3];
   }
 
   // Position vgroup ref's are stored in posList
-  if ((vpos = Vattach(fid,posList[posIndex].ref,"r")) == HDFFAIL)
+  if ((vpos = Vattach(p_->fid,p_->posList[posIndex].ref,"r")) == HDFFAIL)
     return false;
   // Find correct model in position vgroup
   if (modname.length()) {
@@ -366,7 +405,7 @@ bool HDFFile::readData(const int posIndex,
     if (Vgettagrefs(vpos,tags,refs,npairs) != HDFFAIL)
       for (i=0;i<npairs;i++)
 	if (tags[i] == DFTAG_VH)
-	  if ((vmod = VSattach(fid,refs[i],"r")) != HDFFAIL) {
+	  if ((vmod = VSattach(p_->fid,refs[i],"r")) != HDFFAIL) {
 	    VSgetname(vmod,modelName);
 #ifdef DEBUG
 	    cout << "Vdata name:" << modelName << endl;
@@ -392,7 +431,7 @@ bool HDFFile::readData(const int posIndex,
   } else {
     // model is undefined, get first model from file
     if (Vgettagref(vpos,0,&tag,&ref)==HDFFAIL) return false;
-    if ((vmod = VSattach(fid,ref,"r"))==HDFFAIL) return false;
+    if ((vmod = VSattach(p_->fid,ref,"r"))==HDFFAIL) return false;
     if (VSgetname(vmod, modelName)==HDFFAIL) {
       VSdetach(vmod);
       Vdetach(vpos);
@@ -405,7 +444,7 @@ bool HDFFile::readData(const int posIndex,
       return false;
     }
     // set correct modelrun
-    modrun=modList[modidx].run[3];
+    modrun=p_->modList[modidx].run[3];
   }
 
   // ok..we have a satisfactory model and run
@@ -460,7 +499,7 @@ bool HDFFile::readData(const int posIndex,
   // read vdata from file
   if (VSread(vmod,dataBuf,nrec,interlace)==HDFFAIL){
     cout << "HDFFile::readData. Error reading vdata from station:"<<
-      posList[posIndex].name<<endl;
+      p_->posList[posIndex].name<<endl;
     delete[] fields;
     delete[] dataBuf;
     VSdetach(vmod);
@@ -655,22 +694,22 @@ bool HDFFile::writeData(const int posIndex,
   if (modIndex < 0 || modIndex >= nmod)
     return false;
 
-  modname = modList[modIndex].name;
+  modname = p_->modList[modIndex].name;
 
-  if (!hasposVG){
+  if (!p_->hasposVG){
     // make the main position vgroup
-    posVG=Vattach(fid,-1,"w");
-    Vsetname(posVG,VGPOSGROUP);
-    hasposVG= true;
+    p_->posVG=Vattach(p_->fid,-1,"w");
+    Vsetname(p_->posVG,VGPOSGROUP);
+    p_->hasposVG= true;
   }
 
   // make current positions vgroup
-  vpos=Vattach(fid,-1,"w");
-  Vsetname(vpos,posList[posIndex].name.c_str());
-  Vinsert(posVG,vpos);
+  vpos=Vattach(p_->fid,-1,"w");
+  Vsetname(vpos,p_->posList[posIndex].name.c_str());
+  Vinsert(p_->posVG,vpos);
 
   // make vdata for current model
-  modVD=VSattach(fid,-1,"w");
+  modVD=VSattach(p_->fid,-1,"w");
   VSsetname(modVD,modname.c_str());
   Vinsert(vpos,modVD);
 
@@ -734,9 +773,9 @@ bool HDFFile::writeData(const int posIndex,
     // find parameter alias in parList
     alias = parameters[i].Id().alias;
     atemp = alias;
-    for (j=0; (j<parList.size())&&(parList[j].alias!=atemp);j++)
+    for (j=0; (j<p_->parList.size())&&(p_->parList[j].alias!=atemp);j++)
       ;
-    if (j==parList.size()){
+    if (j==p_->parList.size()){
       cerr << "ptHDFFile ERROR..parameter not found in parList:" << alias << endl;
       j=0;
     }
@@ -746,10 +785,10 @@ bool HDFFile::writeData(const int posIndex,
     if (kk == aliaslist.size()){// new alias
       aliaslist.push_back(alias); // store it
       colidx.push_back(j);        // store corresponding index to parList
-      numcomp+=parList[j].order;  // update number of datacomponents
-      VSfdefine(modVD,parList[j].alias.c_str(),DFNT_INT16,parList[j].order);
+      numcomp+=p_->parList[j].order;  // update number of datacomponents
+      VSfdefine(modVD,p_->parList[j].alias.c_str(),DFNT_INT16,p_->parList[j].order);
       strcat(thisPosFN,",");
-      strcat(thisPosFN,parList[j].alias.c_str());
+      strcat(thisPosFN,p_->parList[j].alias.c_str());
     }
     column.push_back(kk);
   }
@@ -842,13 +881,13 @@ bool HDFFile::writeData(const int posIndex,
 		   cursubmodel == S_UNDEF) &&
 		  smallTL.flag(i,parameters[j].TimeLineIndex())){
 		aliasfound = true;
-		for (k=0; k<parList[parc].order; k++){
+		for (k=0; k<p_->parList[parc].order; k++){
 		  fdata = parameters[j].Data(partimes[j],k);
 		  if (fdata == UNDEF) // check for undefvalue
 		    idata= undefValue;
 		  else
 		    idata = static_cast<int16>
-		      (puRint(fdata*(pow(10.0,-parList[parc].scale))));
+		      (puRint(fdata*(pow(10.0,-p_->parList[parc].scale))));
 		  memcpy(tmp,&idata,inc=sizeof(int16));
 		  tmp+=inc;
 		}
@@ -859,7 +898,7 @@ bool HDFFile::writeData(const int posIndex,
 	  if (!aliasfound){
 	    // if no alias found with correct level and timestep:
 	    idata=undefValue;
-	    for (k=0; k<parList[parc].order; k++){
+	    for (k=0; k<p_->parList[parc].order; k++){
 	      memcpy(tmp,&idata,inc=sizeof(int16));
 	      tmp+=inc;
 	    }
@@ -877,7 +916,7 @@ bool HDFFile::writeData(const int posIndex,
   Vdetach(vpos);
 
   if (complete_write){
-    Vdetach(posVG);
+    Vdetach(p_->posVG);
     if (!_writeParList(ef)) return false;
     if (!_prepPosRefs(ef))  return false;
     if (!_writePosList(ef)) return false;
@@ -964,16 +1003,16 @@ bool HDFFile::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
 #endif
   int i;
   Parameter par;
-  HDFPar hpar;
-  HDFMod hmod;
+  HDFFilePrivate::HDFPar hpar;
+  HDFFilePrivate::HDFMod hmod;
   parameters.push_back(wp);
 
   ParId pid = wp.Id();
 
   // check if parameter exist in parList
-  for (i=0; (i<parList.size())&&(parList[i].alias!=pid.alias);i++)
+  for (i=0; (i<p_->parList.size())&&(p_->parList[i].alias!=pid.alias);i++)
     ;
-  if (i==parList.size()){ //parameter not found
+  if (i==p_->parList.size()){ //parameter not found
     if (pdef.getParameter(pid.alias,par)) {
       hpar.num   = uint16(par.num());
       hpar.name  = par.name();
@@ -984,7 +1023,7 @@ bool HDFFile::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
       hpar.order = int32(par.order());
       hpar.dataType = uint16(par.datatype());
       hpar.plotType = uint16(par.plottype());
-      parList.push_back(hpar);
+      p_->parList.push_back(hpar);
       npar++;
     } else {
       cerr << "ptHDFFile::putOnePar  Warning, parameter:" << pid.alias
@@ -998,13 +1037,13 @@ bool HDFFile::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
       hpar.order = int32(1);
       hpar.dataType = uint16(0);
       hpar.plotType = uint16(1);
-      parList.push_back(hpar);
+      p_->parList.push_back(hpar);
       npar++;
     }
   }
   // check if model exist in modList
-  for (i=0; (i<modList.size())&&(modList[i].name!=pid.model);i++);
-  if (i==modList.size()){ //model not found
+  for (i=0; (i<p_->modList.size())&&(p_->modList[i].name!=pid.model);i++);
+  if (i==p_->modList.size()){ //model not found
     hmod.modelPn = 0;
     hmod.name = pid.model;
     hmod.run[0]  = 0;
@@ -1013,7 +1052,7 @@ bool HDFFile::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
     hmod.run[3]  = (pid.run != R_UNDEF ? pid.run : 0);
     hmod.run[4]  = 0;
     hmod.run[5]  = 0;
-    modList.push_back(hmod);
+    p_->modList.push_back(hmod);
     nmod++;
   }
 
@@ -1027,12 +1066,12 @@ bool HDFFile::_openFile(ErrorFlag* ef)
   cout << "HDFFile::_openFile" << endl;
 #endif
 //   cerr << "***** Foer Hopen.."<<endl;
-  if((fid = Hopen(Name.c_str(),DFACC_RDONLY,0))==-1) {
+  if((p_->fid = Hopen(Name.c_str(),DFACC_RDONLY,0))==-1) {
     *ef = DF_FILE_OPEN_ERROR;
     return false;
   }
 //   cerr << "+++++ Foer Vstart.."<<endl;
-  if (Vstart(fid)==-1) {
+  if (Vstart(p_->fid)==-1) {
     *ef = DF_FILE_ACCESS_ERROR;
     return false;
   }
@@ -1048,11 +1087,11 @@ bool HDFFile::_createFile(ErrorFlag* ef)
 #ifdef DEBUG
   cout << "HDFFile::_createFile" << endl;
 #endif
-  if((fid = Hopen(Name.c_str(),DFACC_CREATE,0))==-1) {
+  if((p_->fid = Hopen(Name.c_str(),DFACC_CREATE,0))==-1) {
     *ef = DF_FILE_OPEN_ERROR;
     return false;
   }
-  if (Vstart(fid)==-1) {
+  if (Vstart(p_->fid)==-1) {
     *ef = DF_FILE_ACCESS_ERROR;
     return false;
   }
@@ -1077,11 +1116,11 @@ bool HDFFile::_readParList(ErrorFlag* ef)
   //const int HDFFAIL = -1;
 
   // Open vgroup VGPARNAME and get its tags and reference numbers
-  if((vgparid = findVG(fid,VGPARNAME))==-1) {
+  if((vgparid = findVG(p_->fid,VGPARNAME))==-1) {
     *ef = DF_PARAMETERLIST_NOT_FOUND;
     return false;
   }
-  vgparid = Vattach(fid,vgparid,"r");
+  vgparid = Vattach(p_->fid,vgparid,"r");
   npairs = Vntagrefs(vgparid);
   tags = new int32[npairs];
   refs = new int32[npairs];
@@ -1089,7 +1128,7 @@ bool HDFFile::_readParList(ErrorFlag* ef)
 
   for (i=0;i<npairs;i++){
     if (tags[i] == DFTAG_VH) {
-      vdid = VSattach(fid,refs[i],"r");
+      vdid = VSattach(p_->fid,refs[i],"r");
       VSgetname(vdid,vdname);
       if (strcmp(vdname,VGPARNAME)==0) {
         nfields = VFnfields(vdid);
@@ -1128,7 +1167,7 @@ bool HDFFile::_readParList(ErrorFlag* ef)
   delete[] tags;
   delete[] refs;
 
-  HDFPar tempPar;
+  HDFFilePrivate::HDFPar tempPar;
 
   tmp = buf;
   if(tmp) {
@@ -1159,18 +1198,18 @@ bool HDFFile::_readParList(ErrorFlag* ef)
       tempPar.alias= tempalias;
       tempPar.unit=  tempunit;
 
-      parList.push_back(tempPar);
+      p_->parList.push_back(tempPar);
 #ifdef DEBUG
       cout <<"---- Parameter ["<<i<<"] ->" <<endl;
-      cout <<"Num :"<<parList[i].num<<endl;
-      cout <<"Name:"<<parList[i].name<<endl;
-      cout <<"Alias:"<<parList[i].alias<<endl;
-      cout <<"Unit:"<<parList[i].unit<<endl;
-      cout <<"Scale:"<<parList[i].scale<<endl;
-      cout <<"Size:"<<parList[i].size<<endl;
-      cout <<"Order:"<<parList[i].order<<endl;
-      cout <<"DataType:"<<parList[i].dataType<<endl;
-      cout <<"PlotType:"<<parList[i].plotType<<endl;
+      cout <<"Num :"<<p_->parList[i].num<<endl;
+      cout <<"Name:"<<p_->parList[i].name<<endl;
+      cout <<"Alias:"<<p_->parList[i].alias<<endl;
+      cout <<"Unit:"<<p_->parList[i].unit<<endl;
+      cout <<"Scale:"<<p_->parList[i].scale<<endl;
+      cout <<"Size:"<<p_->parList[i].size<<endl;
+      cout <<"Order:"<<p_->parList[i].order<<endl;
+      cout <<"DataType:"<<p_->parList[i].dataType<<endl;
+      cout <<"PlotType:"<<p_->parList[i].plotType<<endl;
 #endif
     }
     delete[] tempname;
@@ -1196,10 +1235,10 @@ bool HDFFile::_writeParList(ErrorFlag* ef)
   uint8 *buf,*tmp;
   int32 vgid,vdid;
 
-  vgid=Vattach(fid,-1,"w");
+  vgid=Vattach(p_->fid,-1,"w");
   Vsetname(vgid,VGPARNAME);
 
-  vdid=VSattach(fid,-1,"w");
+  vdid=VSattach(p_->fid,-1,"w");
   VSsetname(vdid,VGPARNAME);
   Vinsert(vgid,vdid);
 
@@ -1239,21 +1278,21 @@ bool HDFFile::_writeParList(ErrorFlag* ef)
   char ctmp[100];
 
   for (i=0; i<npar; i++) {
-    memcpy(tmp,&(parList[i].num),     inc=sizeof(uint16)); tmp+=inc;
-    strcpy(ctmp,parList[i].name.c_str());
+    memcpy(tmp,&(p_->parList[i].num),     inc=sizeof(uint16)); tmp+=inc;
+    strcpy(ctmp,p_->parList[i].name.c_str());
     for (j=strlen(ctmp);j<=PARNSZ;j++) ctmp[j]='\0';
     memcpy(tmp,  ctmp,     inc=(PARNSZ+1)*sizeof(char)); tmp+=inc;
-    strcpy(ctmp,parList[i].alias.c_str());
+    strcpy(ctmp,p_->parList[i].alias.c_str());
     for (j=strlen(ctmp);j<=ALIASZ;j++) ctmp[j]='\0';
     memcpy(tmp,  ctmp,    inc=(ALIASZ+1)*sizeof(char)); tmp+=inc;
-    strcpy(ctmp,parList[i].unit.c_str());
+    strcpy(ctmp,p_->parList[i].unit.c_str());
     for (j=strlen(ctmp);j<=UNITSZ;j++) ctmp[j]='\0';
     memcpy(tmp,  ctmp,     inc=(UNITSZ+1)*sizeof(char)); tmp+=inc;
-    memcpy(tmp,&(parList[i].scale),   inc=sizeof(int8));   tmp+=inc;
-    memcpy(tmp,&(parList[i].size),    inc=sizeof(int32));  tmp+=inc;
-    memcpy(tmp,&(parList[i].order),   inc=sizeof(int32));  tmp+=inc;
-    memcpy(tmp,&(parList[i].dataType),inc=sizeof(uint16)); tmp+=inc;
-    memcpy(tmp,&(parList[i].plotType),inc=sizeof(uint16)); tmp+=inc;
+    memcpy(tmp,&(p_->parList[i].scale),   inc=sizeof(int8));   tmp+=inc;
+    memcpy(tmp,&(p_->parList[i].size),    inc=sizeof(int32));  tmp+=inc;
+    memcpy(tmp,&(p_->parList[i].order),   inc=sizeof(int32));  tmp+=inc;
+    memcpy(tmp,&(p_->parList[i].dataType),inc=sizeof(uint16)); tmp+=inc;
+    memcpy(tmp,&(p_->parList[i].plotType),inc=sizeof(uint16)); tmp+=inc;
   }
 
   VSwrite(vdid,buf,npar,FULL_INTERLACE);
@@ -1288,11 +1327,11 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
   int   refSz,nameSz,posSz,topoSz; //size of fields in bytes
 
   // Open vgroup VGPOSNAME and get its tags and reference numbers
-  if ((vglopin = findVG(fid,VGPOSNAME)) == -1) {
+  if ((vglopin = findVG(p_->fid,VGPOSNAME)) == -1) {
     *ef = DF_POSITIONLIST_NOT_FOUND;
     return false;
   }
-  vglopin = Vattach(fid,vglopin,"r");
+  vglopin = Vattach(p_->fid,vglopin,"r");
   npairs = Vntagrefs(vglopin);
   tags = new int32[npairs];
   refs = new int32[npairs];
@@ -1300,7 +1339,7 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
 
   for (i=0;i<npairs;i++)
     if (tags[i] == DFTAG_VH) {
-      vdin = VSattach(fid,refs[i],"r");
+      vdin = VSattach(p_->fid,refs[i],"r");
       VSgetname(vdin, vdname);
       if (strcmp(vdname,VGPOSNAME) == 0) {
         nfields = VFnfields(vdin); // number of fields in vdata
@@ -1329,7 +1368,7 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
   delete[] tags;
   Vdetach(vglopin);
 
-  HDFPos tempPos;
+  HDFFilePrivate::HDFPos tempPos;
   tmp = buf;
   if(tmp) {
     char *tempname = new char[nameSz+1];
@@ -1344,14 +1383,14 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
       tempname[nameSz] = '\0';
       rtrim(tempname);
       tempPos.name = tempname;
-      posList.push_back(tempPos);
+      p_->posList.push_back(tempPos);
 #ifdef DEBUG
       cout << "---- HDF position no:" << i << endl;
-      cout << "Ref:" << posList[i].ref << endl;
-      cout << "Name:" << posList[i].name << endl;
-      cout << "geopos[0]:" << posList[i].geopos[0] << " geopos[1]:" <<
- 	posList[i].geopos[1] << endl;
-      cout << "topo:" << posList[i].topo << endl;
+      cout << "Ref:" << p_->posList[i].ref << endl;
+      cout << "Name:" << p_->posList[i].name << endl;
+      cout << "geopos[0]:" << p_->posList[i].geopos[0] << " geopos[1]:" <<
+ 	p_->posList[i].geopos[1] << endl;
+      cout << "topo:" << p_->posList[i].topo << endl;
 #endif
     }
     delete[] buf;
@@ -1372,14 +1411,14 @@ bool HDFFile::_prepPosRefs(ErrorFlag* ef)
   int32 posVG, npairs;
   int32 *tags,*refs;
 
-  if ((posVG=findVG(fid,VGPOSGROUP))!=-1) {
-    posVG=Vattach(fid,posVG,"r");
+  if ((posVG=findVG(p_->fid,VGPOSGROUP))!=-1) {
+    posVG=Vattach(p_->fid,posVG,"r");
     npairs=Vntagrefs(posVG);
     tags=new int32[npairs*sizeof(int32)];
     refs=new int32[npairs*sizeof(int32)];
     Vgettagrefs(posVG,tags,refs,npairs);
     for (i=0; i<npairs; i++){
-      posList[i].ref=refs[i];
+      p_->posList[i].ref=refs[i];
     }
 
     delete[] tags;
@@ -1410,16 +1449,16 @@ bool HDFFile::_writePosList(ErrorFlag* ef)
   uint8 *buf, *tmp;
   int32 vgid, vdid;
 
-  vgid=Vattach(fid,-1,"w");
+  vgid=Vattach(p_->fid,-1,"w");
   Vsetname(vgid,VGPOSNAME);
 
-  vdid=VSattach(fid,-1,"w");
+  vdid=VSattach(p_->fid,-1,"w");
   VSsetname(vdid,VGPOSNAME);
   Vinsert(vgid,vdid);
 
   posnsz=0;
   for (i=0; i<npos; i++)
-    if ((sz=posList[i].name.length())>posnsz)
+    if ((sz=p_->posList[i].name.length())>posnsz)
       posnsz=sz;
   posnsz++;
 
@@ -1445,12 +1484,12 @@ bool HDFFile::_writePosList(ErrorFlag* ef)
   char *ctmp = new char[posnsz];
 
   for (i=0; i<npos; i++) {
-    memcpy(tmp,&(posList[i].ref),      inc=sizeof(int32)); tmp+=inc;
-    strcpy(ctmp,posList[i].name.c_str());
+    memcpy(tmp,&(p_->posList[i].ref),      inc=sizeof(int32)); tmp+=inc;
+    strcpy(ctmp,p_->posList[i].name.c_str());
     for (j=strlen(ctmp);j<posnsz;j++) ctmp[j]='\0';
     memcpy(tmp, ctmp, inc=posnsz*sizeof(char)); tmp+=inc;
-    memcpy(tmp, posList[i].geopos,inc=2*sizeof(float32)); tmp+=inc;
-    memcpy(tmp,&(posList[i].topo),     inc=sizeof(float32)); tmp+=inc;
+    memcpy(tmp, p_->posList[i].geopos,inc=2*sizeof(float32)); tmp+=inc;
+    memcpy(tmp,&(p_->posList[i].topo),     inc=sizeof(float32)); tmp+=inc;
   }
 
   VSwrite(vdid,buf,npos,FULL_INTERLACE);
@@ -1486,11 +1525,11 @@ bool HDFFile::_readModList(ErrorFlag* ef)
   int   txtSz; //size of fields in bytes
 
   // Open vgroup VGMODNAME and get its tags and reference numbers
-  if ((vglopin = findVG(fid,VGMODNAME)) == -1) {
+  if ((vglopin = findVG(p_->fid,VGMODNAME)) == -1) {
     *ef = DF_MODELLIST_NOT_FOUND;
     return false;
   }
-  vglopin = Vattach(fid,vglopin,"r");
+  vglopin = Vattach(p_->fid,vglopin,"r");
   npairs = Vntagrefs(vglopin);
   tags = new int32[npairs];
   refs = new int32[npairs];
@@ -1498,7 +1537,7 @@ bool HDFFile::_readModList(ErrorFlag* ef)
 
   for (i=0;i<npairs;i++)
     if (tags[i] == DFTAG_VH) {
-      vdin = VSattach(fid,refs[i],"r");
+      vdin = VSattach(p_->fid,refs[i],"r");
       VSgetname(vdin, vdname);
       if (strcmp(vdname,VGMODNAME) == 0) {
         nfields = VFnfields(vdin); // number of fields in vdata
@@ -1527,7 +1566,7 @@ bool HDFFile::_readModList(ErrorFlag* ef)
   delete[] tags;
   Vdetach(vglopin);
 
-  HDFMod tempMod;
+  HDFFilePrivate::HDFMod tempMod;
   tmp = buf;
   if(tmp) {
     char *tempname = new char[nameSz+1];
@@ -1561,19 +1600,19 @@ bool HDFFile::_readModList(ErrorFlag* ef)
       tempMod.modelid= tempMod.name;
       tempMod.runid= tempMod.run[3];
 
-      modList.push_back(tempMod);
+      p_->modList.push_back(tempMod);
 #ifdef DEBUG
       cout << "---- HDF model no:" << i << endl;
-      cout << "Id:" << modList[i].modelPn << endl;
-      cout << "Name:" << modList[i].name << endl;
-      cout << "Model:" << modList[i].modelid << endl;
-      cout << "runid:" << modList[i].runid <<endl;
-      cout << "run[0]:" << modList[i].run[0] <<
-	" run[1]:" << modList[i].run[1] <<
-	" run[2]:" << modList[i].run[2] <<
-	" run[3]:" << modList[i].run[3] <<
-	" run[4]:" << modList[i].run[4] <<
-	" run[5]:" << modList[i].run[5] << endl;
+      cout << "Id:" << p_->modList[i].modelPn << endl;
+      cout << "Name:" << p_->modList[i].name << endl;
+      cout << "Model:" << p_->modList[i].modelid << endl;
+      cout << "runid:" << p_->modList[i].runid <<endl;
+      cout << "run[0]:" << p_->modList[i].run[0] <<
+	" run[1]:" << p_->modList[i].run[1] <<
+	" run[2]:" << p_->modList[i].run[2] <<
+	" run[3]:" << p_->modList[i].run[3] <<
+	" run[4]:" << p_->modList[i].run[4] <<
+	" run[5]:" << p_->modList[i].run[5] << endl;
 #endif
     }
     delete[] buf;
@@ -1592,9 +1631,9 @@ bool HDFFile::_readModList(ErrorFlag* ef)
 void HDFFile::getTextLines(const ParId p,
 			   vector<std::string>& tl)
 {
-  for (int i=0; i<modList.size(); i++)
-    if (modList[i].modelid==p.model){
-      tl= modList[i].textlines;
+  for (int i=0; i<p_->modList.size(); i++)
+    if (p_->modList[i].modelid==p.model){
+      tl= p_->modList[i].textlines;
       break;
     }
 }
@@ -1618,26 +1657,26 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
   uint8 *buf, *tmp;
   int32 vgid, vdid;
 
-  vgid=Vattach(fid,-1,"w");
+  vgid=Vattach(p_->fid,-1,"w");
   Vsetname(vgid,VGMODNAME);
 
-  vdid=VSattach(fid,-1,"w");
+  vdid=VSattach(p_->fid,-1,"w");
   VSsetname(vdid,VGMODNAME);
   Vinsert(vgid,vdid);
 
   modnsz=0;
   for (i=0; i<nmod; i++)
-    if ((sz=modList[i].name.length())>modnsz)
+    if ((sz=p_->modList[i].name.length())>modnsz)
       modnsz=sz;
   modnsz++;
 
   modtxtsz=0;
   modtxtn=0;
   for (i=0; i<nmod; i++){
-    if (modList[i].textlines.size() > modtxtn)
-      modtxtn=modList[i].textlines.size();
-    for (j=0; j<modList[i].textlines.size(); j++)
-      if ((sz=modList[i].textlines[j].length())>modtxtsz)
+    if (p_->modList[i].textlines.size() > modtxtn)
+      modtxtn=p_->modList[i].textlines.size();
+    for (j=0; j<p_->modList[i].textlines.size(); j++)
+      if ((sz=p_->modList[i].textlines[j].length())>modtxtsz)
 	modtxtsz=sz;
   }
   modtxtsz++;
@@ -1671,19 +1710,19 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
   char *ctmp = new char[modnsz];
 
   for (i=0; i<nmod; i++) {
-    memcpy(tmp,&(modList[i].modelPn),inc=sizeof(uint16)); tmp+=inc;
-    strcpy(ctmp,modList[i].name.c_str());
+    memcpy(tmp,&(p_->modList[i].modelPn),inc=sizeof(uint16)); tmp+=inc;
+    strcpy(ctmp,p_->modList[i].name.c_str());
     for (j=strlen(ctmp);j<modnsz;j++) ctmp[j]='\0';
     memcpy(tmp, ctmp, inc=modnsz); tmp+=inc;
-    memcpy(tmp,&(modList[i].run[0]), inc=sizeof(uint32)); tmp+=inc;
-    memcpy(tmp,&(modList[i].run[1]), inc=sizeof(uint32)); tmp+=inc;
-    memcpy(tmp,&(modList[i].run[2]), inc=sizeof(uint32)); tmp+=inc;
-    memcpy(tmp,&(modList[i].run[3]), inc=sizeof(uint32)); tmp+=inc;
-    memcpy(tmp,&(modList[i].run[4]), inc=sizeof(uint32)); tmp+=inc;
-    memcpy(tmp,&(modList[i].run[5]), inc=sizeof(uint32)); tmp+=inc;
+    memcpy(tmp,&(p_->modList[i].run[0]), inc=sizeof(uint32)); tmp+=inc;
+    memcpy(tmp,&(p_->modList[i].run[1]), inc=sizeof(uint32)); tmp+=inc;
+    memcpy(tmp,&(p_->modList[i].run[2]), inc=sizeof(uint32)); tmp+=inc;
+    memcpy(tmp,&(p_->modList[i].run[3]), inc=sizeof(uint32)); tmp+=inc;
+    memcpy(tmp,&(p_->modList[i].run[4]), inc=sizeof(uint32)); tmp+=inc;
+    memcpy(tmp,&(p_->modList[i].run[5]), inc=sizeof(uint32)); tmp+=inc;
 
-    for (j=0; j<modList[i].textlines.size(); j++){
-      strcpy(txtline, modList[i].textlines[j].c_str());
+    for (j=0; j<p_->modList[i].textlines.size(); j++){
+      strcpy(txtline, p_->modList[i].textlines[j].c_str());
       for (int k=strlen(txtline); k<modtxtsz; k++)
 	txtline[k]='\0';
       memcpy(tmp,  txtline, inc=modtxtsz);  tmp+=inc;
@@ -1710,14 +1749,14 @@ void HDFFile::_setData(int index, const std::string& shortName,
 #ifdef DEBUG
   cout << "HDFFile::_setData" << endl;
 #endif
-  HDFPar* onePar=0;
+  HDFFilePrivate::HDFPar* onePar=0;
 
   // find the parameter in parList corresponding to shortName
-  npar= parList.size();
+  npar= p_->parList.size();
   int i;
   for (i=0;i<npar;++i) {
-    if (shortName == parList[i].alias) {
-      onePar = &parList[i];
+    if (shortName == p_->parList[i].alias) {
+      onePar = &p_->parList[i];
       break;
     }
   }

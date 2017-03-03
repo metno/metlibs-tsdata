@@ -1,9 +1,7 @@
 /*
   libtsData - Time Series Data
-  
-  $Id$
 
-  Copyright (C) 2006 met.no
+  Copyright (C) 2006-2017 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -11,7 +9,7 @@
   0313 OSLO
   NORWAY
   email: diana@met.no
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -21,7 +19,7 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -33,9 +31,9 @@
 
 #include "ptDataStream.h"
 
-#include <puCtools/porttypes.h>
+#include <memory>
 
-//#include <parameter/parameter.h>
+class HDFFilePrivate;
 
 class HDFFile : public DataStream {
 public:
@@ -78,41 +76,9 @@ public:
 		 bool write_submodel);
   bool close(); // close file
   void getTextLines(const ParId p, std::vector<std::string>& tl);
+  bool getFullModeltime(int id, miutil::miTime& t);
+
 private:
-  int32 fid;            // HDF file handler
-  int32 posVG;          // the main position vgroup
-  bool hasposVG;
-
-  struct HDFPar {
-    uint16 num;
-    std::string name;
-    std::string alias;
-    std::string unit;
-    int8   scale;
-    int32  size;     // size in bytes
-    int32  order;    // scalar, vector
-    uint16 dataType; // cartesian, polar
-    uint16 plotType; // line, histogram etc.
-  };
-  struct HDFPos {
-    int32    ref;       // Reference number in HDF file
-    std::string name;      // Modelname
-    float32  geopos[2]; // Longitude/latitude (before: int16)
-    float32  topo;      // Topography
-  };
-  struct HDFMod {
-    uint16   modelPn; // production number
-    std::string name;    // model name
-    uint32   run[6];  // year,month,day,hour,minute,second
-    Model    modelid; // model id
-    Run      runid;   // run id
-    std::vector<std::string> textlines;
-  };
-
-  std::vector<HDFPar> parList;
-  std::vector<HDFPos> posList;
-  std::vector<HDFMod> modList;
-
   bool _openFile(ErrorFlag*);
   bool _readParList(ErrorFlag*);
   bool _readPosList(ErrorFlag*);
@@ -124,8 +90,9 @@ private:
   bool _prepPosRefs(ErrorFlag*);
   bool _writePosList(ErrorFlag*);
   bool _writeModList(ErrorFlag*);
-public:
-  bool getFullModeltime(int id, miutil::miTime& t);
+
+private:
+  std::unique_ptr<HDFFilePrivate> p_;
 };
 
 #endif

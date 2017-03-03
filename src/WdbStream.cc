@@ -239,9 +239,10 @@ WdbStream::BoundaryBox WdbStream::getGeometry()
 }
 
 
-void WdbStream::rotate2geo(float x,float y, std::vector<float>& xdata ,std::vector<float>& ydata)
+void WdbStream::rotate2geo(float, float, std::vector<float>& xdata ,std::vector<float>& ydata)
 {
-  if(xdata.size() != ydata.size()) return;
+  if(xdata.size() != ydata.size())
+    return;
 
   // TODO: Awaiting a new method, diField independent to
   // rotate wind vectors, the old system is briken anyway
@@ -628,13 +629,13 @@ void unimplemented(string func)
 
 
 
-int WdbStream::findStation(const std::string& s)
+int WdbStream::findStation(const std::string&)
 {
   unimplemented("findStation");
   return 0;
 }
 
-int WdbStream::findDataPar(const ParId& p)
+int WdbStream::findDataPar(const ParId&)
 {
   unimplemented("findDataPar");
   return 0;
@@ -646,72 +647,71 @@ void WdbStream::cleanParData()
   unimplemented("cleanParData");
 }
 
-bool WdbStream::openStreamForWrite(ErrorFlag* e)
+bool WdbStream::openStreamForWrite(ErrorFlag*)
 {
   unimplemented("openStreamForWrite");
   return false;
 }
 
-bool WdbStream::readData(const int posIndex, const ParId&,
-    const miTime& p, const miTime& t, ErrorFlag* e)
+bool WdbStream::readData(const int, const ParId&, const miTime&, const miTime&, ErrorFlag*)
 {
   unimplemented("readData");
   return true;
 }
 
-bool WdbStream::putTimeLine(int index, vector<miTime>& tline, vector<int>& pline, ErrorFlag* e)
+bool WdbStream::putTimeLine(int, vector<miTime>&, vector<int>&, ErrorFlag*)
 {
   unimplemented("putTimeLine 1");
   return false;
 }
 
-bool WdbStream::putTimeLine(TimeLine& tl, vector<int>& pline, ErrorFlag* e)
+bool WdbStream::putTimeLine(TimeLine&, vector<int>&, ErrorFlag*)
 {
   unimplemented("putTimeLine 2");
   return false;
 }
 
-bool WdbStream::putOnePar(WeatherParameter& w, ErrorFlag* e)
+bool WdbStream::putOnePar(WeatherParameter&, ErrorFlag*)
 {
   unimplemented("putOnePar");
   return false;
 }
 
-bool WdbStream::getStations(vector<miPosition>& s)
+bool WdbStream::getStations(vector<miPosition>&)
 {
   unimplemented("getStations");
   return false;
 }
 
 
-bool WdbStream::getStationSeq(int i, miPosition& p)
+bool WdbStream::getStationSeq(int, miPosition&)
 {
   unimplemented("getStationSeq");
   return true;
 }
 
 
-bool WdbStream::getModelSeq(int i, Model& m, Run& r, int& ii)
+bool WdbStream::getModelSeq(int, Model&, Run&, int&)
 {
   unimplemented("getModelSeq 1");
   return true;
 }
 
 
-bool WdbStream::getModelSeq(int i, Model& m, Run& r, int& ii, vector<std::string>& n)
+bool WdbStream::getModelSeq(int, Model&, Run&, int&, vector<std::string>&)
 {
   unimplemented("getModelSeq 2");
   return true;
 }
 
-int  WdbStream::putStation(const miPosition& s, ErrorFlag* e)
+int  WdbStream::putStation(const miPosition&, ErrorFlag*)
 {
   unimplemented("putStation");
   return 0;
 }
 
 
-bool WdbStream::writeData(const int posIndex, const int modIndex, ErrorFlag* e, bool complete_write, bool write_submodel)
+bool WdbStream::writeData(const int, const int, ErrorFlag*, bool, bool)
 {
   unimplemented("writeData");
   return false;
@@ -723,7 +723,7 @@ bool WdbStream::close()
   return true;
 }
 
-void WdbStream::getTextLines(const ParId p, vector<std::string>& tl)
+void WdbStream::getTextLines(const ParId, vector<std::string>& tl)
 {
   unimplemented("getTextLines");
   tl = textLines;

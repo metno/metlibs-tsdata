@@ -117,41 +117,41 @@ public:
   MIROS22Server(const std::string&);
   ~MIROS22Server();
 
-  int  findStation(const std::string& posName); // return index in posList
+  int  findStation(const std::string& posName) override; // return index in posList
   int  findModel(const std::string& modelName,
 		 const int& modelRun);       // return index in modList
-  int  findDataPar(const ParId&);            // return index in parList
-  void clean();
-  bool openStream(ErrorFlag*);
-  bool openStreamForWrite(ErrorFlag*);
+  int  findDataPar(const ParId&) override;            // return index in parList
+  void clean() override;
+  bool openStream(ErrorFlag*) override;
+  bool openStreamForWrite(ErrorFlag*) override;
   bool readData(const int posIndex, const ParId&,
-		const miutil::miTime&,const miutil::miTime&,ErrorFlag*);
-  bool getTimeLine(const int& index,
+                const miutil::miTime&,const miutil::miTime&,ErrorFlag*) override;
+  bool getTimeLine(int index,
 		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
-		   ErrorFlag*);
-  bool putTimeLine(const int& index,
+                   ErrorFlag*) override;
+  bool putTimeLine(int index,
 		   std::vector<miutil::miTime>& tline, std::vector<int>& pline,
-		   ErrorFlag*);
+                   ErrorFlag*) override;
   bool putTimeLine(TimeLine& tl, std::vector<int>& pline,
-		   ErrorFlag*);
-  bool getOnePar(int,WeatherParameter&,ErrorFlag*);
-  bool putOnePar(WeatherParameter&,ErrorFlag*);
+                   ErrorFlag*) override;
+  bool getOnePar(int,WeatherParameter&,ErrorFlag*) override;
+  bool putOnePar(WeatherParameter&,ErrorFlag*) override;
   bool getStationSeq(int idx, std::string& name, // fetch name and position
 		     float& lat, float& lng); // of station idx
-  bool getStationSeq(int, miPosition&);
+  bool getStationSeq(int, miPosition&) override;
   bool getModelSeq(int idx, Model& mod,       // fetch model info
-		   Run& run, int& id);
+                   Run& run, int& id) override;
   bool getModelSeq(int idx, Model& mod,       // fetch model info
 		   Run& run, int& id,
-		   std::vector<std::string>& vs);
+                   std::vector<std::string>& vs) override;
   int  putStation(const miPosition& s, //adds station to posList
-		  ErrorFlag*);
+                  ErrorFlag*) override;
   bool writeData(const int posIndex,      //write data to file
 		 const int modIndex,
 		 ErrorFlag*,
 		 bool complete_write,
-		 bool write_submodel);
-  bool close(); // close server
+                 bool write_submodel) override;
+  bool close() override; // close server
 private:
   MIROS22Definition mirosdef;
   std::vector<std::string> modList;

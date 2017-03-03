@@ -27,10 +27,9 @@ void FimexPoslist::addFile(std::string filename)
   while (in) {
     string line;
     getline(in,line);
-    int c = line.find_first_of("#",0);
-    if(0 <= c &&  c < line.length() ) {
-      int k=line.length() -  c;
-      line.erase(c,k);
+    size_t c = line.find_first_of("#",0);
+    if (c != std::string::npos) {
+      line.erase(c);
     }
     boost::algorithm::trim(line);
     if(!line.empty())
@@ -46,10 +45,9 @@ void FimexPoslist::addEntry(std::string entry)
   string posname = words[0];
 
 
-  int n = posname.rfind(".");
-
-  if( n>=0 && n < posname.size() )
-    posname.erase(0,n+1);
+  size_t n = posname.rfind(".");
+  if (n != std::string::npos)
+    posname.erase(0, n+1);
 
   boost::trim(posname);
 
@@ -67,7 +65,6 @@ void FimexPoslist::addEntry(std::string entry)
   double longitude= atof(coordinates[1].c_str());
 
   addEntry(posname,latitude,longitude);
-
 }
 
 void FimexPoslist::addEntry(std::string posname,float latitude, float longitude)
@@ -76,11 +73,9 @@ void FimexPoslist::addEntry(std::string posname,float latitude, float longitude)
   if(pos.count(posname))
     return;
 
-  unsigned int lastPos=lat.size();
+  pos[posname] = lat.size();
   lat.push_back(latitude);
   lon.push_back(longitude);
-  pos[posname] = lastPos;
-
 }
 
 
@@ -244,7 +239,6 @@ void FimexPetsCache::process(ParId pid)
   }
   parameters.back().setId(pid);
   parameters.back().calcAllProperties();
-
 }
 
 
@@ -252,9 +246,6 @@ void FimexPetsCache::clear_tmp()
 {
   tmp_values.clear();
   tmp_times.clear();
-
 }
-
-
 
 } /* namespace pets */

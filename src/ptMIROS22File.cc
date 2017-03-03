@@ -36,6 +36,7 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <string>
 
 #include <glob.h>
 
@@ -133,8 +134,7 @@ bool MIROS22File::read(const std::string& location,
     }
     if (foundclock){
       //cerr << "Found correct clock:" << ps[i].t << endl;
-      bool readok= getline(f, buf);
-      while (readok && not miutil::contains(buf, MIROSend)){
+      while (std::getline(f, buf) && !miutil::contains(buf, MIROSend)) {
         if (buf.length()<8){
           res= bad_file;
           return false;
@@ -145,7 +145,7 @@ bool MIROS22File::read(const std::string& location,
         numl--;
         vector<float> values;
         for (int k=0; k<numl; k++){
-          getline(f,buf);
+          std::getline(f,buf);
           values.push_back(atof(buf.c_str()));
         }
         // extract parameter values
@@ -159,7 +159,6 @@ bool MIROS22File::read(const std::string& location,
             }
           }
         }
-        readok= getline(f,buf);
       }
     }
   }
@@ -335,8 +334,7 @@ int  MIROS22Server::findStation(const std::string& posName) // return index in p
   return -1;
 }
 
-int  MIROS22Server::findModel(const std::string& modelName,
-    const int& modelRun)// return index in modList
+int  MIROS22Server::findModel(const std::string& modelName, const int&) // return index in modList
 {
   for (int i=0; i<nmod; i++){
     if (miutil::to_lower(modList[i]) == miutil::to_lower(modelName))
@@ -470,12 +468,12 @@ bool MIROS22Server::readData(const int posIndex,
 
     globfree(&globBuf);
 
-    for (int count = 0; count < matches.size(); count++){
+    for (size_t count = 0; count < matches.size(); count++){
       MIROS22value v;
       MIROS22parset ps;
       vector<MIROS22parset> vps;
       vps.push_back(ps);
-      for (int i=0; i<mirosdef.pars.size(); i++){
+      for (size_t i=0; i<mirosdef.pars.size(); i++){
         vps[0].val.push_back(v);
         vps[0].val[i].par= mirosdef.pars[i];
       }
@@ -538,11 +536,11 @@ bool MIROS22Server::readData(const int posIndex,
   return true;
 }
 
-bool MIROS22Server::getTimeLine(const int& index,
+bool MIROS22Server::getTimeLine(int index,
     vector<miTime>& tline, vector<int>& pline, ErrorFlag* ef)
 {
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
-    if (index<progLines.size())
+    if (index<int(progLines.size()))
       pline = progLines[index];
     *ef = OK;
     return true;
@@ -553,14 +551,12 @@ bool MIROS22Server::getTimeLine(const int& index,
   }
 }
 
-bool MIROS22Server::putTimeLine(const int& index,
-    vector<miTime>& tline, vector<int>& pline,
-    ErrorFlag* ef)
+bool MIROS22Server::putTimeLine(int, vector<miTime>&, vector<int>&, ErrorFlag*)
 {
   return false;
 }
 
-bool MIROS22Server::putTimeLine(TimeLine& tl, vector<int>& pline, ErrorFlag* ef)
+bool MIROS22Server::putTimeLine(TimeLine&, vector<int>&, ErrorFlag*)
 {
   return false;
 }
@@ -620,7 +616,7 @@ bool MIROS22Server::getModelSeq(int idx, Model& mod,       // fetch model info
 }
 
 bool MIROS22Server::getModelSeq(int idx, Model& mod,       // fetch model info
-    Run& run, int& id, vector<std::string>& vs)
+    Run& run, int& id, vector<std::string>&)
 {
   if (idx >= 0 && idx < nmod) {
     mod= modList[idx];
@@ -631,14 +627,12 @@ bool MIROS22Server::getModelSeq(int idx, Model& mod,       // fetch model info
   return false;
 }
 
-int  MIROS22Server::putStation(const miPosition& s, //adds station to posList
-    ErrorFlag*)
+int  MIROS22Server::putStation(const miPosition&, ErrorFlag*) //adds station to posList
 {
   return -1;
 }
 
-bool MIROS22Server::writeData(const int posIndex,      //write data to file
-    const int modIndex, ErrorFlag*, bool complete_write, bool write_submodel)
+bool MIROS22Server::writeData(const int, const int, ErrorFlag*, bool, bool) //write data to file
 {
   return false;
 }

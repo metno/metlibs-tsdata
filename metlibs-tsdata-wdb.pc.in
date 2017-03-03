@@ -1,11 +1,9 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix=@pc_prefix@
+libdir=@pc_libdir@
+includedir=@pc_includedir@
 
-Name: metlibs-wdb-wdb
+Name: @lib_name@-wdb
 Description: MET Norway time series -- wdb
-Version: @VERSION@
-Requires: metlibs-tsdata-core = @VERSION@
-Libs: -L${libdir} @POSTGRESQL_LDFLAGS@ @BOOST_LDFLAGS@ -lmetlibs-tsdata-wdb @POSTGRESQL_LIBS@ @BOOST_DATE_TIME_LIBS@
-Cflags: -I${includedir} @POSTGRESQL_CPPFLAGS@ @BOOST_CPPFLAGS@
+Version: @TSDATA_PVERSION_FULL@
+Requires: @lib_name@-core = @TSDATA_PVERSION_FULL@, @pc_deps@
+Libs: -l@lib_name@-wdb

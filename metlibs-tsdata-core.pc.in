@@ -1,11 +1,10 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix=@pc_prefix@
+libdir=@pc_libdir@
+includedir=@pc_includedir@
 
-Name: metlibs-tsdata-core
+Name: @lib_name@-core
 Description: MET Norway time series -- core
-Version: @VERSION@
-Requires: puTools >= 5.0.0, puMet >= 5.1.0, puDatatypes >= 5.0.0
-Libs: -L${libdir} @CURL_LDFLAGS@ @BOOST_LDFLAGS@ -lmetlibs-tsdata-core @CURL_LIBS@
-Cflags: -I${includedir} @CURL_CPPFLAGS@ @BOOST_CPPFLAGS@
+Version: @TSDATA_PVERSION_FULL@
+Requires: @pc_deps@
+Libs: -L${libdir} -l@lib_name@-core
+Cflags: -I${includedir}/metlibs

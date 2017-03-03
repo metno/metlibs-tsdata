@@ -1,11 +1,9 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix=@pc_prefix@
+libdir=@pc_libdir@
+includedir=@pc_includedir@
 
-Name: metlibs-tsdata-mora
+Name: @lib_name@-mora@METNO_QT_SUFFIX@
 Description: MET Norway time series -- mora
-Version: @VERSION@
-Requires: metlibs-tsdata-core = @VERSION@, QtXml
-Libs: @QT4_LDFLAGS@ -lmetlibs-tsdata-mora @QT4_LIBS@
-Cflags: @QT4_CPPFLAGS@
+Version: @TSDATA_PVERSION_FULL@
+Requires: @lib_name@-core = @TSDATA_PVERSION_FULL@
+Libs: -l@lib_name@-mora@METNO_QT_SUFFIX@

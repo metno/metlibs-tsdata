@@ -1,11 +1,9 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+prefix=@pc_prefix@
+libdir=@pc_libdir@
+includedir=@pc_includedir@
 
-Name: metlibs-wdb-hdf4
+Name: @lib_name@-hdf4
 Description: MET Norway time series -- hdf
-Version: @VERSION@
-Requires: metlibs-tsdata-core = @VERSION@
-Libs: @HDF4_LDFLAGS@ -lmetlibs-tsdata-hdf4 @HDF4_LIBS@
-Cflags: @HDF4_CPPFLAGS@
+Version: @TSDATA_PVERSION_FULL@
+Requires: @lib_name@-core = @TSDATA_PVERSION_FULL@
+Libs: -l@lib_name@-hdf4 @HDF4_PC_LIBRARIES@

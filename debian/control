@@ -47,9 +47,9 @@ Package: metlibs-tsdata-core-dev
 Section: libdevel
 Architecture: any
 Depends: libmetlibs-tsdata-core6 (= ${binary:Version}),
- metlibs-putools-dev (>= 5.0.0),
- metlibs-pumet-dev (>= 5.1.0),
- metlibs-pudatatypes-dev (>= 5.0.0),
+ metlibs-putools-dev (>= 6.0.0),
+ metlibs-pumet-dev (>= 6.0.0),
+ metlibs-pudatatypes-dev (>= 6.0.0),
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)

@@ -13,9 +13,9 @@ SET(ENABLE_WDB       TRUE CACHE BOOL "Enable WDB support")
 SET(ENABLE_SMHI_MORA TRUE CACHE BOOL "Enable SMHI Mora support")
 
 SET (PKGS_CORE
-  metlibs-putools>=6.0.0
+  metlibs-putools>=7.0.0
   metlibs-pudatatypes>=6.0.0
-  metlibs-pumet>=6.0.0
+  metlibs-pumet>=6.0.1
 )
 PKG_CHECK_MODULES(PC_METLIBS REQUIRED ${PKGS_CORE} metlibs-puctools>=6.0.0)
 

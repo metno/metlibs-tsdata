@@ -1382,7 +1382,7 @@ bool HDFFile::_readPosList(ErrorFlag* ef)
       memcpy(&(tempPos.topo), tmp,inc=topoSz); tmp+=inc;
       tempname[nameSz] = '\0';
       rtrim(tempname);
-      tempPos.name = tempname;
+      tempPos.name = miutil::from_latin1_to_utf8(tempname);
       p_->posList.push_back(tempPos);
 #ifdef DEBUG
       cout << "---- HDF position no:" << i << endl;

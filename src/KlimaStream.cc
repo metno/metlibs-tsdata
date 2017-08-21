@@ -35,6 +35,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <sstream>
+#include <puTools/miStringFunctions.h>
 #include <puTools/miDate.h>
 #include <set>
 
@@ -338,7 +339,7 @@ bool KlimaStream::setStationsFromResult(vector<string>& data,
     boost::split(token, data[i], boost::algorithm::is_any_of(";"));
     if (token.size() < header.size())
       continue;
-    s.name = token[NAME].c_str();
+    s.name = miutil::from_latin1_to_utf8(token[NAME]);
     s.coordinates.setLat(atof(token[LAT].c_str()));
     s.coordinates.setLon(atof(token[LON].c_str()));
     s.amsl = atoi(token[AMSL].c_str());

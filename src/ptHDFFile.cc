@@ -73,7 +73,7 @@ public:
   };
   struct HDFPos {
     int32    ref;       // Reference number in HDF file
-    std::string name;      // Modelname
+    std::string name;      // position name
     float32  geopos[2]; // Longitude/latitude (before: int16)
     float32  topo;      // Topography
   };

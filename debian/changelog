@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (6.0.2-2) RELEASED; urgency=medium
+
+  * version number in shlibs
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Thu, 12 Oct 2017 08:00:08 +0200
+
 metlibs-tseries-tsdata (6.0.2-1) RELEASED; urgency=medium
 
   * convert from latin1 to utf8 for KlimaStream and HDF5 files

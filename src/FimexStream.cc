@@ -211,6 +211,8 @@ bool FimexStream::createPoslistInterpolator()
 
 void FimexStream::createTimeLine()
 {
+  using namespace MetNoFimex;
+
   basetimeline.clear();
 
   try {
@@ -220,30 +222,26 @@ void FimexStream::createTimeLine()
     if (!is_open)
       return;
 
-    // get unlimited axis as time axis. NB! this is true for all known models
-    // at this time, but could be changed later!!!
-    // this makes only sense if all parameters share the same time axis, this is
-    // also true now (2013) ...
 
-    std::string timeAxis="time";
-
-    const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim();
-    if(tmpDim)
-      timeAxis=tmpDim->getName();
-
-    MetNoFimex::DataPtr timeData = interpol->getScaledDataInUnit(timeAxis,"seconds since 1970-01-01 00:00:00 +00:00");
-    boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
-
-    for(size_t u = 0; u < timeData->size(); ++u) {
-      const miutil::miTime t(uTimes[u]);
-      if (!t.undef()) {
-        basetimeline.push_back(t);
-      } else {
-        cerr << "Invalid time value " << uTimes[u] << ", clearing basetimeline and giving up." << endl;
-        basetimeline.clear();
-        break;
+    // merge all time axes
+    std::set<miutil::miTime> basetimes;
+    for (auto cs : listCoordinateSystems(interpol)) {
+      if (CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis()) {
+        DataPtr timeData = interpol->getScaledDataInUnit(tax->getName(), "seconds since 1970-01-01 00:00:00 +00:00");
+        boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
+        for (size_t u = 0; u < timeData->size(); ++u) {
+          const miutil::miTime t(uTimes[u]);
+          if (!t.undef()) {
+            basetimes.insert(t);
+          } else {
+            cerr << "Invalid time value " << uTimes[u] << ", clearing basetimeline and giving up." << endl;
+            timeLineIsRead = true;
+            return;
+          }
+        }
       }
     }
+    basetimeline = std::vector<miutil::miTime>(basetimes.begin(), basetimes.end());
   } catch (exception& e) {
     cerr << "Exception catched in createTimeline: " << e.what() << endl;
   }
@@ -536,6 +534,8 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
 
 bool FimexStream::readFromFimexSlice(FimexParameter par)
 {
+  using namespace MetNoFimex;
+
   if (!reader)
     openStream();
 
@@ -553,17 +553,20 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   for(unsigned int i=0;i<cache.size();i++)
     cache[i].clear_tmp();
 
-  std::string timeAxis;
-  size_t timeSize;
-
-  if (const MetNoFimex::CDMDimension* tmpDim = interpol->getCDM().getUnlimitedDim()) {
-    timeAxis = tmpDim->getName();
-    timeSize = tmpDim->getLength();
-  } else {
-    timeAxis = "time";
-    const MetNoFimex::CDMDimension& timeDim = interpol->getCDM().getDimension(timeAxis);
-    timeSize = timeDim.getLength();
+  boost::shared_ptr<const CoordinateSystem> cs =
+      findCompleteCoordinateSystemFor(listCoordinateSystems(interpol), par.parametername);
+  if (!cs) {
+    cerr << "no coordinate system for parameter '" << par.parametername << "'" << endl;
+    return false;
   }
+  CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis();
+  if (!tax) {
+    cerr << "no time axis for parameter '" << par.parametername << "'" << endl;
+    return false;
+  }
+  const std::string& timeAxis = tax->getShape().front();
+  const MetNoFimex::CDMDimension& timeDim = interpol->getCDM().getDimension(timeAxis);
+  const size_t timeSize = timeDim.getLength();
 
   for (unsigned int i=0; i<par.dimensions.size();i++) {
 

@@ -103,7 +103,7 @@ void FimexStream::setFimexParameters(const std::vector<pets::FimexParameter>& pa
 {
   fimexpar=par;
   vector<string> apar;
-  for(int i=0;i<fimexpar.size();i++)
+  for(size_t i=0;i<fimexpar.size();i++)
     apar.push_back(fimexpar[i].parid.alias);
   allParameters=apar;
 }
@@ -163,11 +163,11 @@ FimexStream::FimexStream(const std::string& fname, const std::string& modname,
     const std::string& ftype, const std::string& cfile)
   : filename(fname)
   , modelname(modname)
-  , progtime(0)
-  , is_open(false)
-  , increment(0)
   , configfile(cfile)
+  , progtime(0)
   , activePosition(0)
+  , increment(0)
+  , is_open(false)
 {
   vector<string> typetokens;
   boost::split(typetokens, ftype, boost::algorithm::is_any_of(":"));
@@ -274,7 +274,7 @@ void FimexStream::filterParameters(vector<ParId>& inpar)
 {
   vector<ParId> tmp;
   std::swap(tmp, inpar);
-  for (int i=0; i<tmp.size(); i++) {
+  for (size_t i=0; i<tmp.size(); i++) {
     if (!parameterFilter.count(tmp[i].alias)) {
       inpar.push_back(tmp[i]);
     }
@@ -398,10 +398,11 @@ bool FimexStream::readData(const std::string& placename,float lat, float lon, ve
 bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
 {
   bool foundSomeData=false;
-  FimexPetsCache tmp;
-  if (createPoslist)
-    for(unsigned int i=0; i<poslen; i++)
+  if (createPoslist) {
+    FimexPetsCache tmp;
+    for(int i=0; i<poslen; i++)
       cache.push_back(tmp);
+  }
   // check the parameterlist - what to get and what not....
 
   int maxprogress=0;
@@ -413,7 +414,6 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
     }
   }
 
-  vector<FimexParameter> activeParameters;
   int localProgress=0;
   for (unsigned int i=0; i<inpar.size(); i++) {
     for (unsigned int j=0; j<fimexpar.size(); j++) {
@@ -553,8 +553,6 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   for(unsigned int i=0;i<cache.size();i++)
     cache[i].clear_tmp();
 
-  unsigned int timeId;
-
   std::string timeAxis;
   size_t timeSize;
 
@@ -602,8 +600,6 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
   MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
-  int pardim = 0;
-  int timdim = basetimeline.size();
   if (sliceddata.get()) {
     boost::shared_array<float> valuesInSlice = sliceddata->asFloat();
 

@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (6.0.3-1) RELEASED; urgency=medium
+
+  * time axes from CoordinateSystem
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 31 Oct 2017 08:00:08 +0100
+
 metlibs-tseries-tsdata (6.0.2-2) RELEASED; urgency=medium
 
   * version number in shlibs

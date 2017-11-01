@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (7.0.0-1) RELEASED; urgency=medium
+
+  * updated libmetlibs-putools
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Wed, 01 Nov 2017 08:00:08 +0100
+
 metlibs-tseries-tsdata (6.0.3-2) RELEASED; urgency=medium
 
   * update fimex

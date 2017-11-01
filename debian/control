@@ -6,9 +6,9 @@ Build-Depends: debhelper (>= 9),
  pkg-config,
  metlibs-milogger-dev (>= 6.0.0),
  metlibs-puctools-dev (>= 6.0.0),
- metlibs-putools-dev (>= 7.1.0),
+ metlibs-putools-dev (>= 8.0.0),
  metlibs-pudatatypes-dev (>= 6.0.0),
- metlibs-pumet-dev (>= 6.0.1),
+ metlibs-pumet-dev (>= 7.0.0),
  libcurl-dev | libcurl4-gnutls-dev,
  qtbase5-dev, qtbase5-dev-tools, qttools5-dev-tools,
  libboost-dev,
@@ -33,11 +33,11 @@ Description: MET Norway time series plotting lib -- all
  .
  This dependency package pulls in all functionality.
 
-Package: libmetlibs-tsdata6-dbg
+Package: libmetlibs-tsdata7-dbg
 Section: debug
 Priority: extra
 Architecture: any
-Depends: libmetlibs-tsdata-core6 (= ${binary:Version})
+Depends: libmetlibs-tsdata-core7 (= ${binary:Version})
 Description: MET Norway time series plotting lib -- debug
  MET Norway time series plotting library.
  .
@@ -46,9 +46,9 @@ Description: MET Norway time series plotting lib -- debug
 Package: metlibs-tsdata-core-dev
 Section: libdevel
 Architecture: any
-Depends: libmetlibs-tsdata-core6 (= ${binary:Version}),
- metlibs-putools-dev (>= 6.0.0),
- metlibs-pumet-dev (>= 6.0.0),
+Depends: libmetlibs-tsdata-core7 (= ${binary:Version}),
+ metlibs-putools-dev (>= 8.0.0),
+ metlibs-pumet-dev (>= 7.0.0),
  metlibs-pudatatypes-dev (>= 6.0.0),
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -58,7 +58,7 @@ Description: MET Norway time series plotting lib -- core
  .
  This package provides the core functionality development files.
 
-Package: libmetlibs-tsdata-core6
+Package: libmetlibs-tsdata-core7
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -72,8 +72,8 @@ Package: metlibs-tsdata-fimex-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libmetlibs-tsdata-fimex6 (= ${binary:Version}),
- libfimex-dev (>= 0.61.1),
+ libmetlibs-tsdata-fimex7 (= ${binary:Version}),
+ libfimex-dev (>= 0.65.0),
  libboost-date-time-dev,
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -83,7 +83,7 @@ Description: MET Norway time series plotting lib -- fimex
  .
  This package provides the fimex datastream functionality.
 
-Package: libmetlibs-tsdata-fimex6
+Package: libmetlibs-tsdata-fimex7
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -98,7 +98,7 @@ Package: metlibs-tsdata-hdf4-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libmetlibs-tsdata-hdf4-6 (= ${binary:Version}),
+ libmetlibs-tsdata-hdf4-7 (= ${binary:Version}),
  libhdf4-dev,
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -108,7 +108,7 @@ Description: MET Norway time series plotting lib -- HDF4
  .
  This package provides the HDF4 datastream functionality.
 
-Package: libmetlibs-tsdata-hdf4-6
+Package: libmetlibs-tsdata-hdf4-7
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -123,7 +123,7 @@ Package: metlibs-tsdata-mora-qt5-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libmetlibs-tsdata-mora-qt5-6 (= ${binary:Version}),
+ libmetlibs-tsdata-mora-qt5-7 (= ${binary:Version}),
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -132,7 +132,7 @@ Description: MET Norway time series plotting lib -- SMHI Mora
  .
  This package provides the SMHI Mora datastream functionality.
 
-Package: libmetlibs-tsdata-mora-qt5-6
+Package: libmetlibs-tsdata-mora-qt5-7
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -147,7 +147,7 @@ Package: metlibs-tsdata-wdb-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libmetlibs-tsdata-wdb6 (= ${binary:Version}),
+ libmetlibs-tsdata-wdb7 (= ${binary:Version}),
  libpqxx-dev | libpqxx3-dev,
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -157,7 +157,7 @@ Description: MET Norway time series plotting lib -- wdb
  .
  This package provides the wdb datastream functionality.
 
-Package: libmetlibs-tsdata-wdb6
+Package: libmetlibs-tsdata-wdb7
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},

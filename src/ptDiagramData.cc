@@ -1787,7 +1787,32 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
         }
       }
     }
-
+  } else if (inpid.alias == "APTD") {
+    // TT EPS deciler (T850) (1..9)
+    id1.alias = "APTT";
+    wpok = copyParameter(id1, wp, &error);
+    if (wpok) {
+      int n, m, i;
+      ParId outpid = inpid;
+      m = wp.Npoints();
+      wp2 = wp;
+      wp2.setDims(m, 1);
+      vector<float> dezils(9);
+      for (i = 0; i < 9; i++)
+        dezils[i] = i + 1;
+      fdata = statist.getXdecil(wp.copyDataVector(), wp.Ndim(), dezils);
+      n = fdata.size();
+      if (n == 9 * m) {
+        for (i = 0; i < 9; i++) {
+          for (j = 0; j < m; j++)
+            wp2.setData(j, 0, fdata[i * m + j]);
+          wp2.calcAllProperties();
+          outpid.level = static_cast<int> (dezils[i] * 10);
+          wp2.setId(outpid);
+          addParameter(wp2);
+        }
+      }
+    }
     // TT EPS deciler (1..9) (total)
   } else if (inpid.alias == "EPTDT") {
     id1.alias = "EPTT";

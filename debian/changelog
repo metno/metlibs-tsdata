@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (7.0.1-1) RELEASED; urgency=medium
+
+  * added APTD for 850 hPa temp ensembles
+
+ -- Juergen Schulze <juergens@met.no>  Mon, 18 Jun 2018 09:15:20 +0200
+
 metlibs-tseries-tsdata (7.0.0-1) RELEASED; urgency=medium
 
   * updated libmetlibs-putools

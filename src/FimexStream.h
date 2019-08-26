@@ -44,7 +44,6 @@
 #include <map>
 
 
-#include <fimex/CDMReaderUtils.h>
 #include <fimex/coordSys/CoordinateSystem.h>
 #include <fimex/CoordinateSystemSliceBuilder.h>
 #include <fimex/CDMFileReaderFactory.h>
@@ -81,8 +80,8 @@ private:
   static std::vector<std::string> allParameters; // pets parameternames to create filter
   int progtime; // 0,6,12,etc for pets name
 
-  boost::shared_ptr<MetNoFimex::CDMReader>       reader;   // the datafile access
-  boost::shared_ptr<MetNoFimex::CDMInterpolator> interpol; // flexible interpolator - new coordinates
+  MetNoFimex::CDMReader_p       reader;   // the datafile access
+  MetNoFimex::CDMInterpolator_p interpol; // flexible interpolator - new coordinates
   static FimexPoslist commonposlist;
   static int          commonposlistVersion;
   static int          progress;

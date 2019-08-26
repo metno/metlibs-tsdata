@@ -37,10 +37,12 @@
 
 #include "ptDiagramData.h"
 
-#include <fimex/CDMReaderUtils.h>
+#include <fimex/boost-posix-time-compat.h>
 #include <fimex/CDM.h>
+#include <fimex/CDMInterpolator.h>
+#include <fimex/CDMReaderUtils.h>
 #include <fimex/Data.h>
-#include <fimex/Utils.h>
+#include <fimex/mifi_constants.h>
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -59,9 +61,9 @@
 #include <numeric>
 #include <functional>
 
-
 using namespace std;
 using namespace miutil;
+using namespace MetNoFimex;
 
 namespace pets
 {
@@ -196,7 +198,7 @@ bool FimexStream::createPoslistInterpolator()
     if (!reader)
       openStream();
 
-    interpol.reset( new MetNoFimex::CDMInterpolator (reader));
+    interpol = std::make_shared<CDMInterpolator>(reader);
     interpol->changeProjection(MIFI_INTERPOL_BILINEAR,poslist.getLon(), poslist.getLat() );
   } catch (exception& e) {
     cerr << e.what() << endl;
@@ -226,9 +228,9 @@ void FimexStream::createTimeLine()
     // merge all time axes
     std::set<miutil::miTime> basetimes;
     for (auto cs : listCoordinateSystems(interpol)) {
-      if (CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis()) {
+      if (CoordinateAxis_cp tax = cs->getTimeAxis()) {
         DataPtr timeData = interpol->getScaledDataInUnit(tax->getName(), "seconds since 1970-01-01 00:00:00 +00:00");
-        boost::shared_array<unsigned long long> uTimes = timeData->asUInt64();
+        shared_array<unsigned long long> uTimes = timeData->asUInt64();
         for (size_t u = 0; u < timeData->size(); ++u) {
           const miutil::miTime t(uTimes[u]);
           if (!t.undef()) {
@@ -252,7 +254,7 @@ void FimexStream::createTimeLine()
 void FimexStream::openStream()
 {
   try {
-    reader = MetNoFimex::CDMFileReaderFactory::create(filetype, filename, configfile);
+    reader = CDMFileReaderFactory::create(filetype, filename, configfile);
     cerr << "Stream " << filename << " opened " << endl;
     is_open=true;
   } catch (exception& e) {
@@ -265,7 +267,7 @@ boost::posix_time::ptime FimexStream::getReferencetime()
   if (!reader)
     openStream();
 
-  return MetNoFimex::getUniqueForecastReferenceTime(reader);
+  return fromFimexTime(getUniqueForecastReferenceTimeFT(reader));
 }
 
 void FimexStream::filterParameters(vector<ParId>& inpar)
@@ -439,8 +441,8 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   return foundSomeData;
 }
 
-static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<MetNoFimex::CDMReader> reader,
-    const string& parName, const string& parUnit, const vector<MetNoFimex::SliceBuilder>& slices)
+static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t /*maxProcs*/, CDMReader_p reader,
+    const string& parName, const string& parUnit, const vector<SliceBuilder>& slices)
 {
   vector<size_t> sliceLengths(slices.size(), 1);
   for (size_t i = 0; i < slices.size(); i++) {
@@ -448,7 +450,7 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
     sliceLengths.at(i) = accumulate(ssize.begin(), ssize.end(), size_t(1), std::multiplies<size_t>());
   }
   const size_t total = accumulate(sliceLengths.begin(), sliceLengths.end(), size_t(0));
-  boost::shared_array<float> allFloats(new float[total]);
+  shared_array<float> allFloats(new float[total]);
 
 #ifndef TSDATA_FIMEX_DISABLE_FORK
   // fork: there seems to be some problem with fork() and OpenMP when
@@ -489,10 +491,10 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
             cerr << "error fetching data on '" << parName << "', '" << parUnit << "' slice " << j << ": " << ex.what() << endl;
             data = MetNoFimex::createData(MetNoFimex::CDM_FLOAT, 0);
           }
-          boost::shared_array<float> array;
+          shared_array<float> array;
           const size_t array_size = sliceLengths.at(j);
           if (data->size() == 0) {
-            array = boost::shared_array<float>(new float[array_size]);
+            array = shared_array<float>(new float[array_size]);
             std::fill(array.get(), array.get() + array_size, MIFI_UNDEFINED_F);
           } else {
             assert(data->size() == array_size);
@@ -528,7 +530,7 @@ static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boo
   std::copy(regionFloat, regionFloat+total, allFloats.get());
 #endif // !TSDATA_FIMEX_DISABLE_FORK
 
-  return MetNoFimex::createData(total, allFloats);
+  return createData(total, allFloats);
 }
 
 
@@ -553,13 +555,12 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   for(unsigned int i=0;i<cache.size();i++)
     cache[i].clear_tmp();
 
-  boost::shared_ptr<const CoordinateSystem> cs =
-      findCompleteCoordinateSystemFor(listCoordinateSystems(interpol), par.parametername);
+  CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(listCoordinateSystems(interpol), par.parametername);
   if (!cs) {
     cerr << "no coordinate system for parameter '" << par.parametername << "'" << endl;
     return false;
   }
-  CoordinateSystem::ConstAxisPtr tax = cs->getTimeAxis();
+  CoordinateAxis_cp tax = cs->getTimeAxis();
   if (!tax) {
     cerr << "no time axis for parameter '" << par.parametername << "'" << endl;
     return false;
@@ -604,7 +605,7 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   MetNoFimex::DataPtr sliceddata  = getParallelScaledDataSliceInUnit(numProcs, interpol, par.parametername, par.unit, slices);
 
   if (sliceddata.get()) {
-    boost::shared_array<float> valuesInSlice = sliceddata->asFloat();
+    shared_array<float> valuesInSlice = sliceddata->asFloat();
 
     // all parameters in all dimensions;
     unsigned int numAll     = sliceddata->size() / numPos;
@@ -620,7 +621,7 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
           unsigned int index = pardim*numPos +  tim*numPardims*numPos + pos;
 
-          if (!MetNoFimex::mifi_isnan(valuesInSlice[index])) {
+          if (!std::isnan(valuesInSlice[index])) {
             if (!pardim)
               cache[pos].tmp_times.push_back(basetimeline.at(tim));
 

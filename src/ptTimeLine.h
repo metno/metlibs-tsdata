@@ -119,6 +119,10 @@ public:
   TimeLine()
   {
   }
+  TimeLine(const TimeLine& rhs)
+      : data(rhs.data)
+  {
+  }
   TimeLine& operator=(const TimeLine& rhs)
   {
     if (&rhs != this) {

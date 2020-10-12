@@ -269,7 +269,7 @@ void WeatherParameter::setDims(const int nt, const int nd)
 
 void WeatherParameter::setData(const int i, const float val)
 {
-  if (i>=0 && i<data.size()){
+  if (i>=0 && i<(int)data.size()){
     float oldd= data[i];
     if (fabs(oldd-val)>0.000001){
       data[i] = val;

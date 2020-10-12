@@ -64,7 +64,7 @@ int SHClevel::dirIndex(const float& angle)
 int SHCinfo::levelIndex(const int& level)
 {
   if (levels.size()>0){
-    for (int i=0; i<levels.size(); i++)
+    for (int i=0; i<(int)levels.size(); i++)
       if (levels[i].level==level)
         return i;
   }
@@ -107,7 +107,7 @@ bool SHCcollection::readList(const std::string& filename)
   std::string buf;
   std::string totalname;
   int numloc= -1;
-  int numlev=-1, numdir=-1, ilevel;
+  int numlev=-1, numdir=-1, ilevel=-1;
   SHCdir dir;
   SHClevel level;
   SHCinfo info;
@@ -170,7 +170,7 @@ bool SHCcollection::readList(const std::string& filename)
         return false;
       }
       const vector<std::string> vvs = miutil::split(vs[1], ",");
-      if (vvs.size()!=numdir+1) {
+      if ((int)vvs.size()!=numdir+1) {
         cerr << "numdirections doesn't match" << endl;
         f.close();
         return false;
@@ -212,9 +212,9 @@ bool SHCcollection::readList(const std::string& filename)
     }
   }
   // find strongest criteria
-  for (int i=0; i<list.size(); i++){
-    for (int j=0; j<list[i].levels.size(); j++){
-      for (int k=0; k<list[i].levels[j].dirs.size(); k++){
+  for (int i=0; i<(int)list.size(); i++){
+    for (int j=0; j<(int)list[i].levels.size(); j++){
+      for (int k=0; k<(int)list[i].levels[j].dirs.size(); k++){
         if (list[i].levels[j].dirs[k].value<total.levels[j].dirs[k].value)
           total.levels[j].dirs[k].value= list[i].levels[j].dirs[k].value;
       }

@@ -191,7 +191,7 @@ bool AsciiStream::openStream(ErrorFlag* ef)
   return true;
 }
 
-bool AsciiStream::openStreamForWrite(ErrorFlag* ef)
+bool AsciiStream::openStreamForWrite(ErrorFlag* /*ef*/)
 {
 #ifdef DEBUG
   cout << "AsciiStream::openFileForWrite" << endl;
@@ -208,8 +208,8 @@ bool AsciiStream::openStreamForWrite(ErrorFlag* ef)
 //---------------------------------------------------------------
 bool AsciiStream::readData(const int posIndex,
 			   const ParId& modid,
-			   const miTime& start,
-			   const miTime& stop,
+                           const miTime& /*start*/,
+                           const miTime& /*stop*/,
 			   ErrorFlag* ef)
 {
   std::string modname;
@@ -337,11 +337,11 @@ bool AsciiStream::readData(const int posIndex,
 }
 
 
-bool AsciiStream::writeData(const int posIndex,
-			    const int modIndex,
-			    ErrorFlag* ef,
-			    bool complete_write,
-			    bool write_submodel)
+bool AsciiStream::writeData(const int /*posIndex*/,
+                            const int /*modIndex*/,
+                            ErrorFlag* /*ef*/,
+                            bool /*complete_write*/,
+                            bool /*write_submodel*/)
 {
   return false;
 }
@@ -357,7 +357,7 @@ bool AsciiStream::getTimeLine(int index,
   cout << "AsciiStream::getTimeLine" << endl;
 #endif
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
-    if (index<progLines.size())
+    if (index<(int)progLines.size())
       pline = progLines[index];
     return setErrorOK(ef);
   } else {
@@ -365,7 +365,7 @@ bool AsciiStream::getTimeLine(int index,
   }
 }
 
-bool AsciiStream::putTimeLine(int index,
+bool AsciiStream::putTimeLine(int /*index*/,
 			      vector<miTime>& tline,
 			      vector<int>& pline,
 			      ErrorFlag* ef)
@@ -409,7 +409,7 @@ bool AsciiStream::getOnePar(int index, WeatherParameter& wp, ErrorFlag* ef)
   return setErrorOK(ef);
 }
 
-bool AsciiStream::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
+bool AsciiStream::putOnePar(WeatherParameter& /*wp*/, ErrorFlag* /*ef*/)
 {
 #ifdef DEBUG
   cout << "AsciiStream::putOnePar" << endl;
@@ -440,7 +440,7 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
   AsciiData adata;
 
   while (getline(file,buf)){
-    int p;
+    std::string::size_type p;
     if ((p=buf.find("#"))!=string::npos)
       buf.erase(p);
 

@@ -174,7 +174,7 @@ void ParId::setFromString(const std::string& buffer)
 
 bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
 {
-  for (int i=0; i<paramList.size(); i++)
+  for (int i=0; i<(int)paramList.size(); i++)
     if (paramList[i].alias() == id ){
       p =  paramList[i];
       return true;

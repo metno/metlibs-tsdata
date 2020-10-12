@@ -95,7 +95,7 @@ public:
       Run& run, int& id);
   bool getModelSeq(int idx, Model& mod,       // fetch model info
       Run& run, int& id,
-      std::vector<std::string>& vtl)
+      std::vector<std::string>& /*vtl*/)
   {return getModelSeq(idx,mod,run,id);}
   int  putStation(const miPosition& s, //adds station to posList
       ErrorFlag*);

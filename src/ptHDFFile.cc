@@ -248,7 +248,7 @@ int HDFFile::findModel(const std::string& modelName,
   int rn=-1, i;
   for (i=0; i<nmod; ++i) {
     if ((p_->modList[i].name==modelName) &&
-	(p_->modList[i].run[3]==modelRun || modelRun==R_UNDEF)) {
+        ((int)p_->modList[i].run[3]==modelRun || modelRun==R_UNDEF)) {
       rn = i;
       break;
     }
@@ -258,7 +258,7 @@ int HDFFile::findModel(const std::string& modelName,
 
 bool HDFFile::getFullModeltime(int id, miTime& t)
 {
-  if ( id<0 || id>=p_->modList.size() ) return false;
+  if ( id<0 || id>=(int)p_->modList.size() ) return false;
 
   t =  miTime(p_->modList[id].run[0],p_->modList[id].run[1],p_->modList[id].run[2],
 	      p_->modList[id].run[3],p_->modList[id].run[4],p_->modList[id].run[5]);
@@ -341,8 +341,8 @@ bool HDFFile::openStreamForWrite(ErrorFlag* ef)
 //---------------------------------------------------------------
 bool HDFFile::readData(const int posIndex,
 		       const ParId& modid,
-		       const miTime& start,
-		       const miTime& stop,
+                       const miTime& /*start*/,
+                       const miTime& /*stop*/,
 		       ErrorFlag* ef)
 {
   uint8* dataBuf;
@@ -574,8 +574,8 @@ bool HDFFile::readData(const int posIndex,
     else if (nameFields[i] == FNLEV) {
       for (j=0;j<nrec;++j) {
 	// keep a list of unique levels
- 	levelfound = false;
- 	for (k=0;k<uniqLevels.size() && !levelfound; k++)
+        levelfound = false;
+        for (k=0;k<(int)uniqLevels.size() && !levelfound; k++)
  	  levelfound=(uniqLevels[k]==fdata[j]);
 	if (!levelfound){
 	  uniqLevels.push_back(fdata[j]);
@@ -615,12 +615,12 @@ bool HDFFile::readData(const int posIndex,
 	  parTimes[curlevel].push_back(j);
       }
       // add a new weatherparameter for each unique level
-      for (k=0;k<uniqLevels.size();k++){
+      for (k=0;k<(int)uniqLevels.size();k++){
 	if (parTimes[k].size()){
 	  wp.setDims(parTimes[k].size(),orderFields[i]);
 	  parameters.push_back(wp); // add it to the vector
-	  // insert the actual data
-	  for (j=0;j<parTimes[k].size();++j) {
+          // insert the actual data
+          for (j=0;j<(int)parTimes[k].size();++j) {
 	    for (l=0;l<orderFields[i];++l) // insert values..
 	      parameters[ipar].setData(j,l,fdata[parTimes[k][j]+l*nrec]);
 	    times.push_back(timeLine[parTimes[k][j]]);
@@ -751,12 +751,12 @@ bool HDFFile::writeData(const int posIndex,
 
   if (!write_submodel) uniqSModels.push_back(undefValue);
 
-  for (i=0; i<parameters.size(); i++) {
+  for (i=0; i<(int)parameters.size(); i++) {
     // make a list over unique levels
     ltemp = parameters[i].Id().level;
-    for (k=0; (k<uniqLevels.size())&&(ltemp!=uniqLevels[k]); k++)
+    for (k=0; (k<(int)uniqLevels.size())&&(ltemp!=uniqLevels[k]); k++)
       ;
-    if (k==uniqLevels.size()) uniqLevels.push_back(ltemp);
+    if (k==(int)uniqLevels.size()) uniqLevels.push_back(ltemp);
 
     if (write_submodel){
       // make a list over unique SubModels
@@ -765,24 +765,24 @@ bool HDFFile::writeData(const int posIndex,
 	stemp = atoi(sm.c_str());
       else
 	stemp = undefValue;
-      for (is=0; (is<uniqSModels.size())&&(stemp!=uniqSModels[is]); is++)
+      for (is=0; (is<(int)uniqSModels.size())&&(stemp!=uniqSModels[is]); is++)
 	;
-      if (is==uniqSModels.size()) uniqSModels.push_back(stemp);
+      if (is==(int)uniqSModels.size()) uniqSModels.push_back(stemp);
     }
 
     // find parameter alias in parList
     alias = parameters[i].Id().alias;
     atemp = alias;
-    for (j=0; (j<p_->parList.size())&&(p_->parList[j].alias!=atemp);j++)
+    for (j=0; (j<(int)p_->parList.size())&&(p_->parList[j].alias!=atemp);j++)
       ;
-    if (j==p_->parList.size()){
+    if (j==(int)p_->parList.size()){
       cerr << "ptHDFFile ERROR..parameter not found in parList:" << alias << endl;
       j=0;
     }
     // make a list of unique alias's
-    for (kk=0; (kk<aliaslist.size()) && (aliaslist[kk] != alias); kk++)
+    for (kk=0; (kk<(int)aliaslist.size()) && (aliaslist[kk] != alias); kk++)
       ;
-    if (kk == aliaslist.size()){// new alias
+    if (kk == (int)aliaslist.size()){// new alias
       aliaslist.push_back(alias); // store it
       colidx.push_back(j);        // store corresponding index to parList
       numcomp+=p_->parList[j].order;  // update number of datacomponents
@@ -801,7 +801,7 @@ bool HDFFile::writeData(const int posIndex,
   vector<miTime> tl;
   int tlindex, nmt=0;
   vector<int> partimes;
-  for (i=0; i<parameters.size(); i++) {
+  for (i=0; i<(int)parameters.size(); i++) {
     partimes.push_back(0); // used in datawriting below
     timeLines.Timeline(parameters[i].TimeLineIndex(),tl);
     if ((tlindex=smallTL.Exist(tl))==-1){
@@ -835,11 +835,11 @@ bool HDFFile::writeData(const int posIndex,
   SubModel cursubmodel;
   bool aliasfound;
 
-  for (is=0; is<uniqSModels.size(); is++){
+  for (is=0; is<(int)uniqSModels.size(); is++){
     cursubmodel= (uniqSModels[is] != undefValue
 		  ? miutil::from_number(uniqSModels[is]) : S_UNDEF);
 
-    for (il=0; il<uniqLevels.size(); il++){
+    for (il=0; il<(int)uniqLevels.size(); il++){
       curlev = uniqLevels[il];
       for (i=0; i<ntime; i++) {
 	i16dum=smallTL[i].year();
@@ -871,10 +871,10 @@ bool HDFFile::writeData(const int posIndex,
 	  memcpy(tmp,&(i16dum),inc=sizeof(int16));
 	  tmp+=inc;
 	}
-	for (kk=0; kk<aliaslist.size(); kk++){
+        for (kk=0; kk<(int)aliaslist.size(); kk++){
 	  aliasfound = false;
 	  parc = colidx[kk];
-	  for (j=0; (j<parameters.size())&&(!aliasfound); j++) {
+          for (j=0; (j<(int)parameters.size())&&(!aliasfound); j++) {
 	    if (column[j] == kk) {
 	      if ((parameters[j].Id().level == curlev) &&
 		  (parameters[j].Id().submodel == cursubmodel ||
@@ -938,7 +938,7 @@ bool HDFFile::getTimeLine(int index,
   cout << "HDFFile::getTimeLine" << endl;
 #endif
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
-    if (index<progLines.size())
+    if (index<(int)progLines.size())
       pline = progLines[index];
     *ef = OK;
     return true;
@@ -949,7 +949,7 @@ bool HDFFile::getTimeLine(int index,
   }
 }
 
-bool HDFFile::putTimeLine(int index,
+bool HDFFile::putTimeLine(int /*index*/,
 			  vector<miTime>& tline,
 			  vector<int>& pline,
 			  ErrorFlag* ef)
@@ -1010,9 +1010,9 @@ bool HDFFile::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
   ParId pid = wp.Id();
 
   // check if parameter exist in parList
-  for (i=0; (i<p_->parList.size())&&(p_->parList[i].alias!=pid.alias);i++)
+  for (i=0; (i<(int)p_->parList.size())&&(p_->parList[i].alias!=pid.alias);i++)
     ;
-  if (i==p_->parList.size()){ //parameter not found
+  if (i==(int)p_->parList.size()){ //parameter not found
     if (pdef.getParameter(pid.alias,par)) {
       hpar.num   = uint16(par.num());
       hpar.name  = par.name();
@@ -1042,8 +1042,8 @@ bool HDFFile::putOnePar(WeatherParameter& wp, ErrorFlag* ef)
     }
   }
   // check if model exist in modList
-  for (i=0; (i<p_->modList.size())&&(p_->modList[i].name!=pid.model);i++);
-  if (i==p_->modList.size()){ //model not found
+  for (i=0; (i<(int)p_->modList.size())&&(p_->modList[i].name!=pid.model);i++);
+  if (i==(int)p_->modList.size()){ //model not found
     hmod.modelPn = 0;
     hmod.name = pid.model;
     hmod.run[0]  = 0;
@@ -1631,7 +1631,7 @@ bool HDFFile::_readModList(ErrorFlag* ef)
 void HDFFile::getTextLines(const ParId p,
 			   vector<std::string>& tl)
 {
-  for (int i=0; i<p_->modList.size(); i++)
+  for (int i=0; i<(int)p_->modList.size(); i++)
     if (p_->modList[i].modelid==p.model){
       tl= p_->modList[i].textlines;
       break;
@@ -1673,9 +1673,9 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
   modtxtsz=0;
   modtxtn=0;
   for (i=0; i<nmod; i++){
-    if (p_->modList[i].textlines.size() > modtxtn)
-      modtxtn=p_->modList[i].textlines.size();
-    for (j=0; j<p_->modList[i].textlines.size(); j++)
+    if ((int)p_->modList[i].textlines.size() > modtxtn)
+      modtxtn=(int)p_->modList[i].textlines.size();
+    for (j=0; j<(int)p_->modList[i].textlines.size(); j++)
       if ((sz=p_->modList[i].textlines[j].length())>modtxtsz)
 	modtxtsz=sz;
   }
@@ -1721,7 +1721,7 @@ bool HDFFile::_writeModList(ErrorFlag* ef)
     memcpy(tmp,&(p_->modList[i].run[4]), inc=sizeof(uint32)); tmp+=inc;
     memcpy(tmp,&(p_->modList[i].run[5]), inc=sizeof(uint32)); tmp+=inc;
 
-    for (j=0; j<p_->modList[i].textlines.size(); j++){
+    for (j=0; j<(int)p_->modList[i].textlines.size(); j++){
       strcpy(txtline, p_->modList[i].textlines[j].c_str());
       for (int k=strlen(txtline); k<modtxtsz; k++)
 	txtline[k]='\0';

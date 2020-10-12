@@ -50,7 +50,6 @@ using namespace std;
 namespace pets {
 
 static const int UNDEFINED_COL= -1;
-static int FLAGLEVEL = 5;
 
 void MoraStation::clear()
 {
@@ -108,7 +107,6 @@ string MoraStream::getFromHttp(string url)
 {
  
   CURL *curl = NULL;
-  CURLcode res;
   string data;
 
   curl = curl_easy_init();
@@ -116,7 +114,7 @@ string MoraStream::getFromHttp(string url)
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
-    res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }
@@ -400,8 +398,8 @@ vector<miutil::miTime>  MoraStream::createTimeline( miutil::miTime from, miutil:
 }
 
 
-bool MoraStream::setNormalFromResult(string & data_,
-    miutil::miTime from, miutil::miTime to)
+bool MoraStream::setNormalFromResult(string & /*data_*/,
+    miutil::miTime /*from*/, miutil::miTime /*to*/)
 {
   // TBD: Not implemented yet
   
@@ -859,7 +857,7 @@ int MoraStream::findStation(const std::string& name)
     // report and query are the same
     read(STATIONREPORT, STATIONREPORT);
   }
-  for (int i = 0; i < stationlist.size(); i++) {
+  for (int i = 0; i < (int)stationlist.size(); i++) {
     if (stationlist[i].name == name) {
       return i;
     }
@@ -869,7 +867,7 @@ int MoraStream::findStation(const std::string& name)
 
 int MoraStream::findDataPar(const ParId& id)
 {
-  for (int i = 0; i < parameters.size(); i++) {
+  for (int i = 0; i < (int)parameters.size(); i++) {
     if (parameters[i].Id().alias == id.alias) {
       return i;
     }
@@ -893,8 +891,8 @@ bool MoraStream::openStreamForWrite(ErrorFlag*)
   return false;
 }
 
-bool MoraStream::readData(const int posIndex, const ParId& id,
-    const miutil::miTime& fromTime, const miutil::miTime& toTime, ErrorFlag*)
+bool MoraStream::readData(const int posIndex, const ParId& /*id*/,
+    const miutil::miTime& /*fromTime*/, const miutil::miTime& /*toTime*/, ErrorFlag*)
 {
   miutil::miTime _toTime = miutil::miTime::nowTime();
   _toTime.setTime(_toTime.year(),_toTime.month(),_toTime.day(),_toTime.hour(), _toTime.min(), 0);
@@ -919,21 +917,21 @@ bool MoraStream::getTimeLine(int index,
     std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef)
 {
   if (TimeLineIsRead && timeLines.Timeline(index, tline)) {
-    if (index < progLines.size())
+    if (index < (int)progLines.size())
       pline = progLines[index];
     return setErrorOK(ef);
   }
   return setErrorUnknown(ef);
 }
 
-bool MoraStream::putTimeLine(int index,
-    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
+bool MoraStream::putTimeLine(int /*index*/,
+    std::vector<miutil::miTime>& /*tline*/, std::vector<int>& /*pline*/, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in MoraStream " << endl;
   return false;
 }
 
-bool MoraStream::putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
+bool MoraStream::putTimeLine(TimeLine& /*tl*/, std::vector<int>& /*pline*/, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in MoraStream " << endl;
   return false;
@@ -941,7 +939,7 @@ bool MoraStream::putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
 
 bool MoraStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 {
-  if (i >= 0 && i < parameters.size()) {
+  if (i >= 0 && i < (int)parameters.size()) {
     wp = parameters[i];
     return setErrorOK(ef);
   }
@@ -962,7 +960,7 @@ bool MoraStream::getStations(std::vector<miPosition>&)
 
 bool MoraStream::getStationSeq(int index, miPosition& st)
 {
-  if (index < 0 || index > stationlist.size() - 1)
+  if (index < 0 || index > (int)stationlist.size() - 1)
     return false;
   MoraStation mst = stationlist[index];
   miPosition _st;
@@ -998,14 +996,14 @@ bool MoraStream::getModelSeq(int numn, Model& model, Run& run, int& id,
   return false;
 }
 
-int MoraStream::putStation(const miPosition& s, ErrorFlag*)
+int MoraStream::putStation(const miPosition& /*s*/, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in MoraStream " << endl;
   return 0;
 }
 
-bool MoraStream::writeData(const int posIndex, const int modIndex, ErrorFlag*,
-    bool complete_write, bool write_submodel)
+bool MoraStream::writeData(const int /*posIndex*/, const int /*modIndex*/, ErrorFlag*,
+    bool /*complete_write*/, bool /*write_submodel*/)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in MoraStream " << endl;
   return false;
@@ -1017,7 +1015,7 @@ bool MoraStream::close()
   return false;
 }
 
-void MoraStream::getTextLines(const ParId p, std::vector<std::string>& tl)
+void MoraStream::getTextLines(const ParId /*p*/, std::vector<std::string>& tl)
 {
   tl = textLines;
 }

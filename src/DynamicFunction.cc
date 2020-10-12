@@ -20,13 +20,13 @@ DynamicFunction::DynamicFunction(string nf, double f)
     int pos     = nf.find_first_of("+-*/",0);
     int nextpos = nf.find_first_of("+-*/",pos+1);
 
-    if(pos >= 0 && pos < nf.length()) {
+    if(pos >= 0 && pos < (int)nf.length()) {
 
       char   opr = nf[pos];
       string nxt = "";
       int    end = nf.length();;
 
-      if(nextpos > 0 && nextpos < nf.length()) {
+      if(nextpos > 0 && nextpos < (int)nf.length()) {
         end = nextpos;
         nxt = nf.substr(nextpos,nf.length()-1);
       }

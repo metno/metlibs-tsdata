@@ -395,7 +395,7 @@ bool FimexStream::readData(const std::string& placename,float lat, float lon, ve
   return true;
 }
 
-bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool createPoslist)
+bool FimexStream::addToCache(int /*posstart*/, int poslen,vector<ParId>& inpar, bool createPoslist)
 {
   bool foundSomeData=false;
   if (createPoslist) {
@@ -681,7 +681,7 @@ int FimexStream::numParameters()
 
 bool fetchDataFromFimex(ptDiagramData* diagram, FimexStream* fimex, double lat, double lon,
     const std::string& stationname,
-    std::vector<ParId>& inpars, std::vector<ParId>& outpars)
+    std::vector<ParId>& /*inpars*/, std::vector<ParId>& /*outpars*/)
 {
   if (!diagram->fetchDataFromStream(fimex, false))
     return false;

@@ -107,7 +107,6 @@ size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
 vector<string> KlimaStream::getFromHttp(string url)
 {
   CURL *curl = NULL;
-  CURLcode res;
   string data;
   vector<string> result;
 
@@ -116,7 +115,7 @@ vector<string> KlimaStream::getFromHttp(string url)
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
-    res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }
@@ -307,7 +306,7 @@ bool KlimaStream::read(const std::string& report, const std::string& query, cons
 bool KlimaStream::setStationsFromResult(vector<string>& data,
     vector<string>& header)
 {
-  int NAME = 0, STNR = 0, AMSL = 0, LAT = 0, LON = 0, WMO = 0;
+  int NAME = -1, STNR = -1, AMSL = -1, LAT = -1, LON = -1, WMO = -1;
 
   // Create index
   for (unsigned int i = 0; i < header.size(); i++) {
@@ -327,7 +326,7 @@ bool KlimaStream::setStationsFromResult(vector<string>& data,
 
   }
 
-  if (!(NAME * STNR * AMSL * LAT * LON * WMO)) {
+  if (NAME < 0 || STNR < 0 || AMSL < 0 || LAT < 0 || LON < 0 || WMO) {
     cerr << "Wrong header in " << __FUNCTION__ << endl;
     return false;
   }
@@ -438,7 +437,7 @@ bool KlimaStream::setNormalFromResult(vector<string>& data,
     if ( !monthly_values.count(k))
       continue;
 
-    for(int i=0; i<timeline.size();i++) {
+    for(int i=0; i<(int)timeline.size();i++) {
 
       if(!monthly_values[k].count(timeline[i].month()))
         continue;
@@ -757,7 +756,7 @@ bool KlimaStream::openStreamForWrite(ErrorFlag*)
   return false;
 }
 
-bool KlimaStream::readData(const int posIndex, const ParId&,
+bool KlimaStream::readData(const int /*posIndex*/, const ParId&,
     const miutil::miTime&, const miutil::miTime&, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
@@ -768,21 +767,21 @@ bool KlimaStream::getTimeLine(int index,
     std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef)
 {
   if (TimeLineIsRead && timeLines.Timeline(index, tline)) {
-    if (index < progLines.size())
+    if (index < (int)progLines.size())
       pline = progLines[index];
     return setErrorOK(ef);
   }
   return setErrorUnknown(ef);
 }
 
-bool KlimaStream::putTimeLine(int index,
-    std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag*)
+bool KlimaStream::putTimeLine(int /*index*/,
+    std::vector<miutil::miTime>& /*tline*/, std::vector<int>& /*pline*/, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
 }
 
-bool KlimaStream::putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
+bool KlimaStream::putTimeLine(TimeLine& /*tl*/, std::vector<int>& /*pline*/, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
@@ -790,7 +789,7 @@ bool KlimaStream::putTimeLine(TimeLine& tl, std::vector<int>& pline, ErrorFlag*)
 
 bool KlimaStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 {
-  if (i >= 0 && i < parameters.size()) {
+  if (i >= 0 && i < (int)parameters.size()) {
     wp = parameters[i];
     return setErrorOK(ef);
   }
@@ -828,14 +827,14 @@ bool KlimaStream::getModelSeq(int, Model&, Run&, int&,
   return false;
 }
 
-int KlimaStream::putStation(const miPosition& s, ErrorFlag*)
+int KlimaStream::putStation(const miPosition& /*s*/, ErrorFlag*)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return 0;
 }
 
-bool KlimaStream::writeData(const int posIndex, const int modIndex, ErrorFlag*,
-    bool complete_write, bool write_submodel)
+bool KlimaStream::writeData(const int /*posIndex*/, const int /*modIndex*/, ErrorFlag*,
+    bool /*complete_write*/, bool /*write_submodel*/)
 {
   cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
   return false;
@@ -847,7 +846,7 @@ bool KlimaStream::close()
   return false;
 }
 
-void KlimaStream::getTextLines(const ParId p, std::vector<std::string>& tl)
+void KlimaStream::getTextLines(const ParId /*p*/, std::vector<std::string>& tl)
 {
   tl = textLines;
 }

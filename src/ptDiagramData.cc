@@ -161,7 +161,7 @@ bool ptDiagramData::findParameter(const ParId& id, int& index, ErrorFlag* ef)
 bool ptDiagramData::copyParameter(int index, WeatherParameter& wp,
     ErrorFlag* ef)
 {
-  if (index < 0 || index >= parList.size())
+  if (index < 0 || index >= (int)parList.size())
     return setErrorFlag(ef, DD_RANGE_ERROR);
   else {
     wp = parList[index];
@@ -217,7 +217,7 @@ void ptDiagramData::deleteNegParameter(const ParId& id)
 // remove a weatherparameter; given index
 void ptDiagramData::deleteParameter(const int index)
 {
-  if (index >= 0 && index < parList.size()) {
+  if (index >= 0 && index < (int)parList.size()) {
     vector<WeatherParameter>::iterator p = parList.begin() + index;
     parList.erase(p);
   }
@@ -263,7 +263,7 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
   int j, n;
   ErrorFlag error;
   ParId id1, id2, id3, id4, id5;
-  int wpx, wpx1, wpx2, wpx3, wpx4, wpx5;
+  int wpx, wpx1, wpx2, wpx3, wpx4;
   float d, f1, f2, f3;
   int level;
   Uprofile profs;
@@ -1530,8 +1530,6 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // EPRR (from RRAC for fimex interpolation )
   } else if (inpid.alias == "EPRR" || inpid.alias == "MPRR" ) {
     ParId pid = inpid;
-    bool fixed = true;
-
 
     pid.alias = "RRAC"; // make RR from accumulated precipitation
     if(inpid.alias == "MPRR") pid.alias = "MRRAC";
@@ -1545,8 +1543,8 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
       if(numPardims && numTimes) {
 
 
-        for (unsigned int tim=0; tim < numTimes ; tim++) {
-          for (unsigned int pardim=0; pardim < numPardims ; pardim++) {
+        for (int tim=0; tim < numTimes ; tim++) {
+          for (int pardim=0; pardim < numPardims ; pardim++) {
             unsigned int index = pardim * numTimes  + tim;
 
             float rrac = tmp_data[index];
@@ -2796,7 +2794,7 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
   //  ParameterDefinition parDef;
   WeatherParameter wp;
   int index = -1;
-  int i, j;
+  int i;
   std::string alias = pid.alias;
   //  Parameter pp;
   parameter_info pai;
@@ -2855,19 +2853,19 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
     // left neighbor
     left = j - 1;
     // find right neighbor
-    for (right = j + 1; right < np; right++)
+    for (right = j + 1; right < (int)np; right++)
       if (locked[right])
         break;
 
     // loop through all dimensions
     for (l = 0; l < nd; l++) {
-      if (left > -1 && right < np) {
+      if (left > -1 && right < (int)np) {
         leftd = parList[idx].Data(left, l);
         rightd = parList[idx].Data(right, l);
       } else if (left > -1) {
         leftd = parList[idx].Data(left, l);
         rightd = leftd;
-      } else if (right < np) {
+      } else if (right < (int)np) {
         rightd = parList[idx].Data(right, l);
         leftd = rightd;
       } else {
@@ -2879,7 +2877,7 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
       // calculate spread-value
       meanv = (rightd / (right - left));
       // fill data-points
-      for (m = left + 1; m < right; m++) {
+      for (m = left + 1; (int)m < right; m++) {
         if (pai.interpok) {
           // interpolation ok
           dat = leftd + slope * (m - left);
@@ -2895,7 +2893,7 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
         parList[idx].setData(m, l, dat);
       }
       // correct right value if spread of data
-      if (right < np && !pai.interpok && pai.spreadok)
+      if (right < (int)np && !pai.interpok && pai.spreadok)
         parList[idx].setData(right, l, meanv);
     }
     // adjust main counter
@@ -2921,7 +2919,7 @@ void ptDiagramData::replaceData(const int oldidx, const int newidx,
         continue;
       for (k = 0; k < curtline.size(); k++) {
         if (inptline[j] == curtline[k]) {
-          for (l = 0; l < parList[oldidx].Ndim(); l++) {
+          for (l = 0; (int)l < parList[oldidx].Ndim(); l++) {
             float data = parList[newidx].Data(k, l);
             if (data < pai.min)
               data = pai.min;
@@ -3241,7 +3239,7 @@ bool ptDiagramData::makeSHC_(const int diridx, WeatherParameter& wp,
     const int level)
 {
   //cerr << "Making SHC for level:" << level << endl;
-  if (diridx < 0 || diridx >= parList.size())
+  if (diridx < 0 || diridx >= (int)parList.size())
     return false;
 
   int levelidx = shcinfo.levelIndex(level);
@@ -3372,7 +3370,6 @@ float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
   const float a2 = 0.445;
   const float a3 = -0.105;
   const float a4 = 0.272;
-  const float deltah = 0.67;
 
   float fpid = 4*pi*pi*d;
 
@@ -3505,7 +3502,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
 
 
 
-void ptDiagramData::makeYrWeatherSymbols(ParId p)
+void ptDiagramData::makeYrWeatherSymbols(ParId /*p*/)
 {
   // start by checking the precipitation frequency
   /*
@@ -3730,7 +3727,7 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
   // if fewer symbols than data-points - use automatic
   // min/max-time algorithm in symbolMaker
   int tmin, tmax;
-  if (termin.size() == times.size()) {
+  if ((int)termin.size() == times.size()) {
     tmin = 0;
     tmax = 0;
     symbols = wsymbols.compute_new(modelVec, termin, tmin, tmax, false);
@@ -3751,7 +3748,7 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
         return;
       }
       j = termin.size();
-      for (i = 0; i < j; i++)
+      for (i = 0; (int)i < j; i++)
         parList[wpidx].setData(i, 0, symbols[i].customNumber());
       wp.calcAllProperties();
 
@@ -3854,7 +3851,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
     }
   } else { // get the parameters specified in inPars
     int parIndex;
-    for (i = 0; i < inPars.size(); i++) {
+    for (i = 0; i < (int)inPars.size(); i++) {
       if ((parIndex = pfile->findDataPar(inPars[i])) != -1) {
         if (pfile->getOnePar(parIndex, wp, ef)) {
           if (renamemodelid != M_UNDEF){
@@ -3885,7 +3882,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
   }
   // if no parameters are found, delete the timeline we added previously
   if (nread == 0) {
-    for (i = 0; i < newtimelines.size(); i++) {
+    for (i = 0; i < (int)newtimelines.size(); i++) {
       deleteTimeLine(newtimelines[i]);
       progLines.pop_back();
     }
@@ -3898,7 +3895,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
   fetchRange.push_back(range);
   ++nfetches;
 
-  if (nread < inPars.size()) { // check if all parameters are found
+  if (nread < (int)inPars.size()) { // check if all parameters are found
     return setErrorFlag(ef, DD_SOME_PARAMETERS_NOT_FOUND);
   }
 
@@ -3916,7 +3913,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
       emptyvec, first, last, outPars, append, ef);
 }
 
-bool ptDiagramData::writeAllToFile(DataStream* pf, const std::string& modelName,
+bool ptDiagramData::writeAllToFile(DataStream* /*pf*/, const std::string& /*modelName*/,
     ErrorFlag* ef)
 {
   return setErrorUnknown(ef);
@@ -3958,14 +3955,14 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
     return false;
   }
   if (wpindexes.size() == 0) { // write all parameters
-    for (i = 0; i < parList.size(); i++) {
+    for (i = 0; i < (int)parList.size(); i++) {
       if (!pfile->putOnePar(parList[i], ef)) {
         cerr << "Kunne ikke skrive ut parameter:" << parList[i] << endl;
       }
     }
   } else { // write the parameters specified in wpindexes
-    for (i = 0; i < wpindexes.size(); i++) {
-      if (wpindexes[i] < 0 || wpindexes[i] >= parList.size()) {
+    for (i = 0; i < (int)wpindexes.size(); i++) {
+      if (wpindexes[i] < 0 || wpindexes[i] >= (int)parList.size()) {
         cerr << "Illegal parameterindex:" << wpindexes[i] << endl;
         continue;
       }
@@ -4039,7 +4036,7 @@ void ptDiagramData::deleteTimeLine(int index)
 
 bool ptDiagramData::getProgLine(int i, vector<int>& prog, ErrorFlag* ef)
 {
-  if (i < 0 || i >= progLines.size()) {
+  if (i < 0 || i >= (int)progLines.size()) {
     return setErrorFlag(ef, DD_RANGE_ERROR);
   }
   prog = progLines[i];
@@ -4093,7 +4090,7 @@ bool ptDiagramData::makeVector(const ParId& comp1, const ParId& comp2,
 // make a polar vector from two cartesian components.
 // zangle is startangle and rotsign is sign of rotation (+1=clockwise)
 bool ptDiagramData::makePolarVector(const ParId& comp1, const ParId& comp2,
-    const ParId& result, const float& zangle, const int& rotsign)
+    const ParId& result, const float& /*zangle*/, const int& /*rotsign*/)
 {
   int cidx1, cidx2, i;
   ErrorFlag ef;
@@ -4304,7 +4301,7 @@ bool ptDiagramData::fetchDataFromStream(AbstractDataStream* stream, bool dropIfE
 
   // if no parameters are found, delete the timeline we added previously
   if (dropIfEmpty && nread == 0) {
-    for (int i = 0; i < newtimelines.size(); i++) {
+    for (int i = 0; i < (int)newtimelines.size(); i++) {
       deleteTimeLine(newtimelines[i]);
       progLines.pop_back();
     }

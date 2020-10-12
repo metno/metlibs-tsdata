@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (7.0.3-1) RELEASED; urgency=medium
+
+  * build with fimex >= 1.3
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 12 Oct 2020 08:00:08 +0200
+
 metlibs-tseries-tsdata (7.0.2-1) RELEASED; urgency=medium
 
   * do not require Qt5 linguist tools

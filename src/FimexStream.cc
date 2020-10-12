@@ -441,7 +441,7 @@ bool FimexStream::addToCache(int posstart, int poslen,vector<ParId>& inpar, bool
   return foundSomeData;
 }
 
-static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t /*maxProcs*/, CDMReader_p reader,
+static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, CDMReader_p reader,
     const string& parName, const string& parUnit, const vector<SliceBuilder>& slices)
 {
   vector<size_t> sliceLengths(slices.size(), 1);

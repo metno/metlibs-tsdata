@@ -326,7 +326,7 @@ bool KlimaStream::setStationsFromResult(vector<string>& data,
 
   }
 
-  if (NAME < 0 || STNR < 0 || AMSL < 0 || LAT < 0 || LON < 0 || WMO) {
+  if (NAME < 0 || STNR < 0 || AMSL < 0 || LAT < 0 || LON < 0 || WMO < 0) {
     cerr << "Wrong header in " << __FUNCTION__ << endl;
     return false;
   }

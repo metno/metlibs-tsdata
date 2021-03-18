@@ -17,7 +17,10 @@ version-check:
 	V_MINOR=`grep '^#define METLIBS_.*_VERSION_MINOR ' "${V_HEADER_FILE}" | cut -d' ' -f3` ; \
 	V_PATCH=`grep '^#define METLIBS_.*_VERSION_PATCH ' "${V_HEADER_FILE}" | cut -d' ' -f3` ; \
 	head -n1 debian/changelog | grep -q "$${V_MAJOR}\\.$${V_MINOR}\\.$${V_PATCH}-" || \
-	{ echo "version mismatch ${V_HEADER_FILE} vs debian/changelog" ; false ; }
+	{ echo "version mismatch ${V_HEADER_FILE} vs debian/changelog" ; false ; } ; \
+	grep '^Package: lib.*[0-9]$$' debian/control | sed -e 's,^Package: ,,' -e 's,[0-9]\+$$,,' | while read PKG ; do \
+	if grep "$${PKG}$${X}[0-9]\\+" debian/control | grep -v "$${PKG}$${X}$${V_MAJOR}\\( \\|-\\|$$\\)" ; then \
+	echo "so version mismatch ${V_HEADER_FILE} vs debian/control" ; exit 1 ; fi ; done
 
 .PHONY: override_dh_strip
 override_dh_strip:

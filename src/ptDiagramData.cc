@@ -2704,7 +2704,7 @@ void ptDiagramData::makedefaultParInfo()
   parInfo["WVFD"] = parameter_info("WVFD", 0, false, false);
   parInfo["WVMD"] = parameter_info("WVMD", 0, false, false);
 
-  parInfo["HS"] = parameter_info("HS", 0.01, -1, 6, 0, false, true, false); //
+  parInfo["HS"] = parameter_info("HS", 0.01, -2, 6, 0, false, true, false); //
   parInfo["CU"] = parameter_info("CU", 0, false, false);
   parInfo["CV"] = parameter_info("CV", 0, false, false);
   parInfo["CUV"] = parameter_info("CUV", 0, false, false);

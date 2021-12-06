@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (7.0.4-1) RELEASED; urgency=medium
+
+  * changed minvalue for HS in qed
+
+ -- juergens <juergen.schulze@met.no>  Mon, 06 Dec 2021 12:23:04 +0100
+
 metlibs-tseries-tsdata (7.0.3-1) RELEASED; urgency=medium
 
   * build with fimex >= 1.3

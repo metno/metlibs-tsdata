@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (7.0.5-1) RELEASED; urgency=medium
+
+  * added replaceEnv to D22 reading
+
+ -- juergens <juergen.schulze@met.no>  Fri, 28 Jan 2022 13:32:01 +0100
+
 metlibs-tseries-tsdata (7.0.4-1) RELEASED; urgency=medium
 
   * changed minvalue for HS in qed

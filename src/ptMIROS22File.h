@@ -86,6 +86,7 @@ public:
   MIROS22Definition(const std::string& fn);
   void set(const std::string& fn);
   bool scan();
+  std::string replaceEnv(std::string);
 };
 
 // Single MIROS DF022 fileclass

@@ -197,6 +197,29 @@ void MIROS22Definition::set(const std::string& fn)
   filename= fn;
 }
 
+
+std::string MIROS22Definition::replaceEnv(std::string token)
+{
+  while(true) {
+    if(token.find("${")) {
+      int start = token.find("${",0) + 2;
+      int len   = token.find("}",start) - start;
+      
+      if( len > 0 ) {
+      
+	string s = token.substr(start, len);
+	char*  env =  getenv(s.c_str());
+	if(env) {
+	  token.replace(start-2, len+3, env);
+	  continue;
+	}
+      }
+    }
+    return token;
+  }
+}
+
+
 bool MIROS22Definition::scan()
 {
   if (filename.empty()) return false;
@@ -297,7 +320,7 @@ bool MIROS22Definition::scan()
           cerr << "MIROS22Definition Warning: Bad Filepath definition:" << buf << endl;
           continue;
         }
-        locs[n-1].filepath= vs1[1];
+        locs[n-1].filepath= replaceEnv(vs1[1]);
       }
     }
   }

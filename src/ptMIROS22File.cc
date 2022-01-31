@@ -200,8 +200,9 @@ void MIROS22Definition::set(const std::string& fn)
 
 std::string MIROS22Definition::replaceEnv(std::string token)
 {
+  cerr << "[INFO] Found Path " <<  token << endl;
   while(true) {
-    if(token.find("${")) {
+    if(token.find("${") < token.npos) {
       int start = token.find("${",0) + 2;
       int len   = token.find("}",start) - start;
       

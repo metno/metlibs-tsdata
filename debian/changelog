@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (7.0.7) RELEASED; urgency=medium
+
+  * Small fix in replaceEnv
+
+ -- juergens <juergen.schulze@met.no>  Mon, 31 Jan 2022 12:56:10 +0100
+
 metlibs-tseries-tsdata (7.0.6-1) RELEASED; urgency=medium
 
   * Some output in replaceEnv

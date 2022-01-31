@@ -215,6 +215,7 @@ std::string MIROS22Definition::replaceEnv(std::string token)
 	}
       }
     }
+    cerr << "[INFO] Reading D22 from " << token << endl;  
     return token;
   }
 }

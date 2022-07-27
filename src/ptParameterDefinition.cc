@@ -97,27 +97,6 @@ bool operator>(const ParId& lhs, const ParId& rhs)
   return false;
 }
 
-bool ParId::wdbCompare(const ParId& lhs)
-{
-
-  if (lhs.alias != alias)
-    return false;
-
-  if(lhs.submodel != submodel ) {
-    // special case! the raw submodel (dataversion 0 ) has to match exactly
-    if (lhs.submodel ==  "RAW" || submodel == "RAW" )
-      return false;
-    // in any other case, the UNDEF
-    if (lhs.submodel !=  M_UNDEF && submodel != M_UNDEF )
-      return false;
-  }
-
-  if (lhs.model !=  M_UNDEF && model != M_UNDEF  && lhs.model != model )
-    return false;
-  return true;
-
-}
-
 std::string ParId::toString()
 {
   const std::string palias    =  ( alias    != A_UNDEF ? alias    : "x");

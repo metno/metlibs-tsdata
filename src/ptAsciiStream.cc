@@ -134,7 +134,6 @@ int AsciiStream::findModel(const std::string& modelName,
   return rn;
 }
 
-
 int AsciiStream::findDataPar(const ParId& id)
 {
   METLIBS_LOG_SCOPE();
@@ -379,8 +378,8 @@ bool AsciiStream::putOnePar(WeatherParameter& /*wp*/, ErrorFlag* /*ef*/)
 
 bool AsciiStream::_openFile(ErrorFlag* ef)
 {
-  ifstream file(Name.c_str());
   METLIBS_LOG_SCOPE();
+  ifstream file(Name);
   if (!file){
     *ef = DF_FILE_OPEN_ERROR;
     return false;
@@ -405,7 +404,8 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
     miutil::remove(buf, '\n');
     miutil::trim(buf);
 
-    if (buf.length() == 0) continue;
+    if (buf.length() == 0)
+      continue;
 
     if (miutil::contains(miutil::to_upper(buf), "MODEL=")){
       if (!data_saved) dataList.push_back(adata);
@@ -451,10 +451,10 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       }
       miTime t;
       std::string times= vt1[0]+" "+vt1[1];
-      if (miTime::isValid(times)) 
-	t.setTime(times);
-      else {
-	return false;
+      if (miTime::isValid(times)) {
+        t.setTime(times);
+      } else {
+        return false;
         METLIBS_LOG_ERROR("invalid isotime in dataline:" << buf);
       }
       int level= miutil::to_int(vt1[2]);
@@ -462,7 +462,7 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       int ds= 3;
       if (use_submodel) {
         submodel= miutil::to_int(vt1[3]);
-	ds= 4;
+        ds = 4;
       }
       AsciiLine line;
       line.time= t;
@@ -470,10 +470,10 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       line.level= level;
       line.submodel= submodel;
       for (size_t j=ds; j<vt1.size(); j++){
-	float f= UNDEF;
-	if (vt1[j] != "-")
-	  f= atof(vt1[j].c_str());
-	line.data.push_back(f);
+        float f = UNDEF;
+        if (vt1[j] != "-")
+          f = atof(vt1[j].c_str());
+        line.data.push_back(f);
       }
       adata.pardata.push_back(line);
 
@@ -483,18 +483,17 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       
     } else {
       vt1= miutil::split(buf, " ");
-      if (vt1.size() < 2 || 
-	  (miutil::to_upper(vt1[0])!="TIME" || miutil::to_upper(vt1[1])!="LEVEL")){
+      if (vt1.size() < 2 || (miutil::to_upper(vt1[0]) != "TIME" || miutil::to_upper(vt1[1]) != "LEVEL")) {
         METLIBS_LOG_ERROR("table-header should start with \"TIME LEVEL\" ");
         return false;
       }
       int ds= 2;
-      if (vt1.size()>2 && miutil::to_upper(vt1[2])=="SUBMODEL"){
-	ds= 3;
+      if (vt1.size() > 2 && miutil::to_upper(vt1[2]) == "SUBMODEL") {
+        ds= 3;
 	use_submodel= true;
       }
       for (size_t j=ds; j<vt1.size(); j++){
-	adata.params.push_back(vt1[j]);
+        adata.params.push_back(vt1[j]);
       }
       adata.levels.clear();
       adata.submodels.clear();

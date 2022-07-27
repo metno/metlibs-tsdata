@@ -6,7 +6,7 @@
  */
 
 #include "FimexTools.h"
-#include <boost/algorithm/string.hpp>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -23,9 +23,9 @@ namespace pets {
 
 void FimexPoslist::addFile(std::string filename)
 {
-  ifstream in(filename.c_str());
-  if(!in)
-    throw FimexstreamException( filename+"not found");
+  ifstream in(filename);
+  if (!in)
+    throw FimexstreamException(filename + "not found");
 
   while (in) {
     string line;
@@ -81,22 +81,12 @@ void FimexPoslist::addEntry(std::string posname,float latitude, float longitude)
   lon.push_back(longitude);
 }
 
-
-
-
-
-
-
-
-
-
 void FimexPoslist::clear()
 {
   lat.clear();
   lon.clear();
   pos.clear();
 }
-
 
 int FimexPoslist::getPos(std::string posname, float nlat, float nlon)
 {
@@ -112,7 +102,6 @@ int FimexPoslist::getPos(std::string posname, float nlat, float nlon)
   return -1;
 }
 
-
 void FimexDimension::setFromString(std::string token)
 {
   boost::trim(token);
@@ -126,8 +115,6 @@ void FimexDimension::setFromString(std::string token)
   start = atoi(tokens[1].c_str());
   size  = atoi(tokens[2].c_str());
 }
-
-
 
 void FimexParameter::setFromString(std::string token)
 {
@@ -204,13 +191,6 @@ void FimexPetsCache::getExtrapars(std::vector<ParId>& inpar, std::vector<ParId>&
   }
 }
 
-
-
-
-
-
-
-
 void FimexPetsCache::process(ParId pid)
 {
   // add Data dimensions
@@ -245,7 +225,6 @@ void FimexPetsCache::process(ParId pid)
   parameters.back().setId(pid);
   parameters.back().calcAllProperties();
 }
-
 
 void FimexPetsCache::clear_tmp()
 {

@@ -353,7 +353,7 @@ bool HDFFile::readData(const int posIndex,
   vector<int>   orderFields;
   vector<int>   fieldSize;
   char  *fields;
-  int32  vpos, vmod;
+  int32 vpos, vmod = -1;
   int32  tag, ref, interlace, recsz, i, j, k, l;
   int    fnsize=0;
 

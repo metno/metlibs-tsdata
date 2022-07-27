@@ -247,7 +247,6 @@ float ptDiagramData::precip_state(float& tt, float& rr)
 // update weatherparameter
 void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 {
-
   const float ktms = float(1847.0 / 3600.0);
   int j, n;
   ErrorFlag error;
@@ -1073,7 +1072,6 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
 // make weatherparameter from existing wp's
 void ptDiagramData::makeOneParameter(const ParId& inpid)
 {
-
   int j, idx, idx2;
   ErrorFlag error;
   ParId id1, id2, id3, id4, newpid;
@@ -3895,8 +3893,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
       emptyvec, first, last, outPars, append, ef);
 }
 
-bool ptDiagramData::writeAllToFile(DataStream* /*pf*/, const std::string& /*modelName*/,
-    ErrorFlag* ef)
+bool ptDiagramData::writeAllToFile(DataStream* /*pf*/, const std::string& /*modelName*/, ErrorFlag* ef)
 {
   return setErrorUnknown(ef);
 }
@@ -3908,7 +3905,6 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
   METLIBS_LOG_SCOPE();
   // first save timelines, parameterlist, modellist and position-info
   // to DataStream. Then call DataStream.writeData
-
 
   if (!pfile->isOpen())
     if (!pfile->openStreamForWrite(ef)) {
@@ -4212,9 +4208,8 @@ set<Model> ptDiagramData::allModels()
 {
   set<Model> models;
 
-  int n = parList.size();
-  for (int i = 0; i < n; i++)
-    models.insert(parList[i].Id().model);
+  for (const auto& p : parList)
+    models.insert(p.Id().model);
 
   return models;
 }
@@ -4238,11 +4233,12 @@ void ptDiagramData::setStationFromLatLon(double lat, double lon, const std::stri
 {
   station.setLat(lat);
   station.setLon(lon);
-  miCoordinates c=station.Coordinates();
-  if(!stationname.empty())
+  if (!stationname.empty()) {
     station.setName(stationname);
-  else
+  } else {
+    miCoordinates c = station.Coordinates();
     station.setName( c.str() );
+  }
 }
 
 bool ptDiagramData::fetchDataFromStream(AbstractDataStream* stream, bool dropIfEmpty)
@@ -4282,8 +4278,8 @@ bool ptDiagramData::fetchDataFromStream(AbstractDataStream* stream, bool dropIfE
 
   // if no parameters are found, delete the timeline we added previously
   if (dropIfEmpty && nread == 0) {
-    for (int i = 0; i < (int)newtimelines.size(); i++) {
-      deleteTimeLine(newtimelines[i]);
+    for (int ntl : newtimelines) {
+      deleteTimeLine(ntl);
       progLines.pop_back();
     }
     return false;

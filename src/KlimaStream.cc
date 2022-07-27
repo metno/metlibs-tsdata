@@ -30,16 +30,15 @@
 #include "KlimaStream.h"
 #include "ptDiagramData.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <sstream>
 #include <puTools/miStringFunctions.h>
 #include <puTools/miDate.h>
-#include <set>
+
+#include <boost/algorithm/string.hpp>
 
 #include <curl/curl.h>
+
+#include <set>
+#include <sstream>
 
 #define MILOGGER_CATEGORY "metlibs.tsdata.KlimaStream"
 #include <miLogger/miLogging.h>
@@ -47,7 +46,6 @@
 using namespace std;
 
 namespace pets {
-
 
 static const string MONTHNORMALREPORT = "28";
 static const string STATIONREPORT = "16";
@@ -230,7 +228,6 @@ void KlimaStream::setSingleParameterDefinition(string key, string token,
     parameterDefinitions[parameterkey].transform =
         new pets::math::DynamicFunction(tokens[1]);
   }
-
 }
 
 bool KlimaStream::read(const std::string& report, const std::string& query)
@@ -255,26 +252,24 @@ bool KlimaStream::read(const std::string& report, const std::string& query, cons
   // if we repaint and rebuild the same diagram again and again - we
   // pull the same klimadata out again and again - no point in that
 
-
-  if(report==MONTHNORMALREPORT ) {
-    if( url != cachedMonthlyQuery )  {
+  if (report == MONTHNORMALREPORT) {
+    if (url != cachedMonthlyQuery) {
       METLIBS_LOG_INFO("READING FROM: " << url);
       cachedMonthly = getFromHttp(url);
     }
     lines = cachedMonthly;
     cachedMonthlyQuery = url;
-  } else if (report==DATAREPORT) {
-    if( url != cachedDataQuery )  {
+  } else if (report == DATAREPORT) {
+    if (url != cachedDataQuery) {
       METLIBS_LOG_INFO("READING FROM: " << url);
       cachedData = getFromHttp(url);
-      }
-      lines = cachedData;
-      cachedDataQuery = url;
+    }
+    lines = cachedData;
+    cachedDataQuery = url;
   } else {
     lines = getFromHttp(url);
     METLIBS_LOG_INFO("READING FROM: " << url);
   }
-
 
   vector<string> data;
   vector<string> header;
@@ -282,16 +277,16 @@ bool KlimaStream::read(const std::string& report, const std::string& query, cons
   if (lines.empty())
     return false;
 
-  for (unsigned int i = 0; i < lines.size(); i++) {
-    boost::trim(lines[i]);
-    if (lines[i].empty())
+  for (auto& line : lines) {
+    boost::trim(line);
+    if (line.empty())
       continue;
     if (header.empty()) {
-      boost::split(header, lines[i], boost::algorithm::is_any_of(";"));
+      boost::split(header, line, boost::algorithm::is_any_of(";"));
       continue;
     }
 
-    data.push_back(lines[i]);
+    data.push_back(line);
   }
 
   if (report == STATIONREPORT) {

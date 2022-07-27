@@ -64,8 +64,9 @@ bool MIROS22File::read(const std::string& location,
   bool allpars=false;
   res= cant_open;
 
-  ifstream f(filename.c_str());
-  if (!f) return false;
+  ifstream f(filename);
+  if (!f)
+    return false;
 
   res= bad_file;
   std::string buf;
@@ -205,13 +206,12 @@ std::string MIROS22Definition::replaceEnv(std::string token)
       int len   = token.find("}",start) - start;
       
       if( len > 0 ) {
-      
-	string s = token.substr(start, len);
-	char*  env =  getenv(s.c_str());
-	if(env) {
-	  token.replace(start-2, len+3, env);
-	  continue;
-	}
+        string s = token.substr(start, len);
+        char* env = getenv(s.c_str());
+        if (env) {
+          token.replace(start - 2, len + 3, env);
+          continue;
+        }
       }
     }
     METLIBS_LOG_INFO("Reading D22 from '" << token << "'");
@@ -222,11 +222,13 @@ std::string MIROS22Definition::replaceEnv(std::string token)
 
 bool MIROS22Definition::scan()
 {
-  if (filename.empty()) return false;
   METLIBS_LOG_SCOPE();
+  if (filename.empty())
+    return false;
 
-  ifstream f(filename.c_str());
-  if (!f) return false;
+  ifstream f(filename);
+  if (!f)
+    return false;
 
   enum bstatus {
     no_block,

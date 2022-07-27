@@ -32,8 +32,8 @@
 
 #include <puTools/miStringFunctions.h>
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 using namespace miutil;
@@ -176,28 +176,6 @@ bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
     }
   return false;
 }
-
-
-//  NB The following function is based on libParameter and uses an very very very
-//  old lex based parser. Avoid the usage of this function by any means!!!!
-//
-
-// bool ParameterDefinition::readParameters(const std::string& paramdef)
-// {
-//   // Experimental reading of parameter file
-//   paramList.clear();
-//   parameter **parlist;
-//   int npar;
-
-//   parsepardefs(paramdef.c_str(),&parlist,&npar);
-//   for (int i=0; i<npar; i++) {
-//     paramList.push_back(Parameter(*parlist[i]));
-//     free(parlist[i]);
-//   }
-//   free(parlist);
-//   return true;
-// }
-
 
 std::string ParameterDefinition::ParId2Str(ParId p)
 {

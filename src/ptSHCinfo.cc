@@ -90,7 +90,7 @@ bool SHCcollection::readList(const std::string& filename)
   total.levels.clear();
   list.clear();
 
-  ifstream f(filename.c_str());
+  ifstream f(filename);
   if (!f) {
     METLIBS_LOG_ERROR("could not open file '" << filename << "'");
     return false;
@@ -121,7 +121,6 @@ bool SHCcollection::readList(const std::string& filename)
     if (miutil::contains(buf, "[LOCATION]")){
       if (numlev<0 || numdir<0){
         METLIBS_LOG_ERROR("directions and levels before locations");
-        f.close();
         return false;
       }
       list.push_back(info);
@@ -146,7 +145,6 @@ bool SHCcollection::readList(const std::string& filename)
         mode= read_val;
         if (numdir<0 || numlev<0){
           METLIBS_LOG_ERROR("directions and levels must be defined before values");
-          f.close();
           return false;
         }
       }
@@ -163,13 +161,11 @@ bool SHCcollection::readList(const std::string& filename)
     } else if (miutil::contains(buf, "directions=")){
       if (numdir<0) {
         METLIBS_LOG_ERROR("numdirections before directions");
-        f.close();
         return false;
       }
       const vector<std::string> vvs = miutil::split(vs[1], ",");
       if ((int)vvs.size()!=numdir+1) {
         METLIBS_LOG_ERROR("numdirections doesn't match");
-        f.close();
         return false;
       }
       for (int i=0; i<numdir+1; i++)
@@ -179,14 +175,12 @@ bool SHCcollection::readList(const std::string& filename)
       ilevel++;
       if(ilevel >= numlev){
         METLIBS_LOG_ERROR("Too many levels in [values] block");
-        f.close();
         return false;
       }
       const vector<std::string> vals = miutil::split(buf, ",");
       int nd= vals.size();
       if (nd!=numdir){
         METLIBS_LOG_ERROR("values' number of directions doesn't match");
-        f.close();
         return false;
       }
       for (int i=0; i<numdir; i++){
@@ -218,6 +212,5 @@ bool SHCcollection::readList(const std::string& filename)
     }
   }
 
-  f.close();
   return true;
 }

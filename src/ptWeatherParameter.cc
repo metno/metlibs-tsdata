@@ -45,16 +45,15 @@
  * UPDATES:
  ***************************************************************************/
 
-
-#include <math.h>
 #include "ptWeatherParameter.h"
+
+#include <cmath>
 
 #define MILOGGER_CATEGORY "metlibs.tsdata.WeatherParameter"
 #include <miLogger/miLogging.h>
 
 using namespace std;
 
-// constructor
 WeatherParameter::WeatherParameter()
   : polar(false)
   , type(DUM_PRIMITIVE)
@@ -68,7 +67,6 @@ WeatherParameter::WeatherParameter()
 {
 }
 
-// destructor
 WeatherParameter::~WeatherParameter()
 {
 }
@@ -294,77 +292,3 @@ void WeatherParameter::clearTempDirty()
   temp_dirty=false;
   std::fill(modified.begin(), modified.end(), false);
 }
-
-//==========================================================
-
-// void CompositeParameter::_copyDataMembers(const CompositeParameter& rhs)
-// {
-//   cout << "Inside CompositeParameter._copyDataMembers" << endl;
-//   WeatherParameter::_copyDataMembers(rhs);
-//   wp = rhs.wp;
-//   wpexist = rhs.wpexist;
-// }
-
-// CompositeParameter::CompositeParameter(const CompositeParameter& rhs)
-// {
-//   cout << "Inside CompositeParameter.copy-constructor" << endl;
-//   _copyDataMembers(rhs);
-// }
-
-// CompositeParameter& CompositeParameter::operator=(const CompositeParameter& rhs)
-// {
-//   cout << "Inside CompositeParameter.equal-operator" << endl;
-//   if (this == &rhs)
-//     return *this;
-
-//   // elementwise copy
-//   _copyDataMembers(rhs);
-
-//   return *this;
-// }
-
-
-// void CompositeParameter::calcCompProperties(const int icomp)
-// {
-//   if (icomp>=ndim || !wpexist) return;
-
-//   float dv;
-//   cmin[icomp] = FLT_MAX;
-//   cmax[icomp] = -FLT_MAX;
-//   for (int j=0; j<npoints; j++) {
-//     dv = datafunc(j,icomp);
-//     if (dv < cmin[icomp]) cmin[icomp] = dv;
-//     if (dv > cmax[icomp]) cmax[icomp] = dv;
-//   }
-//   cdelta[icomp] = cmax[icomp] - cmin[icomp];
-// }
-
-
-// void CompositeParameter::setWPvector(const vector<WeatherParameter*>& w)
-// {
-//   wp = w;
-//   if (wp.size()) {
-//     wpexist = true;
-//     setPolar(wp[0]->Polar());
-//     setId(wp[0]->Id());
-//     setType(wp[0]->Type());
-//     setNdim(wp[0]->Ndim());
-//     setNpoints(wp[0]->Npoints());
-// //     setDims(wp[0]->Npoints(),wp[0]->Ndim());
-//     setTimeLineIndex(wp[0]->TimeLineIndex());
-//   }
-// }
-
-
-// const vector<float>& CompositeParameter::copyDataVector() const
-// {
-//   vector<float> tempvec;
-//   if (wpexist)
-//     for (int i=0; i<ndim; i++)
-//       for (int j=0; j<npoints; j++)
-// 	tempvec.push_back(datafunc(j,i));
-
-//   return tempvec;
-// }
-
-

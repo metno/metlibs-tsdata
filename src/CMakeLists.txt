@@ -15,6 +15,7 @@ SET(tsdata_core_SOURCES
   ptDataStream.cc
   ptDiagramData.cc
   ptError.cc
+  ptParameter.cc
   ptMIROS22File.cc
   ptParameterDefinition.cc
   ptPrimitiveType.cc
@@ -29,7 +30,6 @@ LIST(APPEND tsdata_core_HEADERS
   tsDataVersion.h
   PetsExceptions.h
   ptTimeLine.h
-  ptParameter.h
 )
 
 ########################################################################

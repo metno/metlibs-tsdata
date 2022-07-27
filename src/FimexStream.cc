@@ -57,9 +57,11 @@
 #include <wait.h>
 
 #include <algorithm>
-#include <iostream>
 #include <numeric>
 #include <functional>
+
+#define MILOGGER_CATEGORY "metlibs.tsdata.FimexStream"
+#include <miLogger/miLogging.h>
 
 using namespace std;
 using namespace miutil;
@@ -194,6 +196,7 @@ void FimexStream::clean()
 
 bool FimexStream::createPoslistInterpolator()
 {
+  METLIBS_LOG_SCOPE();
   try {
     if (!reader)
       openStream();
@@ -201,7 +204,7 @@ bool FimexStream::createPoslistInterpolator()
     interpol = std::make_shared<CDMInterpolator>(reader);
     interpol->changeProjection(MIFI_INTERPOL_BILINEAR,poslist.getLon(), poslist.getLat() );
   } catch (exception& e) {
-    cerr << e.what() << endl;
+    METLIBS_LOG_ERROR("Exception during interpolation: " << e.what());
     return false;
   }
   return true;
@@ -213,6 +216,7 @@ bool FimexStream::createPoslistInterpolator()
 
 void FimexStream::createTimeLine()
 {
+  METLIBS_LOG_SCOPE();
   using namespace MetNoFimex;
 
   basetimeline.clear();
@@ -235,8 +239,9 @@ void FimexStream::createTimeLine()
           const miutil::miTime t(uTimes[u]);
           if (!t.undef()) {
             basetimes.insert(t);
+            METLIBS_LOG_DEBUG(LOGVAL(t));
           } else {
-            cerr << "Invalid time value " << uTimes[u] << ", clearing basetimeline and giving up." << endl;
+            METLIBS_LOG_ERROR("Invalid time value " << uTimes[u] << ", clearing basetimeline and giving up.");
             timeLineIsRead = true;
             return;
           }
@@ -245,7 +250,7 @@ void FimexStream::createTimeLine()
     }
     basetimeline = std::vector<miutil::miTime>(basetimes.begin(), basetimes.end());
   } catch (exception& e) {
-    cerr << "Exception catched in createTimeline: " << e.what() << endl;
+    METLIBS_LOG_ERROR("Exception caught: " << e.what());
   }
 
   timeLineIsRead = true;
@@ -255,7 +260,7 @@ void FimexStream::openStream()
 {
   try {
     reader = CDMFileReaderFactory::create(filetype, filename, configfile);
-    cerr << "Stream " << filename << " opened " << endl;
+    METLIBS_LOG_INFO("fimex stream '" << filename << "' opened");
     is_open=true;
   } catch (exception& e) {
     throw FimexstreamException("Could not open fimexstream");
@@ -283,6 +288,7 @@ void FimexStream::filterParameters(vector<ParId>& inpar)
 
 bool FimexStream::hasParameter(const std::string& parametername)
 {
+  METLIBS_LOG_SCOPE(LOGVAL(parametername));
   try {
     if (!reader)
       openStream();
@@ -293,7 +299,7 @@ bool FimexStream::hasParameter(const std::string& parametername)
     return interpol->getCDM().hasVariable(parametername);
 
   } catch (exception& e) {
-    cerr << "Exception in hasParameter: " << e.what() << endl;
+    METLIBS_LOG_ERROR("Exception: " << e.what());
   }
   return false;
 }
@@ -397,6 +403,7 @@ bool FimexStream::readData(const std::string& placename,float lat, float lon, ve
 
 bool FimexStream::addToCache(int /*posstart*/, int poslen,vector<ParId>& inpar, bool createPoslist)
 {
+  METLIBS_LOG_SCOPE();
   bool foundSomeData=false;
   if (createPoslist) {
     FimexPetsCache tmp;
@@ -430,7 +437,7 @@ bool FimexStream::addToCache(int /*posstart*/, int poslen,vector<ParId>& inpar, 
           if (readFromFimexSlice(fimexpar[j]))
             foundSomeData = true;
         } catch (exception& e) {
-          cerr <<"Exception from ReadFromFimexSlice:  " <<  e.what() << endl;
+          METLIBS_LOG_ERROR("Exception from ReadFromFimexSlice: " << e.what());
         }
 
         break;
@@ -444,6 +451,8 @@ bool FimexStream::addToCache(int /*posstart*/, int poslen,vector<ParId>& inpar, 
 static MetNoFimex::DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, CDMReader_p reader,
     const string& parName, const string& parUnit, const vector<SliceBuilder>& slices)
 {
+  METLIBS_LOG_SCOPE();
+
   vector<size_t> sliceLengths(slices.size(), 1);
   for (size_t i = 0; i < slices.size(); i++) {
     vector<size_t> ssize = slices.at(i).getDimensionSizes();
@@ -544,7 +553,7 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
   if (!is_open)
     return false;
 
-  cerr << "Interpolating Parameter: " << par.parametername << " for model " << modelname;
+  METLIBS_LOG_INFO("Interpolating Parameter: " << par.parametername << " for model " << modelname);
   boost::posix_time::ptime start  = boost::posix_time::microsec_clock::universal_time();
   MetNoFimex::SliceBuilder slice(interpol->getCDM(),par.parametername);
 
@@ -557,12 +566,12 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
 
   CoordinateSystem_cp cs = findCompleteCoordinateSystemFor(listCoordinateSystems(interpol), par.parametername);
   if (!cs) {
-    cerr << "no coordinate system for parameter '" << par.parametername << "'" << endl;
+    METLIBS_LOG_ERROR("no coordinate system for parameter '" << par.parametername << "'");
     return false;
   }
   CoordinateAxis_cp tax = cs->getTimeAxis();
   if (!tax) {
-    cerr << "no time axis for parameter '" << par.parametername << "'" << endl;
+    METLIBS_LOG_ERROR("no time axis for parameter '" << par.parametername << "'");
     return false;
   }
   const std::string& timeAxis = tax->getShape().front();
@@ -647,7 +656,8 @@ bool FimexStream::readFromFimexSlice(FimexParameter par)
       cache[i].process(pid);
 
     boost::posix_time::ptime last   = boost::posix_time::microsec_clock::universal_time();
-    cerr << " ... done. Used : "  << (last-start).total_milliseconds() << " ms   " << endl;
+    METLIBS_LOG_INFO("Done interpolating Parameter: " << par.parametername << " for model " << modelname << ". Used " << (last - start).total_milliseconds()
+                                                      << " ms");
 
     return true;
   }

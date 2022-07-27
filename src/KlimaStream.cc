@@ -41,7 +41,8 @@
 
 #include <curl/curl.h>
 
-#include <iostream>
+#define MILOGGER_CATEGORY "metlibs.tsdata.KlimaStream"
+#include <miLogger/miLogging.h>
 
 using namespace std;
 
@@ -240,6 +241,7 @@ bool KlimaStream::read(const std::string& report, const std::string& query)
 
 bool KlimaStream::read(const std::string& report, const std::string& query, const miutil::miTime& from, const miutil::miTime& to)
 {
+  METLIBS_LOG_SCOPE();
   if (host.empty())
     return false;
   if (!initialized)
@@ -256,21 +258,21 @@ bool KlimaStream::read(const std::string& report, const std::string& query, cons
 
   if(report==MONTHNORMALREPORT ) {
     if( url != cachedMonthlyQuery )  {
-      cerr << "READING FROM: " << url << endl;
+      METLIBS_LOG_INFO("READING FROM: " << url);
       cachedMonthly = getFromHttp(url);
     }
     lines = cachedMonthly;
     cachedMonthlyQuery = url;
   } else if (report==DATAREPORT) {
     if( url != cachedDataQuery )  {
-        cerr << "READING FROM: " << url << endl;
-        cachedData = getFromHttp(url);
+      METLIBS_LOG_INFO("READING FROM: " << url);
+      cachedData = getFromHttp(url);
       }
       lines = cachedData;
       cachedDataQuery = url;
   } else {
     lines = getFromHttp(url);
-    cerr << "READING FROM: " << url << endl;
+    METLIBS_LOG_INFO("READING FROM: " << url);
   }
 
 
@@ -306,6 +308,7 @@ bool KlimaStream::read(const std::string& report, const std::string& query, cons
 bool KlimaStream::setStationsFromResult(vector<string>& data,
     vector<string>& header)
 {
+  METLIBS_LOG_SCOPE();
   int NAME = -1, STNR = -1, AMSL = -1, LAT = -1, LON = -1, WMO = -1;
 
   // Create index
@@ -327,7 +330,7 @@ bool KlimaStream::setStationsFromResult(vector<string>& data,
   }
 
   if (NAME < 0 || STNR < 0 || AMSL < 0 || LAT < 0 || LON < 0 || WMO < 0) {
-    cerr << "Wrong header in " << __FUNCTION__ << endl;
+    METLIBS_LOG_ERROR("Wrong header in " << __FUNCTION__);
     return false;
   }
 
@@ -729,37 +732,37 @@ string KlimaStream::createDataQuery(vector<string> klimaNames,
 
 int KlimaStream::findStation(const std::string&)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return 0;
 } // find station index
 
 int KlimaStream::findDataPar(const ParId&)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return 0;
 }
 
 void KlimaStream::cleanParData()
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
 }
 
 bool KlimaStream::openStream(ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::openStreamForWrite(ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::readData(const int /*posIndex*/, const ParId&,
     const miutil::miTime&, const miutil::miTime&, ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
@@ -777,13 +780,13 @@ bool KlimaStream::getTimeLine(int index,
 bool KlimaStream::putTimeLine(int /*index*/,
     std::vector<miutil::miTime>& /*tline*/, std::vector<int>& /*pline*/, ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::putTimeLine(TimeLine& /*tl*/, std::vector<int>& /*pline*/, ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
@@ -798,51 +801,51 @@ bool KlimaStream::getOnePar(int i, WeatherParameter& wp, ErrorFlag* ef)
 
 bool KlimaStream::putOnePar(WeatherParameter&, ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::getStations(std::vector<miPosition>&)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::getStationSeq(int, miPosition&)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::getModelSeq(int, Model&, Run&, int&)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::getModelSeq(int, Model&, Run&, int&,
     std::vector<std::string>&)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 int KlimaStream::putStation(const miPosition& /*s*/, ErrorFlag*)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return 0;
 }
 
 bool KlimaStream::writeData(const int /*posIndex*/, const int /*modIndex*/, ErrorFlag*,
     bool /*complete_write*/, bool /*write_submodel*/)
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
 bool KlimaStream::close()
 {
-  cerr << "Unimplemented " << __FUNCTION__ << " called in KlimaStream " << endl;
+  METLIBS_LOG_SCOPE("not implemented");
   return false;
 }
 
@@ -869,6 +872,7 @@ bool fetchDataFromKlimaDB(ptDiagramData* diagram, KlimaStream* klima,
     vector<ParId>& inpars, vector<ParId>& outpars,
     const miutil::miTime& fromTime, const miutil::miTime& toTime)
 {
+  METLIBS_LOG_SCOPE();
   klima->clean();
 
   // find station and read in data block
@@ -876,7 +880,7 @@ bool fetchDataFromKlimaDB(ptDiagramData* diagram, KlimaStream* klima,
     if (!klima->readKlimaData(inpars,outpars,fromTime,toTime))
       return false;
   } catch(exception& e) {
-    cerr << "KLIMA::READDATA FAILED: " << e.what() << endl;
+    METLIBS_LOG_ERROR(e.what());
     return false;
   }
 

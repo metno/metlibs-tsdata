@@ -38,9 +38,6 @@
 #define _ptParameter_h
 
 #include <string>
-#include <iostream>
-
-
 
 #define PARNSZ 32  /* Parameter name */
 #define UNITSZ 10  /* Unit */
@@ -60,49 +57,17 @@ class Parameter {
 
 public:
   Parameter() {}
- 
 
-  std::string alias() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return alias_;
-  }
-  std::string name() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return name_;
-  }
-  std::string unit() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return unit_;
-  }
-  int num() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return num_;
-  }
-  int scale() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return scale_;
-  }
-  int size() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return size_;
-  }
-  int order() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return order_;
-  }
-  int datatype() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return datatype_;
-  }
-  int plottype() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    return plottype_;
-  }
-
-  void printName() const {
-    std::cerr << "deprecated function Parameter::" << __FUNCTION__ << " called !" << std::endl;
-    std::cout << name_ << std::endl;
-  }
+  std::string alias() const;
+  std::string name() const;
+  std::string unit() const;
+  int num() const;
+  int scale() const;
+  int size() const;
+  int order() const;
+  int datatype() const;
+  int plottype() const;
+  void printName() const;
 };
 
 #endif

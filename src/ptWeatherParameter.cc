@@ -49,6 +49,9 @@
 #include <math.h>
 #include "ptWeatherParameter.h"
 
+#define MILOGGER_CATEGORY "metlibs.tsdata.WeatherParameter"
+#include <miLogger/miLogging.h>
+
 using namespace std;
 
 // constructor
@@ -85,7 +88,6 @@ WeatherParameter::~WeatherParameter()
  ***************************************************************************/
 void WeatherParameter::_copyDataMembers(const WeatherParameter& rhs)
 {
-//   cout << "Inside WeatherParameter._copyDataMembers" << endl;
   data = rhs.data;
   cmin= rhs.cmin;
   cmax= rhs.cmax;
@@ -118,7 +120,6 @@ void WeatherParameter::_copyDataMembers(const WeatherParameter& rhs)
  ***************************************************************************/
 WeatherParameter::WeatherParameter(const WeatherParameter& rhs)
 {
-//   cout << "Inside WeatherParameter.copy-constructor" << endl;
   _copyDataMembers(rhs);
 }
 
@@ -136,7 +137,6 @@ WeatherParameter::WeatherParameter(const WeatherParameter& rhs)
  ***************************************************************************/
 WeatherParameter& WeatherParameter::operator=(const WeatherParameter& rhs)
 {
-//   cout << "Inside WeatherParameter.equal-operator" << endl;
   if (this == &rhs)
     return *this;
 

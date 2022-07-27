@@ -11,8 +11,11 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <iostream>
+
 #include <fstream>
+
+#define MILOGGER_CATEGORY "metlibs.tsdata.FimexTools"
+#include <miLogger/miLogging.h>
 
 using namespace std;
 
@@ -128,6 +131,8 @@ void FimexDimension::setFromString(std::string token)
 
 void FimexParameter::setFromString(std::string token)
 {
+  METLIBS_LOG_SCOPE();
+
   vector<string> tokenlist;
   boost::split( tokenlist, token, boost::is_any_of("=") );
   if(tokenlist.size() < 2 )
@@ -157,7 +162,7 @@ void FimexParameter::setFromString(std::string token)
         dim.setFromString(parameterdeflist[i]);
         dimensions.push_back(dim);
       } catch( exception& e){
-        cerr << e.what() << endl;
+        METLIBS_LOG_ERROR(e.what());
       }
     }
   }

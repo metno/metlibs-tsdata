@@ -35,7 +35,9 @@
 #include <puTools/miStringFunctions.h>
 
 #include <cmath>
-#include <iostream>
+
+#define MILOGGER_CATEGORY "metlibs.tsdata.ptDiagramData"
+#include <miLogger/miLogging.h>
 
 using namespace std;
 
@@ -52,17 +54,13 @@ ptDiagramData::ptDiagramData(symbolMaker& wsym) :
 
 ptDiagramData::ptDiagramData(const ptDiagramData& rhs)
 {
-#ifdef DEBUG
-  cerr << "ptDiagramData::ptDiagramData()" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   copyMembers(rhs);
 }
 
 ptDiagramData& ptDiagramData::operator=(const ptDiagramData& rhs)
 {
-#ifdef DEBUG
-  cerr << "ptDiagramData::operator=" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   if (this == &rhs)
     return *this;
 
@@ -72,9 +70,7 @@ ptDiagramData& ptDiagramData::operator=(const ptDiagramData& rhs)
 
 void ptDiagramData::copyMembers(const ptDiagramData& rhs)
 {
-#ifdef DEBUG
-  cerr << "ptDiagramData::copyMembers" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   station = rhs.station;
   timeLine = rhs.timeLine;// sjekk = operator
   progLines = rhs.progLines;
@@ -96,9 +92,7 @@ void ptDiagramData::Erase()
 
 void ptDiagramData::cleanDataStructure_()
 {
-#ifdef DEBUG
-  cerr << "ptDiagramData::cleanDataStructure_" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   fetchRange.clear();
   timeLine.clear();
   progLines.clear();
@@ -227,7 +221,7 @@ void ptDiagramData::clearDirty()
 
 void ptDiagramData::useAlternateSymbolmaker(const bool use)
 {
-  cerr << "useAlternateSymbolmaker called" << endl;
+  METLIBS_LOG_SCOPE();
   new_symbolmaker = use;
 }
 
@@ -2486,11 +2480,11 @@ void ptDiagramData::makeOneParameter(const ParId& inpid)
     // Weather symbol
   } else if (inpid.alias == "WW") {
     if (new_symbolmaker) {
-      cerr << "USING NEW SYMBOLMAKER" << endl;
+      METLIBS_LOG_INFO("USING NEW SYMBOLMAKER");
 
       makeWeatherSymbols_new_(inpid, false);
     } else {
-      cerr << "USING OLD SYMBOLMAKER" << endl;
+      METLIBS_LOG_INFO("USING OLD SYMBOLMAKER");
 
       makeWeatherSymbols_(inpid);
     }
@@ -2746,6 +2740,7 @@ bool ptDiagramData::parameterInfo(const ParId& pid, float& def, bool& interpok,
 //      interpok= ok to interpolate values
 //      spreadok= if !interpok, spread datavalues
 {
+  METLIBS_LOG_SCOPE();
   if (pid.alias == A_UNDEF)
     return false;
   std::string alias = pid.alias;
@@ -2757,7 +2752,7 @@ bool ptDiagramData::parameterInfo(const ParId& pid, float& def, bool& interpok,
     spreadok = pai.spreadok;
     return true;
   }
-  cerr << "ptDiagramData::parameterInfo Id not found:" << pid << endl;
+  METLIBS_LOG_ERROR("Id not found:" << pid);
   return false;
 }
 
@@ -2766,6 +2761,7 @@ bool ptDiagramData::parameterInfo(const ParId& pid, parameter_info& pai)
 // input: one parameter id
 // out: parameter_info
 {
+  METLIBS_LOG_SCOPE();
   if (pid.alias == A_UNDEF)
     return false;
   std::string alias = pid.alias;
@@ -2774,7 +2770,7 @@ bool ptDiagramData::parameterInfo(const ParId& pid, parameter_info& pai)
     pai = parInfo[alias];
     return true;
   }
-  cerr << "ptDiagramData::parameterInfo Id not found:" << pid << endl;
+  METLIBS_LOG_ERROR("Id not found:" << pid);
   return false;
 }
 
@@ -2817,6 +2813,7 @@ int ptDiagramData::makeOneParameter(const ParId& pid, const int tlindex,
 // interpolate wp's data to remove gaps of default values
 void ptDiagramData::interpData(const int idx, vector<bool>& locked)
 {
+  METLIBS_LOG_SCOPE();
   // 1. find undefined timepoints
   // 2. find neighboring defined timepoints
   // 3. if two neighbors: linear interpolation
@@ -2864,7 +2861,7 @@ void ptDiagramData::interpData(const int idx, vector<bool>& locked)
         rightd = parList[idx].Data(right, l);
         leftd = rightd;
       } else {
-        cerr << "ptDiagramData::interpData internal error" << endl;
+        METLIBS_LOG_ERROR("internal error");
         continue;
       }
       // calculate slope of interpolating curve
@@ -2938,6 +2935,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
     const vector<ParId>& xtramod, // sec. model values
     const vector<time_interval>& intervals)
 {
+  METLIBS_LOG_SCOPE();
   ErrorFlag error;
   WeatherParameter inpwp, curwp;
   unsigned int i, j;
@@ -2950,24 +2948,19 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
 
   if (tempmod.size() != destmod.size() || tempmod.size() != subjmod.size()
       || tempmod.size() != mainmod.size() || tempmod.size() != xtramod.size()) {
-    cerr << "++++++++++++++++OBS! ptDiagramData::makeDatasets wrong sizes"
-        << endl;
-    cerr << "tempmod:" << tempmod.size() << endl;
-    cerr << "destmod:" << destmod.size() << endl;
-    cerr << "subjmod:" << subjmod.size() << endl;
-    cerr << "mainmod:" << mainmod.size() << endl;
-    cerr << "xtramod:" << xtramod.size() << endl;
+    METLIBS_LOG_ERROR("wrong sizes:  tempmod:" << tempmod.size() << " destmod:" << destmod.size() << " subjmod:" << subjmod.size()
+                                               << " mainmod:" << mainmod.size() << " xtramod:" << xtramod.size());
     return;
   }
 
   if (!intervals.size()) {
-    cerr << "ptDiagramData::makeDatasets error: intervals.size()==0" << endl;
+    METLIBS_LOG_ERROR("intervals.size()==0");
     return;
   }
   // check intervals
   for (i = 0; i < intervals.size(); i++)
     if (intervals[i].from < intervals[i].until && intervals[i].step == 0) {
-      cerr << "Illegal stepsize in time-interval: 0" << endl;
+      METLIBS_LOG_ERROR("Illegal stepsize in time-interval: 0");
       return;
     }
   // make new timeline
@@ -3006,8 +2999,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
     //     cerr << " has index: " << tempindex << endl;
 
     if (tempindex == -1) {
-      cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
-          << endl;
+      METLIBS_LOG_ERROR("Could not make wp:" << tempid);
       // This goes wrong after we removed libParameter. In preliminary tests
       // there was no negative effect on this - Libparameter has to be avoided
       // due to its ancient lex parser
@@ -3076,8 +3068,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
         }
 
       if (!anyp) {
-        cerr << destid << " does not contain any real data, do an update.."
-            << endl;
+        METLIBS_LOG_INFO(destid << " does not contain any real data, do an update..");
         UpdateOneParameter(destid);
       }
 
@@ -3087,8 +3078,7 @@ void ptDiagramData::makeDatasets(const vector<ParId>& tempmod, // work buffer
       // .. and clear modification flags
       parList[tempindex].clearTempDirty();
     } else {
-      cerr << "PtDiagramData::makeDatasets error: Tempid disappeared:"
-          << tempid << endl;
+      METLIBS_LOG_ERROR("Tempid disappeared:" << tempid);
     }
   }
 }
@@ -3108,7 +3098,7 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
   ParId tempid, destid, subjid, mainid, xtraid, xtra2id;
 
   if (!inptline.size()) {
-    cerr << "ptDiagramData::makeDatasets error: inputtimes.size()==0" << endl;
+    METLIBS_LOG_ERROR("inputtimes.size()==0");
     return;
   }
 
@@ -3137,8 +3127,7 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
   tempindex = makeOneParameter(tempid, tlindex, inptline.size());
 
   if (tempindex == -1) {
-    cerr << "ptDiagramData::makeDatasets error: Could not make wp:" << tempid
-        << endl;
+    METLIBS_LOG_ERROR("Could not make wp:" << tempid);
     return;
     // This goes wrong after we removed libParameter. In preliminary tests
     // there was no negative effect on this - Libparameter has to be avoided
@@ -3204,8 +3193,7 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
       }
 
     if (!anyp) {
-      cerr << destid << " does not contain any real data, doing an update.."
-          << endl;
+      METLIBS_LOG_INFO(destid << " does not contain any real data, doing an update..");
       UpdateOneParameter(destid);
     }
 
@@ -3215,8 +3203,7 @@ void ptDiagramData::makeDatasets(const datasetparam& dsp,
     // .. and clear modification flags
     parList[tempindex].clearTempDirty();
   } else {
-    cerr << "PtDiagramData::makeDatasets error: Tempid disappeared:" << tempid
-        << endl;
+    METLIBS_LOG_ERROR("Tempid disappeared:" << tempid);
   }
 }
 
@@ -3404,6 +3391,7 @@ float ptDiagramData::calcCMC_(float hst, float hs, float tm01, float tm02)
 
 void ptDiagramData::makeWeatherSymbols_(ParId p)
 {
+  METLIBS_LOG_SCOPE();
   unsigned int i;
   int j;
   int tlidx;
@@ -3473,8 +3461,7 @@ void ptDiagramData::makeWeatherSymbols_(ParId p)
     for (i = 0; i < symbols.size(); i++) {
       int cn = symbols[i].customNumber();
       if (cn == 999) {
-        cerr << i << " Symbolmaker Error:" << symbols[i].customName()
-                                                                        << " number:" << symbols[i].customNumber() << endl;
+        METLIBS_LOG_ERROR(i << " Symbolmaker Error:" << symbols[i].customName() << " number:" << symbols[i].customNumber());
         cn = 0;
       }
       termin.push_back(symbols[i].getTime());
@@ -3644,6 +3631,7 @@ void ptDiagramData::makeYrWeatherSymbols(ParId /*p*/)
 
 void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 {
+  METLIBS_LOG_SCOPE();
   unsigned int i;
   int j;
   int tlidx;
@@ -3669,8 +3657,7 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 
   if (update) {
     if (!findParameter(p, wpidx, &error)) {
-      cerr << "_makeWeatherSymbols_new: WeatherParameter:" << p << " not found"
-          << endl;
+      METLIBS_LOG_ERROR("WeatherParameter:" << p << " not found");
       return;
     }
   }
@@ -3739,7 +3726,7 @@ void ptDiagramData::makeWeatherSymbols_new_(ParId p, bool update)
 
     if (update) {
       if (termin.size() != symbols.size()) {
-        cerr << "Catastrophic: termin.size()!=symbols.size()" << endl;
+        METLIBS_LOG_ERROR("Catastrophic: termin.size()!=symbols.size()");
         return;
       }
       j = termin.size();
@@ -3832,7 +3819,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
         if ((tlIndex = timeLine.Exist(tline)) == -1) {
           tlIndex = addTimeLine(tline);
           if (tlIndex == -1) {
-            cerr << "Too many timelines! giving up this parameter" << endl;
+            METLIBS_LOG_WARN("Too many timelines! giving up this parameter");
             continue;
           }
           progLines.push_back(pline);
@@ -3860,7 +3847,7 @@ bool ptDiagramData::fetchDataFromFile(DataStream* pfile,
           if ((tlIndex = timeLine.Exist(tline)) == -1) {
             tlIndex = addTimeLine(tline);
             if (tlIndex == -1) {
-              cerr << "Too many timelines! giving up this parameter" << endl;
+              METLIBS_LOG_WARN("Too many timelines! giving up this parameter");
               continue;
             }
             progLines.push_back(pline);
@@ -3918,14 +3905,14 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
     const miPosition& stat, const vector<int>& wpindexes, bool append,
     ErrorFlag* ef, bool complete_write, bool write_submodel)
 {
-  int i;
+  METLIBS_LOG_SCOPE();
   // first save timelines, parameterlist, modellist and position-info
   // to DataStream. Then call DataStream.writeData
 
 
   if (!pfile->isOpen())
     if (!pfile->openStreamForWrite(ef)) {
-      cerr << "DiagramData: feilet i stream->openStreamForWrite" << endl;
+      METLIBS_LOG_ERROR("problem in stream->openStreamForWrite");
       return false;
     }
 
@@ -3946,31 +3933,30 @@ bool ptDiagramData::writeWeatherparametersToFile(DataStream* pfile,
     pline = progLines[0];
 
   if (!pfile->putTimeLine(timeLine, pline, ef)) {
-    cerr << "DiagramData: Feilet i putTimeline" << endl;
+    METLIBS_LOG_ERROR("problem i putTimeline");
     return false;
   }
-  if (wpindexes.size() == 0) { // write all parameters
-    for (i = 0; i < (int)parList.size(); i++) {
-      if (!pfile->putOnePar(parList[i], ef)) {
-        cerr << "Kunne ikke skrive ut parameter:" << parList[i] << endl;
+  if (wpindexes.empty()) { // write all parameters
+    for (auto& wp : parList) {
+      if (!pfile->putOnePar(wp, ef)) {
+        METLIBS_LOG_ERROR("Kunne ikke skrive ut parameter:" << wp);
       }
     }
   } else { // write the parameters specified in wpindexes
-    for (i = 0; i < (int)wpindexes.size(); i++) {
-      if (wpindexes[i] < 0 || wpindexes[i] >= (int)parList.size()) {
-        cerr << "Illegal parameterindex:" << wpindexes[i] << endl;
+    for (const int wpi : wpindexes) {
+      if (wpi < 0 || wpi >= (int)parList.size()) {
+        METLIBS_LOG_ERROR("Illegal parameterindex:" << wpi);
         continue;
       }
-      if (!pfile->putOnePar(parList[wpindexes[i]], ef)) {
-        cerr << "Kunne ikke skrive ut parameter:" << parList[wpindexes[i]]
-                                                             << endl;
+      if (!pfile->putOnePar(parList[wpi], ef)) {
+        METLIBS_LOG_ERROR("Kunne ikke skrive ut parameter:" << parList[wpi]);
       }
     }
   }
 
   int modIndex = 0;
   if (!pfile->writeData(statIndex, modIndex, ef, complete_write, write_submodel)) {
-    cerr << "DiagramData: Feilet i writeData" << endl;
+    METLIBS_LOG_ERROR("Feilet i writeData");
     return false;
   }
 
@@ -4050,6 +4036,7 @@ bool ptDiagramData::addTimePoint(const miutil::miTime& tp, int tlIndex, ErrorFla
 bool ptDiagramData::makeVector(const ParId& comp1, const ParId& comp2,
     const ParId& result, bool polar)
 {
+  METLIBS_LOG_SCOPE();
   int cidx1, cidx2, i;
   ErrorFlag ef;
   WeatherParameter wp1, wp2, wpresult;
@@ -4057,9 +4044,8 @@ bool ptDiagramData::makeVector(const ParId& comp1, const ParId& comp2,
   if (findParameter(comp1, cidx1, &ef) && findParameter(comp2, cidx2, &ef)) {
     if (copyParameter(cidx1, wp1, &ef) && copyParameter(cidx2, wp2, &ef)) {
       if (wp1.size() != wp2.size()) {
-        cerr << "wp sizes not matching making vector [" << result << "] from ["
-            << comp1 << "] (size:" << wp1.size() << ") and [" << comp2
-            << "] (size:" << wp2.size() << ")" << endl;
+        METLIBS_LOG_ERROR("wp sizes not matching making vector [" << result << "] from [" << comp1 << "] (size:" << wp1.size() << ") and [" << comp2
+                                                                  << "] (size:" << wp2.size() << ")");
         return false;
       }
       wpresult.setDims(wp1.size(), 2);
@@ -4087,6 +4073,7 @@ bool ptDiagramData::makeVector(const ParId& comp1, const ParId& comp2,
 bool ptDiagramData::makePolarVector(const ParId& comp1, const ParId& comp2,
     const ParId& result, const float& /*zangle*/, const int& /*rotsign*/)
 {
+  METLIBS_LOG_SCOPE();
   int cidx1, cidx2, i;
   ErrorFlag ef;
   WeatherParameter wp1, wp2, wpresult;
@@ -4094,9 +4081,8 @@ bool ptDiagramData::makePolarVector(const ParId& comp1, const ParId& comp2,
   if (findParameter(comp1, cidx1, &ef) && findParameter(comp2, cidx2, &ef)) {
     if (copyParameter(cidx1, wp1, &ef) && copyParameter(cidx2, wp2, &ef)) {
       if (wp1.size() != wp2.size()) {
-        cerr << "wp sizes not matching making polar vector [" << result
-            << "] from [" << comp1 << "] (size:" << wp1.size() << ") and ["
-            << comp2 << "] (size:" << wp2.size() << ")" << endl;
+        METLIBS_LOG_ERROR("wp sizes not matching making polar vector [" << result << "] from [" << comp1 << "] (size:" << wp1.size() << ") and [" << comp2
+                                                                        << "] (size:" << wp2.size() << ")");
         return false;
       }
       wpresult.setDims(wp1.size(), 2);
@@ -4139,7 +4125,7 @@ bool ptDiagramData::makePolarVector(const ParId& comp1, const ParId& comp2,
 bool ptDiagramData::makeCartesianVector(const ParId& comp1, const ParId& comp2,
     const ParId& result, const float& zangle, const int& rotsign)
 {
-  //cerr << "Making cartesian vector:" << result << endl;
+  METLIBS_LOG_SCOPE();
 
   int cidx1, cidx2, i;
   ErrorFlag ef;
@@ -4148,9 +4134,8 @@ bool ptDiagramData::makeCartesianVector(const ParId& comp1, const ParId& comp2,
   if (findParameter(comp1, cidx1, &ef) && findParameter(comp2, cidx2, &ef)) {
     if (copyParameter(cidx1, wp1, &ef) && copyParameter(cidx2, wp2, &ef)) {
       if (wp1.size() != wp2.size()) {
-        cerr << "wp sizes not matching making cartesian vector [" << result
-            << "] from [" << comp1 << "] (size:" << wp1.size() << ") and ["
-            << comp2 << "] (size:" << wp2.size() << ")" << endl;
+        METLIBS_LOG_ERROR("wp sizes not matching making cartesian vector [" << result << "] from [" << comp1 << "] (size:" << wp1.size() << ") and [" << comp2
+                                                                            << "] (size:" << wp2.size() << ")");
         return false;
       }
       //cerr << "here we go.." << endl;
@@ -4262,6 +4247,7 @@ void ptDiagramData::setStationFromLatLon(double lat, double lon, const std::stri
 
 bool ptDiagramData::fetchDataFromStream(AbstractDataStream* stream, bool dropIfEmpty)
 {
+  METLIBS_LOG_SCOPE();
   if (!stream)
     return false;
 
@@ -4282,7 +4268,7 @@ bool ptDiagramData::fetchDataFromStream(AbstractDataStream* stream, bool dropIfE
       if ((tlIndex = timeLine.Exist(tline)) == -1) {
         tlIndex = addTimeLine(tline);
         if (tlIndex == -1) {
-          cerr << "Too many timelines! giving up this parameter" << endl;
+          METLIBS_LOG_WARN("Too many timelines! giving up this parameter");
           continue;
         }
         progLines.push_back(pline);

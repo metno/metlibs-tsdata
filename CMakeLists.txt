@@ -16,8 +16,10 @@ SET (PKGS_CORE
   metlibs-putools>=8.0.0
   metlibs-pudatatypes>=6.0.0
   metlibs-pumet>=7.0.0
+  metlibs-puctools>=6.0.0
+  metlibs-milogger>=6.0.0
 )
-PKG_CHECK_MODULES(PC_METLIBS REQUIRED ${PKGS_CORE} metlibs-puctools>=6.0.0)
+PKG_CHECK_MODULES(PC_METLIBS REQUIRED ${PKGS_CORE})
 
 IF (ENABLE_HDF4)
   #SET (PKGS_HDF4 )

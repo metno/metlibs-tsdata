@@ -2,7 +2,7 @@ Source: metlibs-tseries-tsdata
 Priority: optional
 Maintainer: MET Norway <diana@met.no>
 Build-Depends: debhelper (>= 11),
- cmake,
+ cmake (>= 3.10),
  pkg-config,
  metlibs-milogger-dev (>= 6.0.0),
  metlibs-puctools-dev (>= 6.0.0),

@@ -20,7 +20,6 @@ SET(tsdata_core_SOURCES
   ptSHCinfo.cc
   ptWeatherParameter.cc
   DynamicFunction.cc
-  KlimaStream.cc
 )
 
 METNO_HEADERS (tsdata_core_HEADERS tsdata_core_SOURCES ".cc" ".h")

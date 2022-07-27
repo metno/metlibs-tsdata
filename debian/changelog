@@ -1,3 +1,10 @@
+metlibs-tseries-tsdata (7.1.0-1) RELEASED; urgency=medium
+
+  * drop wdb, hdf4, klima
+  * use metlibs-milogger
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Mon, 25 Jul 2022 08:00:08 +0200
+
 metlibs-tseries-tsdata (7.0.7) RELEASED; urgency=medium
 
   * Small fix in replaceEnv

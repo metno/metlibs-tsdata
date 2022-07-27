@@ -1,4 +1,4 @@
 Name: tsData
 Description: MET Norway time series -- all
 Version: @TSDATA_PVERSION_FULL@
-Requires: metlibs-tsdata-core = @TSDATA_PVERSION_FULL@, metlibs-tsdata-fimex = @TSDATA_PVERSION_FULL@, metlibs-tsdata-mora@METNO_QT_SUFFIX@ = @TSDATA_PVERSION_FULL@
+Requires: metlibs-tsdata-core = @TSDATA_PVERSION_FULL@@TSDATA_PC_FIMEX@@TSDATA_PC_SMHI_MORA@

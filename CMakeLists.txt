@@ -36,11 +36,15 @@ SET(lib_name "metlibs-tsdata")
 
 METNO_GEN_PKGCONFIG(metlibs-tsdata-core.pc.in "${lib_name}-core.pc"
   "${PKGS_CORE}" "" "" "")
-METNO_GEN_PKGCONFIG(metlibs-tsdata-fimex.pc.in "${lib_name}-fimex.pc"
+IF (ENABLE_FIMEX)
+  METNO_GEN_PKGCONFIG(metlibs-tsdata-fimex.pc.in "${lib_name}-fimex.pc"
   "${PKGS_FIMEX}" "" "" "")
+  SET (TSDATA_PC_FIMEX ", metlibs-tsdata-fimex = ${TSDATA_PVERSION_FULL}")
+ENDIF()
 IF (ENABLE_SMHI_MORA)
   METNO_GEN_PKGCONFIG(metlibs-tsdata-mora.pc.in "${lib_name}-mora${METNO_QT_SUFFIX}.pc"
     "" "" "" "")
+  SET (TSDATA_PC_SMHI_MORA ", metlibs-tsdata-mora${METNO_QT_SUFFIX} = ${TSDATA_PVERSION_FULL}")
 ENDIF ()
 
 CONFIGURE_FILE(tsData.pc.in tsData.pc @ONLY)

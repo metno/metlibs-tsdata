@@ -1586,10 +1586,10 @@ bool HDFFile::_readModList(ErrorFlag* ef)
 	  if (temptext[j]!='\0')
 	    tmp+= temptext[j];
 	  else if (tmp.length() > 0){
-	    miutil::replace(tmp, "@","Ø");
-	    miutil::replace(tmp, "$","Å");
-	    miutil::replace(tmp, "#","Æ");
-	    tempMod.textlines.push_back(tmp);
+            miutil::replace(tmp, "@", "\xC3\x98"); // O-slash
+            miutil::replace(tmp, "$", "\xC3\x85"); // A-ring
+            miutil::replace(tmp, "#", "\xC3\x86"); // AE
+            tempMod.textlines.push_back(tmp);
 	    tmp= "";
 	  }
 	}

@@ -1,9 +1,0 @@
-prefix=@pc_prefix@
-libdir=@pc_libdir@
-includedir=@pc_includedir@
-
-Name: @lib_name@-hdf4
-Description: MET Norway time series -- hdf
-Version: @TSDATA_PVERSION_FULL@
-Requires: @lib_name@-core = @TSDATA_PVERSION_FULL@
-Libs: -l@lib_name@-hdf4 @HDF4_PC_LIBRARIES@

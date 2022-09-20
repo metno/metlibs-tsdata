@@ -101,7 +101,6 @@ private:
   int  increment;
   void createTimeLine();
   // pets stuff
-  std::vector<int>            progline;      // progline - uninitialised
   std::vector<miutil::miTime> basetimeline;  // basetimeline from file
 
   bool readFromFimexSlice(FimexParameter par);
@@ -133,11 +132,7 @@ public:
   static void setFimexParameters(const std::vector<pets::FimexParameter>& par);
   static const std::vector<std::string>& getAllParameters();
 
-  /// Implemented from DataStream interface -------------------------------
-
   void openStream();
-
-  bool closeStream();   // unimplemented
 
   bool isOpen() const { return is_open; }
   bool hasParameter(const std::string& parametername);
@@ -145,8 +140,6 @@ public:
   // set the raw position list
   void setPositions();
 
-
-  void setIncrement(int incr);
   // use the position list to interpolate the data
   bool createPoslistInterpolator();
 
@@ -154,11 +147,11 @@ public:
   boost::posix_time::ptime getReferencetime();
   bool hasCompleteDataset(const std::string& placename,float lat, float lon, std::vector<ParId> inpar);
 
+  /// Implemented from AbstractDataStream interface -------------------------------
 
-  bool getOnePar(int, WeatherParameter&, ErrorFlag* ef) /* override */;
-  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef) /* override */;
-
-  int numParameters() /* override */;
+  bool getOnePar(int, WeatherParameter&, ErrorFlag* ef) override;
+  bool getTimeLine(int index, std::vector<miutil::miTime>& tline, std::vector<int>& pline, ErrorFlag* ef) override;
+  int numParameters() override;
 };
 
 bool fetchDataFromFimex(ptDiagramData* diagram, FimexStream* fimex, double lat, double lon, const std::string& fimexname,

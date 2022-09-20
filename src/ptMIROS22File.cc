@@ -25,20 +25,18 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "ptMIROS22File.h"
 
 #include <puTools/miStringFunctions.h>
 
 #include <fstream>
-#include <iostream>
 #include <set>
 #include <string>
 
 #include <glob.h>
+
+#define MILOGGER_CATEGORY "metlibs.tsdata.MIROS22File"
+#include <miLogger/miLogging.h>
 
 typedef std::vector<std::string> string_v;
 
@@ -66,8 +64,9 @@ bool MIROS22File::read(const std::string& location,
   bool allpars=false;
   res= cant_open;
 
-  ifstream f(filename.c_str());
-  if (!f) return false;
+  ifstream f(filename);
+  if (!f)
+    return false;
 
   res= bad_file;
   std::string buf;
@@ -200,23 +199,22 @@ void MIROS22Definition::set(const std::string& fn)
 
 std::string MIROS22Definition::replaceEnv(std::string token)
 {
-  cerr << "[INFO] Found Path " <<  token << endl;
+  METLIBS_LOG_INFO("Found Path '" << token << "'");
   while(true) {
     if(token.find("${") < token.npos) {
       int start = token.find("${",0) + 2;
       int len   = token.find("}",start) - start;
       
       if( len > 0 ) {
-      
-	string s = token.substr(start, len);
-	char*  env =  getenv(s.c_str());
-	if(env) {
-	  token.replace(start-2, len+3, env);
-	  continue;
-	}
+        string s = token.substr(start, len);
+        char* env = getenv(s.c_str());
+        if (env) {
+          token.replace(start - 2, len + 3, env);
+          continue;
+        }
       }
     }
-    cerr << "[INFO] Reading D22 from " << token << endl;  
+    METLIBS_LOG_INFO("Reading D22 from '" << token << "'");
     return token;
   }
 }
@@ -224,10 +222,13 @@ std::string MIROS22Definition::replaceEnv(std::string token)
 
 bool MIROS22Definition::scan()
 {
-  if (filename.empty()) return false;
+  METLIBS_LOG_SCOPE();
+  if (filename.empty())
+    return false;
 
-  ifstream f(filename.c_str());
-  if (!f) return false;
+  ifstream f(filename);
+  if (!f)
+    return false;
 
   enum bstatus {
     no_block,
@@ -255,7 +256,7 @@ bool MIROS22Definition::scan()
     } else if (s == parameter_block) {
       vs1= miutil::split(buf, "=");
       if (vs1.size()!=2){
-        cerr << "MIROS22Definition Warning: Bad parameter definition:" << buf << endl;
+        METLIBS_LOG_WARN("Bad parameter definition:" << buf);
         continue;
       }
       // parse ParId
@@ -263,12 +264,12 @@ bool MIROS22Definition::scan()
       // parse MIROS def
       vs2= miutil::split(vs1[1], ",");
       if (vs2.size()<3){
-        cerr << "MIROS22Definition Warning: Bad MIROS definition:" << buf << endl;
+        METLIBS_LOG_WARN("Bad MIROS definition:" << buf);
         continue;
       }
       for (int i=0; i<3; i++)
         if (vs2[i].length()==0){
-          cerr << "MIROS22Definition Warning: Bad MIROS definition:" << buf << endl;
+          METLIBS_LOG_WARN("Bad MIROS definition:" << buf);
           continue;
         }
       int n= pars.size();
@@ -282,12 +283,12 @@ bool MIROS22Definition::scan()
       if (miutil::contains(buf, "Location=")){
         vs1= miutil::split(buf, "=");
         if (vs1.size()<2){
-          cerr << "MIROS22Definition Warning: Bad Location definition:" << buf << endl;
+          METLIBS_LOG_WARN("Bad Location definition:" << buf);
           continue;
         }
         vs2= miutil::split(vs1[1], ";");
         if (vs2.size()<2){
-          cerr << "MIROS22Definition Warning: Bad Location definition:" << buf << endl;
+          METLIBS_LOG_WARN("Bad Location definition:" << buf);
           continue;
         }
         locs.push_back(loc);
@@ -295,17 +296,17 @@ bool MIROS22Definition::scan()
         locs[n].name= vs2[1];
       } else if (miutil::contains(buf, "Position=")){
         if (n==0){
-          cerr << "MIROS22Definition Warning: Define Location before Position:" << buf << endl;
+          METLIBS_LOG_WARN("Define Location before Position:" << buf);
           continue;
         }
         vs1= miutil::split(buf, "=");
         if (vs1.size()<2){
-          cerr << "MIROS22Definition Warning: Bad Position definition:" << buf << endl;
+          METLIBS_LOG_WARN("Bad Position definition:" << buf);
           continue;
         }
         vs2= miutil::split(vs1[1], ",");
         if (vs2.size()<2){
-          cerr << "MIROS22Definition Warning: Bad Position definition:" << buf << endl;
+          METLIBS_LOG_WARN("Bad Position definition:" << buf);
           continue;
         }
         float lat= atof(vs2[0].c_str());
@@ -314,12 +315,12 @@ bool MIROS22Definition::scan()
             0,0,locs[n-1].loc.Name());
       } else if (miutil::contains(buf, "Filepath=")){
         if (n==0){
-          cerr << "MIROS22Definition Warning: Define Location before Filepath:" << buf << endl;
+          METLIBS_LOG_WARN("Define Location before Filepath:" << buf);
           continue;
         }
         vs1= miutil::split(buf, "=");
         if (vs1.size()<2){
-          cerr << "MIROS22Definition Warning: Bad Filepath definition:" << buf << endl;
+          METLIBS_LOG_WARN("Bad Filepath definition:" << buf);
           continue;
         }
         locs[n-1].filepath= replaceEnv(vs1[1]);
@@ -426,7 +427,8 @@ bool MIROS22Server::openStreamForWrite(ErrorFlag*)
 bool MIROS22Server::readData(const int posIndex,
     const ParId& modid, const miTime& start, const miTime& stop, ErrorFlag* ef)
 {
-//  cerr << "Requesting MIROS read for position:" << posIndex << endl;
+  METLIBS_LOG_SCOPE();
+  //  cerr << "Requesting MIROS read for position:" << posIndex << endl;
   if (posIndex < 0 || posIndex >= npos) {
     *ef = DF_RANGE_ERROR;
     return false;
@@ -462,9 +464,7 @@ bool MIROS22Server::readData(const int posIndex,
       t2.hour(), min10, 0);
 
   *ef = DF_DATA_READING_ERROR;
-  cerr << "Reading d22-data for position:" << mirosdef.locs[posIndex].loc.Name()
-       << " and model:" << modname << " from:" << t1 << " until:"
-       << t2 << endl;
+  METLIBS_LOG_INFO("Reading d22-data for position:" << mirosdef.locs[posIndex].loc.Name() << " and model:" << modname << " from:" << t1 << " until:" << t2);
 
   vector<MIROS22parset> totvps;
   std::string filepath= mirosdef.locs[posIndex].filepath;
@@ -508,7 +508,7 @@ bool MIROS22Server::readData(const int posIndex,
       MIROS22File file(filename);
       MIROS22File::status stat;
       if (!file.read(mirosdef.locs[posIndex].name,date,vps,stat)){
-        cerr << "Mirosfile:" << filename <<  " returned bad status:" << stat << endl;
+        METLIBS_LOG_ERROR("Mirosfile:" << filename << " returned bad status:" << stat);
       }
       // push on total vector
       totvps.push_back(vps[0]);

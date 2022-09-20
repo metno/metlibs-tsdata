@@ -1,9 +1,0 @@
-prefix=@pc_prefix@
-libdir=@pc_libdir@
-includedir=@pc_includedir@
-
-Name: @lib_name@-wdb
-Description: MET Norway time series -- wdb
-Version: @TSDATA_PVERSION_FULL@
-Requires: @lib_name@-core = @TSDATA_PVERSION_FULL@, @pc_deps@
-Libs: -l@lib_name@-wdb

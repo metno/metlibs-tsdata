@@ -1,14 +1,13 @@
 
 #include "DynamicFunction.h"
-#include <iostream>
-#include <math.h>
-#include <stdlib.h>
+
+#include <cmath>
+#include <cstdlib>
 
 using namespace std;
 
 namespace pets {
 namespace math {
-
 
 DynamicFunction::DynamicFunction(string nf, double f)
     : factor(f)
@@ -16,7 +15,6 @@ DynamicFunction::DynamicFunction(string nf, double f)
 {
   txt=nf;
   if(!nf.empty()) {
-
     int pos     = nf.find_first_of("+-*/",0);
     int nextpos = nf.find_first_of("+-*/",pos+1);
 
@@ -41,14 +39,11 @@ DynamicFunction::DynamicFunction(string nf, double f)
   }
 }
 
-
-
 void DynamicFunction::calc(double& res)
 {
   if(next)
     next->calc(res);
 }
-
 
 void Add::calc(double& res)
 {
@@ -57,14 +52,12 @@ void Add::calc(double& res)
     next->calc(res);
 }
 
-
 void Divide::calc(double& res)
 {
   res/=factor;
   if(next)
     next->calc(res);
 }
-
 
 void Multiply::calc(double& res)
 {
@@ -73,7 +66,6 @@ void Multiply::calc(double& res)
     next->calc(res);
 }
 
-
 void Substract::calc(double& res)
 {
   res-=factor;
@@ -81,11 +73,5 @@ void Substract::calc(double& res)
     next->calc(res);
 }
 
-
-}
-};
-
-
-
-
-
+} // namespace math
+} // namespace pets

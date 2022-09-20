@@ -101,7 +101,7 @@ struct TimeLineItem {
   {
     return l.time <= r;
   }
-  friend std::ostream& operator<<(std::ostream& out, /*const*/TimeLineItem& t)
+  friend std::ostream& operator<<(std::ostream& out, const TimeLineItem& t)
   {
     std::ostringstream s;
     for (unsigned int i = 0; i < MAXTIMELINES; i++)
@@ -157,13 +157,12 @@ public:
 
   miutil::miTime operator[](int i)
   {
-    miutil::miTime tmp;
-    if (i < 0 || i >= (int)data.size())
-      return tmp;
+    if (i < 0 || i >= size())
+      return miutil::miTime();
     return data[i].time;
   }
 
-  friend std::ostream& operator<<(std::ostream& out, /*const*/TimeLine& tl)
+  friend std::ostream& operator<<(std::ostream& out, const TimeLine& tl)
   {
     for (unsigned int i = 0; i < tl.data.size(); ++i)
       out << i << ": " << tl.data[i] << '\n';
@@ -236,11 +235,11 @@ public:
 
   bool Timeline(const int& index, std::vector<miutil::miTime>& tline)
   {
-    tline.erase(tline.begin(), tline.end());
+    tline.clear();
     if (index >= 0 && index < (int)MAXTIMELINES) {
-      for (unsigned int i = 0; i < data.size(); i++)
-        if (data[i].flag[index])
-          tline.push_back(data[i].time);
+      for (const auto& d : data)
+        if (d.flag[index])
+          tline.push_back(d.time);
       return true;
     }
     return false;
@@ -249,8 +248,9 @@ public:
   // check if the timeline corresponding to tline already exist
   int Exist(const std::vector<miutil::miTime>& tline)
   {
-    if (tline.size() == 0)
+    if (tline.empty())
       return -1;
+
     unsigned int i, j;
     int k;
     std::vector<unsigned int> indices;
@@ -284,8 +284,8 @@ public:
   // if indices>0, only keep these timelines
   void cleanup(std::vector<int>& indices)
   {
-    unsigned int i, j, k;
-    if (indices.size() > 0) {
+    unsigned int j, k;
+    if (!indices.empty()) {
       // sort the indices
       sort(indices.begin(), indices.end());
       // check each separate timeline
@@ -295,41 +295,38 @@ public:
           if (k < (indices.size() - 1))
             k++;
         } else
-          for (i = 0; i < data.size(); i++)
-            data[i].flag[j] = false;
+          for (auto& d : data)
+            d.flag[j] = false;
       }
     }
     // check for unused timepoints
-    bool used;
     std::vector<miutil::miTime> toberemoved;
-    for (i = 0; i < data.size(); i++) {
-      used = false;
-      for (j = 0; j < MAXTIMELINES; j++)
-        used = used || data[i].flag[j];
+    for (const auto& d : data) {
+      bool used = false;
+      for (j = 0; !used && j < MAXTIMELINES; j++)
+        used = used || d.flag[j];
       if (!used)
-        toberemoved.push_back(data[i].time);
+        toberemoved.push_back(d.time);
     }
     // remove them
-    if (toberemoved.size())
-      for (i = 0; i < toberemoved.size(); i++) {
-        for (std::vector<TimeLineItem>::iterator p = data.begin(); p < data.end(); ++p) {
-          if (toberemoved[i] == p->time) {// found position
-            data.erase(p);
-            break;
-          }
+    for (const auto& r : toberemoved) {
+      for (std::vector<TimeLineItem>::iterator p = data.begin(); p < data.end(); ++p) {
+        if (r == p->time) { // found position
+          data.erase(p);
+          break;
         }
       }
+    }
   }
 
   // find first free timeline and return index.
   // returns -1 if no free timelines
   int freeIndex()
   {
-    unsigned int i, j;
-    for (j = 0; j < MAXTIMELINES; j++) {
+    for (size_t j = 0; j < MAXTIMELINES; j++) {
       bool used = false;
-      for (i = 0; i < data.size(); i++) {
-        if ((used = data[i].flag[j]))
+      for (const auto& d : data) {
+        if ((used = d.flag[j]))
           break;
       }
       if (!used)
@@ -343,8 +340,7 @@ public:
   // if new timeline, and timeline class is full: return -1
   int addTimeline(const std::vector<miutil::miTime>& tl)
   {
-    int k;
-    k = Exist(tl);
+    int k = Exist(tl);
     if (k != -1)
       return k;
 
@@ -360,8 +356,8 @@ public:
   {
     if (index < 0 || index >= (int)MAXTIMELINES)
       return;
-    for (unsigned int i = 0; i < data.size(); i++)
-      data[i].flag[index] = false;
+    for (auto& d : data)
+      d.flag[index] = false;
 
     // remove any unused times
     std::vector<int> dummy;

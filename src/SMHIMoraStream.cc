@@ -99,8 +99,14 @@ MoraParameter & MoraParameter::operator=(const MoraParameter & rhs)
   return *this;
 }
 
-// Present in klima stream
-extern size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
+namespace {
+size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
+{
+  string tmp = (char *) buffer;
+  (*(string*) userp) += tmp.substr(0, nmemb);
+  return (size_t) (size * nmemb);
+}
+} // namespace
 
 // Curl or Qt ?
 string MoraStream::getFromHttp(string url)

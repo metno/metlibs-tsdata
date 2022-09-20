@@ -28,17 +28,12 @@
 
 // ptParameterDefinition.cc
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "ptParameterDefinition.h"
 
 #include <puTools/miStringFunctions.h>
 
-#include <fstream>
 #include <algorithm>
-#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace miutil;
@@ -102,27 +97,6 @@ bool operator>(const ParId& lhs, const ParId& rhs)
   return false;
 }
 
-bool ParId::wdbCompare(const ParId& lhs)
-{
-
-  if (lhs.alias != alias)
-    return false;
-
-  if(lhs.submodel != submodel ) {
-    // special case! the raw submodel (dataversion 0 ) has to match exactly
-    if (lhs.submodel ==  "RAW" || submodel == "RAW" )
-      return false;
-    // in any other case, the UNDEF
-    if (lhs.submodel !=  M_UNDEF && submodel != M_UNDEF )
-      return false;
-  }
-
-  if (lhs.model !=  M_UNDEF && model != M_UNDEF  && lhs.model != model )
-    return false;
-  return true;
-
-}
-
 std::string ParId::toString()
 {
   const std::string palias    =  ( alias    != A_UNDEF ? alias    : "x");
@@ -181,28 +155,6 @@ bool ParameterDefinition::getParameter(const Alias& id, Parameter& p) const
     }
   return false;
 }
-
-
-//  NB The following function is based on libParameter and uses an very very very
-//  old lex based parser. Avoid the usage of this function by any means!!!!
-//
-
-// bool ParameterDefinition::readParameters(const std::string& paramdef)
-// {
-//   // Experimental reading of parameter file
-//   paramList.clear();
-//   parameter **parlist;
-//   int npar;
-
-//   parsepardefs(paramdef.c_str(),&parlist,&npar);
-//   for (int i=0; i<npar; i++) {
-//     paramList.push_back(Parameter(*parlist[i]));
-//     free(parlist[i]);
-//   }
-//   free(parlist);
-//   return true;
-// }
-
 
 std::string ParameterDefinition::ParId2Str(ParId p)
 {

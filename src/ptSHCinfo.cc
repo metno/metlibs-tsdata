@@ -25,16 +25,14 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "ptSHCinfo.h"
 
 #include <puTools/miStringFunctions.h>
 
 #include <fstream>
-#include <iostream>
+
+#define MILOGGER_CATEGORY "metlibs.tsdata.SHCinfo"
+#include <miLogger/miLogging.h>
 
 using namespace miutil;
 using namespace std;
@@ -87,14 +85,14 @@ int SHCinfo::highLevel()
 
 bool SHCcollection::readList(const std::string& filename)
 {
-  cerr << "++ READ SHC-information from:" << filename << endl;
+  METLIBS_LOG_SCOPE("READ SHC-information from:" << filename);
   // first clean up
   total.levels.clear();
   list.clear();
 
-  ifstream f(filename.c_str());
+  ifstream f(filename);
   if (!f) {
-    cerr << "ERROR opening file" << endl;
+    METLIBS_LOG_ERROR("could not open file '" << filename << "'");
     return false;
   }
 
@@ -122,8 +120,7 @@ bool SHCcollection::readList(const std::string& filename)
 
     if (miutil::contains(buf, "[LOCATION]")){
       if (numlev<0 || numdir<0){
-        cerr << "directions and levels before locations" << endl;
-        f.close();
+        METLIBS_LOG_ERROR("directions and levels before locations");
         return false;
       }
       list.push_back(info);
@@ -147,9 +144,7 @@ bool SHCcollection::readList(const std::string& filename)
       } else if (miutil::contains(buf, "[values]")){
         mode= read_val;
         if (numdir<0 || numlev<0){
-          cerr << "directions and levels must be defined before values"
-               << endl;
-          f.close();
+          METLIBS_LOG_ERROR("directions and levels must be defined before values");
           return false;
         }
       }
@@ -165,14 +160,12 @@ bool SHCcollection::readList(const std::string& filename)
 
     } else if (miutil::contains(buf, "directions=")){
       if (numdir<0) {
-        cerr << "numdirections before directions" << endl;
-        f.close();
+        METLIBS_LOG_ERROR("numdirections before directions");
         return false;
       }
       const vector<std::string> vvs = miutil::split(vs[1], ",");
       if ((int)vvs.size()!=numdir+1) {
-        cerr << "numdirections doesn't match" << endl;
-        f.close();
+        METLIBS_LOG_ERROR("numdirections doesn't match");
         return false;
       }
       for (int i=0; i<numdir+1; i++)
@@ -181,15 +174,13 @@ bool SHCcollection::readList(const std::string& filename)
     } else if (mode==read_val){
       ilevel++;
       if(ilevel >= numlev){
-        cerr << "Too many levels in [values] block" << endl;
-        f.close();
+        METLIBS_LOG_ERROR("Too many levels in [values] block");
         return false;
       }
       const vector<std::string> vals = miutil::split(buf, ",");
       int nd= vals.size();
       if (nd!=numdir){
-        cerr << "values' number of directions doesn't match" << endl;
-        f.close();
+        METLIBS_LOG_ERROR("values' number of directions doesn't match");
         return false;
       }
       for (int i=0; i<numdir; i++){
@@ -221,6 +212,5 @@ bool SHCcollection::readList(const std::string& filename)
     }
   }
 
-  f.close();
   return true;
 }

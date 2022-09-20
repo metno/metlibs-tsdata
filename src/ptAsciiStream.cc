@@ -25,19 +25,17 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "ptAsciiStream.h"
 #include "puCtools/puMath.h"
 
 #include <cmath>
-#include <iostream>
 #include <fstream>
 
 #include <string.h>
 #include <float.h>
+
+#define MILOGGER_CATEGORY "metlibs.tsdata.AsciiStream"
+#include <miLogger/miLogging.h>
 
 using namespace miutil;
 using namespace std;
@@ -45,16 +43,12 @@ using namespace std;
 AsciiStream::AsciiStream(const std::string& fname)
   : DataStream(fname)
 {
-#ifdef DEBUG
-  cout << "Inside AsciiStream:constructor" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
 }
 
 AsciiStream::~AsciiStream()
 {
-#ifdef DEBUG
-  cout << "Inside AsciiStreams destructor" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   close();
 }
 
@@ -70,9 +64,7 @@ bool AsciiStream::close()
 // return index of station 'statName' in posList, -1 if not found
 int AsciiStream::findStation(const std::string& statName)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::findStation:" << statName << endl;
-#endif
+  METLIBS_LOG_SCOPE(statName);
   int rn=-1, i;
   std::string sname = miutil::to_upper(statName);
   for (i=0; i<npos; ++i) {
@@ -84,20 +76,16 @@ int AsciiStream::findStation(const std::string& statName)
   return rn;
 }
 
-
-bool AsciiStream::getStations(vector<miPosition>& poslist){
-#ifdef DEBUG
-  cout << "AsciiStream::getStations" << endl;
-#endif
+bool AsciiStream::getStations(vector<miPosition>& poslist)
+{
+  METLIBS_LOG_SCOPE();
   poslist= posList;
   return true;
 }
 
-
-bool AsciiStream::getStationSeq(int idx, miPosition& pos){
-#ifdef DEBUG
-  cout << "AsciiStream::getStationSeq" << endl;
-#endif
+bool AsciiStream::getStationSeq(int idx, miPosition& pos)
+{
+  METLIBS_LOG_SCOPE();
   if (idx >= 0 && idx < npos) {
     pos= posList[idx];
     return true;
@@ -146,12 +134,9 @@ int AsciiStream::findModel(const std::string& modelName,
   return rn;
 }
 
-
 int AsciiStream::findDataPar(const ParId& id)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::findDataPar" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   int rn = -1;
   for (int i=0; i<npar; ++i) {
     if (id == parameters[i].Id()) {
@@ -164,9 +149,7 @@ int AsciiStream::findDataPar(const ParId& id)
       
 void AsciiStream::clean()
 {
-#ifdef DEBUG
-  cout << "AsciiStream::clean" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   parameters.clear();
   npar= 0;
   timeLine.clear();
@@ -181,9 +164,7 @@ void AsciiStream::clean()
 
 bool AsciiStream::openStream(ErrorFlag* ef)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::openFileAndReadHeader" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   if (!_openFile(ef))
     return false;
   InfoIsRead = true;
@@ -193,9 +174,7 @@ bool AsciiStream::openStream(ErrorFlag* ef)
 
 bool AsciiStream::openStreamForWrite(ErrorFlag* /*ef*/)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::openFileForWrite" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   return false;
 }
 
@@ -212,12 +191,10 @@ bool AsciiStream::readData(const int posIndex,
                            const miTime& /*stop*/,
 			   ErrorFlag* ef)
 {
+  METLIBS_LOG_SCOPE();
+
   std::string modname;
   int modrun, modidx= -1;
-
-#ifdef DEBUG
-  cout << "AsciiStream::readData" << endl;
-#endif
 
   if (posIndex < 0 || posIndex >= npos) {
     return setErrorFlag(ef, DF_RANGE_ERROR);
@@ -228,10 +205,7 @@ bool AsciiStream::readData(const int posIndex,
   // find name of requested model
   modname = modid.model;
   modrun  = modid.run;
-#ifdef DEBUG
-  cout << "Requested model name:" << modname << endl;
-  cout << "Requested model run :" << modrun << endl;
-#endif
+  METLIBS_LOG_DEBUG("Requested model name:" << modname << " Requested model run :" << modrun);
   if (modname != M_UNDEF) { // check if requested model exists on file
     modidx = findModel(modname, modrun);
     if (modidx==-1) return false;
@@ -313,20 +287,16 @@ bool AsciiStream::readData(const int posIndex,
 	  numTimeLines++;
 	}
 	parameters[ipar].setTimeLineIndex(tlindex);
-#ifdef DEBUG
-	cout << "The full timeline so far:\n" << timeLines << endl;
-#endif
-	// add the progLine
-	//progLines.push_back(ptimes);
+        METLIBS_LOG_DEBUG("The full timeline so far:\n" << timeLines);
+        // add the progLine
+        // progLines.push_back(ptimes);
 
-	// (pid is now fully defined)
+        // (pid is now fully defined)
 	pid.alias = dataList[didx].params[ip];
 	pid.level = int(*leveli);
 	pid.submodel= miutil::from_number(*submi);
 	parameters[ipar].setId(pid);
-#ifdef DEBUG
-	cout << "the complete wp:"<<  parameters[ipar]<<endl;
-#endif
+        METLIBS_LOG_DEBUG("the complete wp:" << parameters[ipar]);
       }
     }
   }
@@ -353,9 +323,7 @@ bool AsciiStream::getTimeLine(int index,
 			      vector<int>& pline,
 			      ErrorFlag* ef)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::getTimeLine" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   if (TimeLineIsRead && timeLines.Timeline(index,tline)) {
     if (index<(int)progLines.size())
       pline = progLines[index];
@@ -370,9 +338,7 @@ bool AsciiStream::putTimeLine(int /*index*/,
 			      vector<int>& pline,
 			      ErrorFlag* ef)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::putTimeLine" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   timeLines.insert(tline,progLines.size());
   progLines.push_back(pline);
   *ef = OK;
@@ -383,10 +349,7 @@ bool AsciiStream::putTimeLine(TimeLine& tl,
 			      vector<int>& pline,
 			      ErrorFlag* ef)
 {
-
-#ifdef DEBUG
-  cout << "AsciiStream::putTimeLine" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   timeLines = tl;
   progLines.push_back(pline);
   *ef = OK;
@@ -395,9 +358,7 @@ bool AsciiStream::putTimeLine(TimeLine& tl,
 
 bool AsciiStream::getOnePar(int index, WeatherParameter& wp, ErrorFlag* ef)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::getOnePar" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   npar= parameters.size();
   if (index < 0 || index >= npar) {
     return setErrorFlag(ef, DF_RANGE_ERROR);
@@ -411,18 +372,14 @@ bool AsciiStream::getOnePar(int index, WeatherParameter& wp, ErrorFlag* ef)
 
 bool AsciiStream::putOnePar(WeatherParameter& /*wp*/, ErrorFlag* /*ef*/)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::putOnePar" << endl;
-#endif
+  METLIBS_LOG_SCOPE();
   return false;
 }
 
 bool AsciiStream::_openFile(ErrorFlag* ef)
 {
-#ifdef DEBUG
-  cout << "AsciiStream::_openFile" << endl;
-#endif
-  ifstream file(Name.c_str());
+  METLIBS_LOG_SCOPE();
+  ifstream file(Name);
   if (!file){
     *ef = DF_FILE_OPEN_ERROR;
     return false;
@@ -447,7 +404,8 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
     miutil::remove(buf, '\n');
     miutil::trim(buf);
 
-    if (buf.length() == 0) continue;
+    if (buf.length() == 0)
+      continue;
 
     if (miutil::contains(miutil::to_upper(buf), "MODEL=")){
       if (!data_saved) dataList.push_back(adata);
@@ -488,25 +446,23 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
     } else if (header_found){
       vt1= miutil::split(buf, " ");
       if (vt1.size() != 2+1+(use_submodel ? 1 : 0)+adata.params.size()){
-	cerr << "AsciiStream error: number of entries in dataline does not match header:"
-	     << buf << endl;
-	return false;
+        METLIBS_LOG_ERROR("number of entries in dataline does not match header:" << buf);
+        return false;
       }
       miTime t;
       std::string times= vt1[0]+" "+vt1[1];
-      if (miTime::isValid(times)) 
-	t.setTime(times);
-      else {
-	cerr << "AsciiStream error: invalid isotime in dataline:"
-	     << buf << endl;
-	return false;
+      if (miTime::isValid(times)) {
+        t.setTime(times);
+      } else {
+        return false;
+        METLIBS_LOG_ERROR("invalid isotime in dataline:" << buf);
       }
       int level= miutil::to_int(vt1[2]);
       int submodel= 0;
       int ds= 3;
       if (use_submodel) {
         submodel= miutil::to_int(vt1[3]);
-	ds= 4;
+        ds = 4;
       }
       AsciiLine line;
       line.time= t;
@@ -514,10 +470,10 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       line.level= level;
       line.submodel= submodel;
       for (size_t j=ds; j<vt1.size(); j++){
-	float f= UNDEF;
-	if (vt1[j] != "-")
-	  f= atof(vt1[j].c_str());
-	line.data.push_back(f);
+        float f = UNDEF;
+        if (vt1[j] != "-")
+          f = atof(vt1[j].c_str());
+        line.data.push_back(f);
       }
       adata.pardata.push_back(line);
 
@@ -527,19 +483,17 @@ bool AsciiStream::_openFile(ErrorFlag* ef)
       
     } else {
       vt1= miutil::split(buf, " ");
-      if (vt1.size() < 2 || 
-	  (miutil::to_upper(vt1[0])!="TIME" || miutil::to_upper(vt1[1])!="LEVEL")){
-	cerr << "AsciiStream error: table-header should start with"
-	     << " \"TIME LEVEL\" " << endl;
-	return false;
+      if (vt1.size() < 2 || (miutil::to_upper(vt1[0]) != "TIME" || miutil::to_upper(vt1[1]) != "LEVEL")) {
+        METLIBS_LOG_ERROR("table-header should start with \"TIME LEVEL\" ");
+        return false;
       }
       int ds= 2;
-      if (vt1.size()>2 && miutil::to_upper(vt1[2])=="SUBMODEL"){
-	ds= 3;
+      if (vt1.size() > 2 && miutil::to_upper(vt1[2]) == "SUBMODEL") {
+        ds= 3;
 	use_submodel= true;
       }
       for (size_t j=ds; j<vt1.size(); j++){
-	adata.params.push_back(vt1[j]);
+        adata.params.push_back(vt1[j]);
       }
       adata.levels.clear();
       adata.submodels.clear();

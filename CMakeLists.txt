@@ -10,18 +10,20 @@ METNO_PVERSION_DEFINES(TSDATA "src/tsDataVersion.h")
 SET(ENABLE_FIMEX     TRUE CACHE BOOL "Enable Fimex support")
 SET(ENABLE_SMHI_MORA TRUE CACHE BOOL "Enable SMHI Mora support")
 
-PKG_CHECK_MODULES(PC_METLIBS REQUIRED IMPORTED_TARGET ${PKGS_CORE}
+SET(PKGS_CORE
   metlibs-putools>=8.0.0
   metlibs-pudatatypes>=6.0.0
   metlibs-pumet>=7.0.0
   metlibs-puctools>=6.0.0
   metlibs-milogger>=6.0.0
 )
+PKG_CHECK_MODULES(PC_METLIBS REQUIRED IMPORTED_TARGET ${PKGS_CORE})
 SET (metlibs_PACKAGE "PkgConfig::PC_METLIBS")
 
 IF (ENABLE_FIMEX)
   PKG_CHECK_MODULES(PC_FIMEX REQUIRED IMPORTED_TARGET fimex>=1.7)
   SET (fimex_PACKAGE "PkgConfig::PC_FIMEX")
+  SET (PKGS_FIMEX fimex>=1.7)
 ENDIF ()
 
 IF (ENABLE_SMHI_MORA)

@@ -24,7 +24,7 @@ version-check:
 
 .PHONY: override_dh_strip
 override_dh_strip:
-	dh_strip --dbg-package=libmetlibs-tsdata7-dbg
+	dh_strip --dbg-package=libmetlibs-tsdata8-dbg
 
 .PHONY: override_dh_makeshlibs
 override_dh_makeshlibs:

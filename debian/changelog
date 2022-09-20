@@ -1,3 +1,10 @@
+metlibs-tseries-tsdata (8.0.0-1) unstable; urgency=low
+
+  * bugfix generated pkg-config files
+  * update so version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 20 Sep 2022 13:15:21 +0200
+
 metlibs-tseries-tsdata (7.1.1-1) RELEASED; urgency=medium
 
   * cmake: use imported targets

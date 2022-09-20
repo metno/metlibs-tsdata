@@ -29,11 +29,11 @@ Description: MET Norway time series plotting lib -- all
  .
  This dependency package pulls in all functionality.
 
-Package: libmetlibs-tsdata7-dbg
+Package: libmetlibs-tsdata8-dbg
 Section: debug
 Priority: extra
 Architecture: any
-Depends: libmetlibs-tsdata-core7 (= ${binary:Version})
+Depends: libmetlibs-tsdata-core8 (= ${binary:Version})
 Description: MET Norway time series plotting lib -- debug
  MET Norway time series plotting library.
  .
@@ -42,7 +42,7 @@ Description: MET Norway time series plotting lib -- debug
 Package: metlibs-tsdata-core-dev
 Section: libdevel
 Architecture: any
-Depends: libmetlibs-tsdata-core7 (= ${binary:Version}),
+Depends: libmetlibs-tsdata-core8 (= ${binary:Version}),
  metlibs-putools-dev (>= 8.0.0),
  metlibs-pumet-dev (>= 7.0.0),
  metlibs-pudatatypes-dev (>= 6.0.0),
@@ -54,7 +54,7 @@ Description: MET Norway time series plotting lib -- core
  .
  This package provides the core functionality development files.
 
-Package: libmetlibs-tsdata-core7
+Package: libmetlibs-tsdata-core8
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -68,7 +68,7 @@ Package: metlibs-tsdata-fimex-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libmetlibs-tsdata-fimex7 (= ${binary:Version}),
+ libmetlibs-tsdata-fimex8 (= ${binary:Version}),
  libfimex-dev (>= 0.65.0),
  libboost-date-time-dev,
  ${misc:Depends}
@@ -79,7 +79,7 @@ Description: MET Norway time series plotting lib -- fimex
  .
  This package provides the fimex datastream functionality.
 
-Package: libmetlibs-tsdata-fimex7
+Package: libmetlibs-tsdata-fimex8
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
@@ -94,7 +94,7 @@ Package: metlibs-tsdata-mora-qt5-dev
 Section: libdevel
 Architecture: any
 Depends: metlibs-tsdata-core-dev (= ${binary:Version}),
- libmetlibs-tsdata-mora-qt5-7 (= ${binary:Version}),
+ libmetlibs-tsdata-mora-qt5-8 (= ${binary:Version}),
  ${misc:Depends}
 Breaks: metlibs-tsdata-dev (<< 5.5.0-1)
 Replaces: metlibs-tsdata-dev (<< 5.5.0-1)
@@ -103,7 +103,7 @@ Description: MET Norway time series plotting lib -- SMHI Mora
  .
  This package provides the SMHI Mora datastream functionality.
 
-Package: libmetlibs-tsdata-mora-qt5-7
+Package: libmetlibs-tsdata-mora-qt5-8
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},

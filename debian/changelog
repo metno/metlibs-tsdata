@@ -1,3 +1,9 @@
+metlibs-tseries-tsdata (8.0.1-1) RELEASED; urgency=medium
+
+  * added SEMC to computed parameters
+
+ -- Jürgen Schulze <juergen.schulze@met.no>  Tue, 22 Apr 2025 13:49:31 +0200
+
 metlibs-tseries-tsdata (8.0.0-1) unstable; urgency=low
 
   * bugfix generated pkg-config files

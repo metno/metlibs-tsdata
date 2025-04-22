@@ -480,7 +480,33 @@ void ptDiagramData::UpdateOneParameter(const ParId& inpid)
       parList[wpx].calcAllProperties();
     }
 
-    //#define OLD_CMC_CALC
+  // SEMC (Simple EMC)
+  } else if (inpid.alias == "SEMC") {
+    id1.alias = "HST";
+    id2.alias = "HS";
+    if (findParameter(inpid, wpx, &error) 
+      && findParameter(id1, wpx1, &error)
+      && findParameter(id2, wpx2, &error) ) {
+      locked = parList[wpx].isLocked(); 
+
+      // check for identical timelines
+      int n = parList[wpx].TimeLineIndex();
+      if (n != parList[wpx1].TimeLineIndex() || 
+          n != parList[wpx2].TimeLineIndex() ) {
+            return;
+          }
+
+      for (j = 0; j < parList[wpx].Npoints(); j++) {
+        if (!locked || parList[wpx1].isModified(j) || parList[wpx2].isModified(j)) {
+          float hst = parList[wpx1].Data(j);
+          float hs = parList[wpx2].Data(j);
+     
+          float semc = 0.95 * hst + hs + 1.1;
+          parList[wpx].setData(j, semc);
+        }
+      }
+      parList[wpx].calcAllProperties();
+    }
 
     // EMC
   } else if (inpid.alias == "EMC") {

@@ -46,8 +46,13 @@ ELSE ()
   SET (curl_PACKAGE CURL::libcurl)
 ENDIF()
 
-FIND_PACKAGE(Boost COMPONENTS date_time system REQUIRED)
-SET(boost_PACKAGE "Boost::date_time;Boost::system")
+FIND_PACKAGE(Boost CONFIG REQUIRED COMPONENTS date_time)
+IF (Boost_VERSION VERSION_LESS "1.89.0")
+    # Boost component "system" was removed in boost version 1.89
+    # but is needed here for earlier Boost versions.
+    FIND_PACKAGE(Boost CONFIG REQUIRED COMPONENTS date_time system)
+ENDIF()
+
 
 SET(lib_name "metlibs-tsdata")
 
